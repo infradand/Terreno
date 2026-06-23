@@ -598,6 +598,55 @@ body.hide-ot .ac-ot,body.hide-ot .ot-head,body.hide-ot .ot-field{display:none!im
   .log-send{flex:1;padding:13px 17px}
   .np-add{flex:1}
 }
+/* ── Vista Lista (Gantt semanal) ── */
+.vseg{flex-shrink:0}
+.gantt{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:auto;max-height:calc(100vh - 230px);margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.g-grid{min-width:680px}
+.g-row{display:grid;grid-template-columns:200px repeat(7,minmax(50px,1fr)) 58px;align-items:stretch}
+.g-name{position:sticky;left:0;z-index:2;background:var(--wh);padding:7px 9px 7px 11px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;justify-content:center;gap:2px;overflow:hidden;border-left:3px solid var(--gl)}
+.g-aid{font-size:9px;font-weight:700;color:var(--gm);letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-an{font-size:11.5px;font-weight:600;color:var(--bk);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.g-day{display:flex;align-items:center;justify-content:center;padding:4px 2px;border-bottom:1px solid var(--bd);min-height:36px}
+.g-tot{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--go);padding:4px;border-bottom:1px solid var(--bd);background:var(--gb)}
+.g-today{background:var(--cream)}
+.g-bar{display:flex;align-items:center;justify-content:center;width:100%;height:24px;color:#fff;font-weight:700;font-size:11px}
+.g-bar.bl{border-top-left-radius:7px;border-bottom-left-radius:7px}
+.g-bar.br{border-top-right-radius:7px;border-bottom-right-radius:7px}
+/* color por criticidad (mismo código que las tarjetas) */
+/* color: barras de dotación en verde (como el programa). Rojo reservado para quiebre/replanificar */
+.g-crit .g-name{border-left-color:var(--ro)}
+.g-imp .g-name{border-left-color:var(--am)}
+.g-norm .g-name{border-left-color:var(--gl)}
+.g-bar{background:var(--ve)}
+.g-qb .g-name{background:var(--ro1);border-left-color:var(--ro)}
+.g-qb .g-an{color:var(--ro)}
+.g-chip{display:inline-block;font-size:8px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--ro);border-radius:9px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+/* cabecera fija */
+.g-head{position:sticky;top:0;z-index:5}
+.g-hname,.g-hday,.g-htot{background:var(--go);color:#fff;font-weight:700;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:center}
+.g-hname{z-index:6;justify-content:flex-start;font-size:10px;letter-spacing:.05em;text-transform:uppercase;border-left:3px solid var(--go)}
+.g-hday{flex-direction:column;gap:1px;padding:7px 3px}
+.g-dl{font-size:10px;font-weight:800;letter-spacing:.02em}
+.g-df{font-size:8px;font-weight:600;opacity:.72}
+.g-htot{font-size:10px;letter-spacing:.04em;text-transform:uppercase}
+.g-head .g-today{background:var(--go)}
+/* grupo por disciplina */
+.g-grp{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;background:linear-gradient(135deg,var(--cream),#fff);border-bottom:1px solid var(--bd)}
+.g-grp-n{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--na2);position:sticky;left:11px}
+.g-grp-m{font-size:9px;font-weight:700;color:var(--gm)}
+/* fila de actividad */
+.g-act{cursor:pointer}
+.g-act:hover .g-name{background:var(--na1);border-left-color:var(--na)}
+.g-act:hover .g-day,.g-act:hover .g-tot{background:var(--na1)}
+/* pie: total por día */
+.g-foot .g-name{background:var(--go);color:#fff;border-left-color:var(--go)}
+.g-fname{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.g-fday{font-weight:800;font-size:13px;color:var(--go);background:var(--gb)}
+.g-ftot{background:var(--na);color:#fff;font-size:13px}
+.g-foot .g-today{background:var(--am1)}
+@media(max-width:640px){.g-row{grid-template-columns:140px repeat(7,minmax(40px,1fr)) 48px}.g-name{padding-left:9px}.g-an{font-size:11px}}
+.replani-box{border:1px solid rgba(193,56,50,.35);background:var(--ro1);border-radius:var(--r2);padding:10px 12px}
+.replani-hint{margin-top:7px;font-size:11px;font-weight:600;color:var(--ro);line-height:1.4}
 </style>
 </head>
 <body>
@@ -695,6 +744,7 @@ body.hide-ot .ac-ot,body.hide-ot .ot-head,body.hide-ot .ot-field{display:none!im
     <div class="mode-banner" id="mode-banner"></div>
     <div class="day-sel" id="day-sel"></div>
     <div class="flt">
+      <span class="seg vseg"><button class="seg-b on" id="vm-cuadros" onclick="setVMode('cuadros')">▦ Cuadros</button><button class="seg-b" id="vm-lista" onclick="setVMode('lista')">≡ Lista</button></span>
       <div class="sw"><span class="si">🔍</span><input class="sb" id="sq" placeholder="Buscar actividad, OT, ejecutor…" oninput="render()"></div>
       <select class="fsel" id="f-disc" onchange="setFilter('disc',this.value)"></select>
       <select class="fsel" id="f-loc" onchange="setFilter('loc',this.value)"></select>
@@ -982,7 +1032,7 @@ function handlePptx(file){
   if(MODE==='ejec'){toast('La carga del PPT se hace en Planificación');return;}
   if(typeof pako==='undefined'){toast('No se pudo cargar el lector de PPT (sin conexión)');return;}
   if(!/\.pptx$/i.test(file.name)){toast('El archivo debe ser .pptx');return;}
-  if(file.size>60*1048576){toast('PPT demasiado grande (máx. 60 MB)');return;}
+  if(file.size>100*1048576){toast('PPT demasiado grande (máx. 100 MB)');return;}
   showBusy('Leyendo PPT… ('+Math.round(file.size/1048576)+' MB)');
   var r=new FileReader();
   r.onload=function(ev){
@@ -1181,7 +1231,7 @@ function showDash(){
   document.getElementById('btn-export').classList.add('show');
   document.getElementById('save-ind').style.display='flex';setSaved(true);
   document.getElementById('turno-seg').style.display='inline-flex';renderTurnoSeg();
-  document.getElementById('ot-toggle').style.display='inline-flex';loadShowOT();
+  document.getElementById('ot-toggle').style.display='inline-flex';loadShowOT();loadVMode();
   document.getElementById('btn-ppt').classList.add('show');
   loadHandovers();loadActions();
   loadNP();mergeNP();
@@ -1461,8 +1511,8 @@ function dispArea(a){var g=normLoc(a.area);return (g&&LOC_LABELS[g])?LOC_LABELS[
 function critOf(a){return isCrit(a)?'CRITICO':((a.crit||'').toUpperCase()==='IMPORTANTE'?'IMPORTANTE':'NORMAL');}
 function estadoOf(a){return ed(a.id).estEj||'Sin iniciar';}
 
-function match(a,q){
-  if(!inDia(a))return false;
+function match(a,q,ignoreDia){
+  if(!ignoreDia&&!inDia(a))return false;
   if(FILT.disc&&a.disc!==FILT.disc)return false;
   if(FILT.loc&&normLoc(a.area)!==FILT.loc)return false;
   if(FILT.crit&&critOf(a)!==FILT.crit)return false;
@@ -1475,7 +1525,9 @@ function match(a,q){
 
 /* ── Render cards ── */
 function render(){
-  if(!DATA)return;var q=(document.getElementById('sq').value||'').toLowerCase();var shown=0,html='';
+  if(!DATA)return;
+  if(VMODE==='lista'){renderGantt();return;}
+  var q=(document.getElementById('sq').value||'').toLowerCase();var shown=0,html='';
   DATA.secs.forEach(function(sec){
     var acts=sec.actividades.filter(function(a){return match(a,q);});
     if(!acts.length)return;shown+=acts.length;var tp=0;acts.forEach(function(a){tp+=totPlan(a);});
@@ -1488,6 +1540,64 @@ function render(){
   document.getElementById('cbadge').textContent=ftxt;
 }
 function tog(h){var b=h.nextElementSibling,a=h.querySelector('.sec-arr');b.classList.toggle('open');a.classList.toggle('open');}
+
+/* ── Vista Lista (Gantt semanal) ── */
+var VMODE='cuadros';
+function loadVMode(){var v=Store.get('vmode','cuadros');VMODE=(v==='lista')?'lista':'cuadros';renderVSeg();}
+function setVMode(m){VMODE=(m==='lista')?'lista':'cuadros';Store.set('vmode',VMODE);renderVSeg();render();}
+function renderVSeg(){
+  var a=document.getElementById('vm-cuadros'),b=document.getElementById('vm-lista');
+  if(a)a.classList.toggle('on',VMODE==='cuadros');
+  if(b)b.classList.toggle('on',VMODE==='lista');
+  var ds=document.getElementById('day-sel');if(ds)ds.style.display=(VMODE==='lista')?'none':'';
+}
+function gCritCls(a){return isCrit(a)?'g-crit':((a.crit||'').toUpperCase()==='IMPORTANTE'?'g-imp':'g-norm');}
+var MES_ABR=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fechaEsp(raw){var f=fmtFecha(raw);var m=f.match(/^(\d{1,2})\/(\d{1,2})/);return m?((+m[1])+' '+MES_ABR[(+m[2])-1]):f;}
+function renderGantt(){
+  if(!DATA)return;
+  var q=(document.getElementById('sq').value||'').toLowerCase();
+  var ti=todayIndex();
+  var head='<div class="g-row g-head"><div class="g-name g-hname">Actividad</div>';
+  for(var d=0;d<7;d++){var dt=DATA.dates[d]||'';head+='<div class="g-day g-hday'+(d===ti?' g-today':'')+'"><span class="g-dl">'+DSHORT[d]+'</span>'+(dt?'<span class="g-df">'+esc(fechaEsp(dt))+'</span>':'')+'</div>';}
+  head+='<div class="g-tot g-htot">Total</div></div>';
+  var body='',shown=0,dayTot=[0,0,0,0,0,0,0],grand=0;
+  DATA.secs.forEach(function(sec){
+    var acts=sec.actividades.filter(function(a){return match(a,q,true);});
+    if(!acts.length)return;
+    var stp=0;acts.forEach(function(a){stp+=totPlan(a);});
+    body+='<div class="g-grp"><span class="g-grp-n">'+esc(sec.nombre)+'</span><span class="g-grp-m">'+acts.length+' act. · '+stp+' pers.</span></div>';
+    acts.forEach(function(a){
+      shown++;
+      var qb=isQuiebre(a),ot=actOT(a);
+      var rowCls=qb?'g-qb':gCritCls(a);
+      var chip=qb?'<span class="g-chip">'+(MODE==='plani'?'↺ Replanificar':'⚠ Quiebre')+'</span>':'';
+      var row='<div class="g-row g-act '+rowCls+'" onclick="openEdit('+jsArg(a.id)+')">';
+      row+='<div class="g-name"><div class="g-aid">'+esc(a.id)+(a.np?' · NP':'')+(ot?' · OT '+esc(ot):'')+chip+'</div><div class="g-an">'+esc(a.nombre)+'</div></div>';
+      var tp=0;
+      for(var d=0;d<7;d++){
+        var v=a.dp[d]||0;tp+=v;dayTot[d]+=v;
+        var cls='g-day'+(d===ti?' g-today':'');
+        if(v>0){
+          var lft=(d===0||(a.dp[d-1]||0)===0),rgt=(d===6||(a.dp[d+1]||0)===0);
+          row+='<div class="'+cls+'"><span class="g-bar'+(lft?' bl':'')+(rgt?' br':'')+'">'+v+'</span></div>';
+        }else{row+='<div class="'+cls+'"></div>';}
+      }
+      grand+=tp;
+      row+='<div class="g-tot">'+tp+'</div></div>';
+      body+=row;
+    });
+  });
+  var foot='';
+  if(shown){
+    foot='<div class="g-row g-foot"><div class="g-name g-fname">Dotación / día</div>';
+    for(var d2=0;d2<7;d2++){foot+='<div class="g-day g-fday'+(d2===ti?' g-today':'')+'">'+(dayTot[d2]||'')+'</div>';}
+    foot+='<div class="g-tot g-ftot">'+grand+'</div></div>';
+  }
+  document.getElementById('list').innerHTML=shown?('<div class="gantt"><div class="g-grid">'+head+body+foot+'</div></div>'):'<div class="empty">Sin resultados para el filtro actual</div>';
+  var ftxt=shown+' actividades';if(CHFLT.type)ftxt+=' · filtro activo';
+  document.getElementById('cbadge').textContent=ftxt;
+}
 
 function progCell(lbl,done,total,pctMode){
   var pct=total?Math.round(done/total*100):0;var clr=total===0?'var(--gm)':(done===total?'var(--ve)':done>0?'var(--am)':'var(--ro)');
@@ -1505,7 +1615,7 @@ function acard(a){
   h+='<div class="ac-top"><span class="ac-id">'+esc(a.id)+'</span>'
     +(a.np?'<span class="chip np-badge">NP</span>':'')
     +'<span class="chip '+cc+'">'+esc(critLbl)+'</span>'
-    +(qb?'<span class="chip quiebre-chip">⚠ Quiebre</span>':'')
+    +(qb?'<span class="chip quiebre-chip">'+(MODE==='plani'?'↺ Replanificar':'⚠ Quiebre')+'</span>':'')
     +(e.adelanto!==null?'<span class="chip adel-chip">⏩ '+DSHORT[e.adelanto]+'</span>':'')
     +(e.repro?'<span class="chip repro-chip">↪ Sem '+e.repro.week+'</span>':'')
     +(e.bloqueo&&e.bloqueo.fase>0?'<span class="chip bloq-chip" style="color:'+bloqColor(e.bloqueo.fase)+';border-color:'+bloqColor(e.bloqueo.fase)+'">🔒 '+esc(BLOQ_FASES[e.bloqueo.fase-1])+'</span>':'')
@@ -1621,27 +1731,35 @@ function openEdit(id){
   h+='<div class="fg"><label class="fl">Fecha término</label><input type="date" class="fi" value="'+(e.fechaTermino||'')+'" onchange="setF(\'fechaTermino\',this.value)"></div>';
   h+='</div>';
 
-  // Reprogramación
-  h+='<div class="repro-box">';
-  if(e.repro){
-    h+='<div class="repro-on">↪ Reprogramada a <b>Semana '+e.repro.week+'</b>'+(e.repro.by?' · '+esc(e.repro.by):'')+(e.repro.turno?' · turno '+esc(e.repro.turno):'')+'</div>';
-    if(e.repro.comment)h+='<div class="repro-cmt">'+esc(e.repro.comment)+'</div>';
-    h+='<div style="display:flex;gap:8px;margin-top:9px"><button class="cl-ab" onclick="openRepro()">Editar reprogramación</button><button class="fclear" style="color:var(--ro);border-color:var(--ro)" onclick="quitarRepro()">Quitar</button></div>';
-  }else{
-    h+='<button class="cl-ab" onclick="openRepro()">↪ Reprogramar actividad</button>';
+  // Reprogramación — acción de Planificación
+  if(MODE==='plani'){
+    h+='<div class="repro-box">';
+    if(e.repro){
+      h+='<div class="repro-on">↪ Reprogramada a <b>Semana '+e.repro.week+'</b>'+(e.repro.by?' · '+esc(e.repro.by):'')+(e.repro.turno?' · turno '+esc(e.repro.turno):'')+'</div>';
+      if(e.repro.comment)h+='<div class="repro-cmt">'+esc(e.repro.comment)+'</div>';
+      h+='<div style="display:flex;gap:8px;margin-top:9px"><button class="cl-ab" onclick="openRepro()">Editar reprogramación</button><button class="fclear" style="color:var(--ro);border-color:var(--ro)" onclick="quitarRepro()">Quitar</button></div>';
+    }else{
+      h+='<button class="cl-ab" onclick="openRepro()">↪ Reprogramar actividad</button>';
+    }
+    h+='</div>';
+  }else if(e.repro){
+    h+='<div class="repro-box"><div class="repro-on">↪ Reprogramada a <b>Semana '+e.repro.week+'</b>'+(e.repro.by?' · '+esc(e.repro.by):'')+'</div>'+(e.repro.comment?'<div class="repro-cmt">'+esc(e.repro.comment)+'</div>':'')+'</div>';
   }
-  h+='</div>';
 
-  // Quiebre
-  h+='<div class="quiebre-box">';
-  if(e.quiebre){
-    h+='<div class="quiebre-on">⚠ <b>Quiebre</b> · '+esc(e.quiebre.by||'')+(e.quiebre.turno?' · turno '+esc(e.quiebre.turno):'')+'</div>';
-    if(e.quiebre.comment)h+='<div class="repro-cmt">'+esc(e.quiebre.comment)+'</div>';
-    h+='<div style="margin-top:9px"><button class="fclear" style="color:var(--ro);border-color:var(--ro)" onclick="quitarQuiebre()">Quitar quiebre</button></div>';
-  }else{
-    h+='<button class="cl-ab" style="background:var(--ro)" onclick="openQuiebre('+jsArg(a.id)+')">⚠ Marcar quiebre</button><span class="quiebre-hint">Para actividades que no alcanzaron a iniciarse; requiere justificación.</span>';
+  // Quiebre — acción de Ejecución
+  if(MODE==='ejec'){
+    h+='<div class="quiebre-box">';
+    if(e.quiebre){
+      h+='<div class="quiebre-on">⚠ <b>Quiebre</b> · '+esc(e.quiebre.by||'')+(e.quiebre.turno?' · turno '+esc(e.quiebre.turno):'')+'</div>';
+      if(e.quiebre.comment)h+='<div class="repro-cmt">'+esc(e.quiebre.comment)+'</div>';
+      h+='<div style="margin-top:9px"><button class="fclear" style="color:var(--ro);border-color:var(--ro)" onclick="quitarQuiebre()">Quitar quiebre</button></div>';
+    }else{
+      h+='<button class="cl-ab" style="background:var(--ro)" onclick="openQuiebre('+jsArg(a.id)+')">⚠ Marcar quiebre</button><span class="quiebre-hint">Para actividades que no alcanzaron a iniciarse; requiere justificación.</span>';
+    }
+    h+='</div>';
+  }else if(e.quiebre){
+    h+='<div class="quiebre-box replani-box"><div class="quiebre-on">⚠ <b>Quiebre desde Ejecución</b>'+(e.quiebre.by?' · '+esc(e.quiebre.by):'')+(e.quiebre.turno?' · turno '+esc(e.quiebre.turno):'')+'</div>'+(e.quiebre.comment?'<div class="repro-cmt">'+esc(e.quiebre.comment)+'</div>':'')+'<div class="replani-hint">↺ Replanifica esta actividad: usa <b>Reprogramar</b> o ajusta la dotación por día.</div></div>';
   }
-  h+='</div>';
 
   // Estado de Bloqueo (LOTO) — corresponde a Ejecución
   h+='<div class="shdg">🔒 Estado de Bloqueo (LOTO) · Ejecución</div>';
