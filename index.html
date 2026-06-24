@@ -413,7 +413,7 @@ textarea.fi{resize:vertical;min-height:80px;font-family:var(--fn);line-height:1.
 .toast.show{transform:translateY(0);opacity:1}
 .empty{text-align:center;padding:40px;color:var(--gm);font-style:italic;font-size:12px}
 
-/* Bloqueo (LOTO) */
+/* Bloqueo */
 .bloq-chip{background:#fff}
 .bloq-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
 .bloq-badge{font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px}
@@ -621,6 +621,11 @@ body.hide-ot .ac-ot,body.hide-ot .ot-head,body.hide-ot .ot-field{display:none!im
 .g-qb .g-name{background:var(--ro1);border-left-color:var(--ro)}
 .g-qb .g-an{color:var(--ro)}
 .g-chip{display:inline-block;font-size:8px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--ro);border-radius:9px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.g-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px;font-size:9px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--te2);white-space:nowrap;overflow:hidden}
+.g-av{display:flex;align-items:center;gap:6px;margin-top:4px}
+.g-av-bar{flex:1;height:6px;background:var(--gl);border-radius:4px;overflow:hidden}
+.g-av-f{height:100%;border-radius:4px;transition:width .3s}
+.g-av-n{font-size:10px;font-weight:800;min-width:30px;text-align:right}
 /* cabecera fija */
 .g-head{position:sticky;top:0;z-index:5}
 .g-hname,.g-hday,.g-htot{background:var(--go);color:#fff;font-weight:700;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:center}
@@ -647,6 +652,17 @@ body.hide-ot .ac-ot,body.hide-ot .ot-head,body.hide-ot .ot-field{display:none!im
 @media(max-width:640px){.g-row{grid-template-columns:140px repeat(7,minmax(40px,1fr)) 48px}.g-name{padding-left:9px}.g-an{font-size:11px}}
 .replani-box{border:1px solid rgba(193,56,50,.35);background:var(--ro1);border-radius:var(--r2);padding:10px 12px}
 .replani-hint{margin-top:7px;font-size:11px;font-weight:600;color:var(--ro);line-height:1.4}
+.bloq-resp{margin-left:auto;font-size:10px;font-weight:700;color:var(--na2);background:var(--cream);border:1px solid var(--bd);border-radius:9px;padding:2px 9px}
+.bloq-step.ro{cursor:default}
+.traspaso-btn{display:block;width:100%;margin:8px 0 4px;background:var(--te);color:#fff;border:none;padding:11px 14px;font-weight:700;font-size:12px;border-radius:var(--r2)}
+.traspaso-btn:hover{background:var(--te2)}
+.hist-del{flex-shrink:0;align-self:center;margin-left:8px;background:transparent;border:1px solid var(--bd);color:var(--gm);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:13px;line-height:1;transition:all .12s}
+.hist-del:hover{background:var(--ro1);border-color:var(--ro);color:var(--ro)}
+.mhdr-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.msave{background:var(--ve);color:#fff;border:none;border-radius:9px;padding:8px 15px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;transition:background .12s}
+.msave:hover{background:#268a4f}
+.msave-full{display:block;width:100%;margin-top:14px;background:var(--ve);color:#fff;border:none;border-radius:var(--r2);padding:14px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:var(--sh);transition:background .12s}
+.msave-full:hover{background:#268a4f}
 </style>
 </head>
 <body>
@@ -857,6 +873,9 @@ body.hide-ot .ac-ot,body.hide-ot .ot-head,body.hide-ot .ot-field{display:none!im
     <div class="mhdr"><div><div class="mey" id="quiebre-act">—</div><div class="mttl">Marcar quiebre</div></div><button class="mcl" onclick="closeQuiebre()">×</button></div>
     <div style="font-size:12px;color:var(--gm);margin-bottom:12px">Marca esta actividad como <b>quiebre</b> (no alcanzó a iniciarse en el turno). Debes justificar la decisión; quedará en la bitácora y en el historial.</div>
     <div class="fg"><label class="fl">Justificación del quiebre *</label><textarea class="fi" id="quiebre-cmt" rows="4" placeholder="Explica por qué la actividad no se ejecutó (falta de materiales, bloqueo, dotación, clima, etc.)…"></textarea></div>
+    <div class="log-pending" id="quiebre-pending"></div>
+    <input type="file" id="quiebre-photo" accept="image/*" capture="environment" style="display:none" onchange="attachPhoto(this,'quiebre')">
+    <button class="cl-ab" style="background:transparent;border:1px solid var(--gm);color:var(--go)" onclick="document.getElementById('quiebre-photo').click()">📷 Adjuntar foto (opcional)</button>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button class="fclear" onclick="closeQuiebre()">Cancelar</button><button class="cl-ab" style="padding:9px 18px;background:var(--ro)" onclick="confirmQuiebre()">⚠ Confirmar quiebre</button></div>
   </div>
 </div>
@@ -928,6 +947,8 @@ function ejInfo(v){
     default:return {cls:'',label:'Sin iniciar',c:'#8A9299'};
   }
 }
+/* color del avance según % (amarillo → verde) */
+function avColor(p){p=+p||0;return p>=100?'#2E9E5B':p>=66?'#7CB342':p>=33?'#C0CA33':p>0?'#F4C430':'#C9CED4';}
 
 /* ── Usuario ── */
 function loadUser(){var u=Store.get('user',null);USER=(u&&u.nombre)?u:null;renderUserChip();}
@@ -1072,14 +1093,20 @@ function splitItems(txt){
   return txt.split(/[\n;]|(?:,(?!\d))| \/ /).map(function(s){return s.replace(/^[\s.:|\-–]+|[\s.:|\-–]+$/g,'');}).filter(function(s){return s.length>2;});
 }
 function cargarDesdePpt(id){
-  var info=PPTINFO[id];if(!info){toast('Sin datos de PPT para esta actividad');return;}
-  var e=ed(id);
-  if(info.req){var ri=splitItems(info.req);if(ri.length){e.reqItems=ri.map(function(t){return {text:t,done:false};});}}
-  if(info.mat){var mi=splitItems(info.mat);if(mi.length){e.matItems=mi.map(function(t){return {text:t,done:false};});}}
+  var a=findAct(id);
+  var info=(a&&a.pptInfo)||PPTINFO[id]||(a&&actOT(a)?PPTINFO[actOT(a)]:null);
+  if(!info){toast('Sin datos del programa para esta actividad');return;}
+  var e=ed(id);var added=0;
+  function merge(key,txt){
+    if(!txt)return;var arr=e[key]||(e[key]=[]);var have={};arr.forEach(function(x){have[(x.text||'').toLowerCase()]=true;});
+    splitItems(txt).forEach(function(t){if(!have[t.toLowerCase()]){arr.push({text:t,done:false});have[t.toLowerCase()]=true;added++;}});
+  }
+  merge('reqItems',info.req);
+  merge('matItems',info.mat);
   if(info.ot&&!e.ot)e.ot=info.ot;
-  logAction('PPT → ítems',id,'Requerimientos y materiales cargados desde el PPT');
+  logAction('PPT → ítems',id,'Traspaso del plan al checklist ('+added+' ítem(s) nuevos)');
   markUnsaved();openEdit(id);refreshAll();
-  toast('✓ Requerimientos y materiales cargados del PPT');
+  toast(added?('✓ '+added+' ítem(s) traspasados al checklist'):'El checklist ya tiene todos los ítems del plan');
 }
 function renderUserChip(){var c=document.getElementById('user-chip');if(USER&&USER.nombre){c.style.display='inline-flex';document.getElementById('user-name').textContent=USER.nombre+' '+USER.apellido;}else{c.style.display='none';}}
 function openReg(edit){document.getElementById('reg-mo').classList.add('open');if(edit&&USER){document.getElementById('reg-nombre').value=USER.nombre||'';document.getElementById('reg-apellido').value=USER.apellido||'';}setTimeout(function(){document.getElementById('reg-nombre').focus();},50);}
@@ -1166,6 +1193,7 @@ function parseCSV(text,filename){
     }
   }
   DATA={title:title,semana:sm,anio:yr,filename:filename,dates:dates,secs:secs};
+  Store.set('data',DATA);
   var sv=Store.get('edits_s'+sm,{});EDITS=(sv&&typeof sv==='object')?sv:{};
 }
 
@@ -1220,7 +1248,16 @@ function totReal(a){return realDot(a).reduce(function(s,v){return s+v;},0);}
 function allActs(){var r=[];DATA.secs.forEach(function(s){s.actividades.forEach(function(a){r.push(a);});});return r;}
 
 /* ── Show / reload ── */
-function showDash(){
+function restoreData(){
+  try{
+    var d=Store.get('data',null);
+    if(!d||!d.secs||!Array.isArray(d.secs)||d.semana==null)return false;
+    DATA=d;
+    var sv=Store.get('edits_s'+DATA.semana,{});EDITS=(sv&&typeof sv==='object')?sv:{};
+    return true;
+  }catch(e){return false;}
+}
+function showDash(silent){
   if(!DATA)return;
   document.getElementById('hero').style.display='none';
   document.getElementById('dash').style.display='block';
@@ -1239,11 +1276,11 @@ function showDash(){
   DIA_INIT=false;
   showTab('dashboard');
   buildCharts();buildChips();refreshAll();
-  hideProg();toast('✓ '+DATA.filename+' cargado'+(Object.keys(PPTINFO).length?' · PPT vinculado':''));
+  hideProg();if(!silent)toast('✓ '+DATA.filename+' cargado'+(Object.keys(PPTINFO).length?' · PPT vinculado':''));
   ensureUser();
 }
 function recargar(){
-  DATA=null;FLT='';FILT={disc:'',loc:'',crit:'',estado:''};CHFLT={type:null,val:null};PPTINFO={};
+  DATA=null;FLT='';FILT={disc:'',loc:'',crit:'',estado:''};CHFLT={type:null,val:null};PPTINFO={};Store.del('data');
   document.getElementById('hero').style.display='flex';
   document.getElementById('dash').style.display='none';
   document.getElementById('tabs').style.display='none';
@@ -1569,18 +1606,19 @@ function renderGantt(){
     body+='<div class="g-grp"><span class="g-grp-n">'+esc(sec.nombre)+'</span><span class="g-grp-m">'+acts.length+' act. · '+stp+' pers.</span></div>';
     acts.forEach(function(a){
       shown++;
-      var qb=isQuiebre(a),ot=actOT(a);
+      var e=ed(a.id);var qb=isQuiebre(a),ot=actOT(a),mida=e.mida||0,avc=avColor(mida),bt=(mida>=66?'#fff':'#3a3000');
       var rowCls=qb?'g-qb':gCritCls(a);
       var chip=qb?'<span class="g-chip">'+(MODE==='plani'?'↺ Replanificar':'⚠ Quiebre')+'</span>':'';
+      var meta=(a.area?'<span>📍 '+esc(dispArea(a))+'</span>':'');
       var row='<div class="g-row g-act '+rowCls+'" onclick="openEdit('+jsArg(a.id)+')">';
-      row+='<div class="g-name"><div class="g-aid">'+esc(a.id)+(a.np?' · NP':'')+(ot?' · OT '+esc(ot):'')+chip+'</div><div class="g-an">'+esc(a.nombre)+'</div></div>';
+      row+='<div class="g-name"><div class="g-aid">'+esc(a.id)+(a.np?' · NP':'')+(ot?' · OT '+esc(ot):'')+chip+'</div><div class="g-an">'+esc(a.nombre)+'</div>'+(meta?'<div class="g-meta">'+meta+'</div>':'')+'<div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:'+mida+'%;background:'+avc+'"></div></div><span class="g-av-n" style="color:'+avc+'">'+mida+'%</span></div></div>';
       var tp=0;
       for(var d=0;d<7;d++){
         var v=a.dp[d]||0;tp+=v;dayTot[d]+=v;
         var cls='g-day'+(d===ti?' g-today':'');
         if(v>0){
           var lft=(d===0||(a.dp[d-1]||0)===0),rgt=(d===6||(a.dp[d+1]||0)===0);
-          row+='<div class="'+cls+'"><span class="g-bar'+(lft?' bl':'')+(rgt?' br':'')+'">'+v+'</span></div>';
+          row+='<div class="'+cls+'"><span class="g-bar'+(lft?' bl':'')+(rgt?' br':'')+'" style="background:'+avc+';color:'+bt+'">'+v+'</span></div>';
         }else{row+='<div class="'+cls+'"></div>';}
       }
       grand+=tp;
@@ -1623,8 +1661,9 @@ function acard(a){
   var otLine='';
   if(ot)otLine+='<span class="ac-ot">OT '+esc(ot)+'</span>';
   h+='<div><div class="ac-name">'+esc(a.nombre)+'</div>'+(otLine?'<div class="ac-ids">'+otLine+'</div>':'')+'</div>';
-  h+='<div class="exec-hero"><div class="exec-top"><span class="exec-lbl">Ejecución · <span style="color:'+ej.c+'">'+ej.label+'</span></span><span class="exec-pct" style="color:'+ej.c+'">'+mida+'%</span></div>'
-    +'<div class="exec-bar"><div class="exec-bar-f" style="width:'+mida+'%;background:'+ej.c+'"></div></div></div>';
+  var avc=avColor(mida);
+  h+='<div class="exec-hero"><div class="exec-top"><span class="exec-lbl">Ejecución · <span style="color:'+ej.c+'">'+ej.label+'</span></span><span class="exec-pct" style="color:'+avc+'">'+mida+'%</span></div>'
+    +'<div class="exec-bar"><div class="exec-bar-f" style="width:'+mida+'%;background:'+avc+'"></div></div></div>';
   h+='<div class="ac-prog">'+progCell('Req',rq.done,rq.total,false)+progCell('Mat',mt.done,mt.total,false)+progCell('Prep',pr.done,pr.applicable,true)+'</div>';
   h+='<div class="mini">';
   for(var d=0;d<7;d++){var p=a.dp[d],r=rd[d];var cls=r&&p&&r>=p?'mc-r':p?'mc-p':'mc-e';h+='<div class="mini-c"><div class="mini-d">'+DSHORT[d].slice(0,1)+'</div><div class="mini-cell '+cls+'">'+(p||'·')+(r?'<span class="mini-real">'+r+'</span>':'')+'</div></div>';}
@@ -1647,7 +1686,7 @@ function openEdit(id){
   var cc=isCrit(a)?'c-crit':((a.crit||'').toUpperCase()==='IMPORTANTE'?'c-imp':'c-norm');
   var estado=calcEstado(a);var estCls=estado==='LISTO'?'est-LISTO':estado==='PENDIENTE'?'est-PENDIENTE':'est-GESTION';
   var estLbl=estado==='EN GESTION'?'En gestión':estado.charAt(0)+estado.slice(1).toLowerCase();
-  var h='<div class="mhdr"><div><div class="mey">'+esc(a.disc)+' · '+esc(a.id)+(actOT(a)?'<span class="ot-head"> · OT '+esc(actOT(a))+'</span>':'')+'</div><div class="mttl">'+esc(a.nombre)+'</div></div><button class="mcl" onclick="closeModal()">×</button></div>';
+  var h='<div class="mhdr"><div><div class="mey">'+esc(a.disc)+' · '+esc(a.id)+(actOT(a)?'<span class="ot-head"> · OT '+esc(actOT(a))+'</span>':'')+'</div><div class="mttl">'+esc(a.nombre)+'</div></div><div class="mhdr-actions"><button class="msave" onclick="guardarModal()">💾 Guardar</button><button class="mcl" onclick="closeModal()">×</button></div></div>';
   var critLbl2=isCrit(a)?'Crítica':((a.crit||'').toUpperCase()==='IMPORTANTE'?'Importante':'Normal');
   h+='<div class="m-meta"><span class="chip '+cc+'">'+esc(critLbl2)+'</span>'
     +'<button class="critm-btn'+(isCrit(a)?' on':'')+'" onclick="toggleCritM('+jsArg(a.id)+')">'+(isCrit(a)?'✓ Crítica':'Marcar crítica')+'</button>'
@@ -1677,6 +1716,9 @@ function openEdit(id){
       h+='<button class="det-btn" onclick="togglePptDetails()" id="det-btn">👁 Ver detalles (descripción, requerimientos y materiales)</button>';
       h+='<div id="ppt-details" style="display:none">'+descBox()+pptBox(false)+'</div>';
     }
+    if(pp){
+      h+='<button class="cl-ab traspaso-btn" onclick="cargarDesdePpt('+jsArg(a.id)+')">📥 Traspasar requerimientos y materiales del plan al checklist</button>';
+    }
   }else{
     h+=descBox()+pptBox(true);
   }
@@ -1693,7 +1735,7 @@ function openEdit(id){
   h+='<div class="shdg">Preparativos <span class="pcttag" id="tag-prep"></span></div><div class="prep-grid">';
   PREP_DEFS.forEach(function(d){
     var v=e[d[0]]||'';
-    h+='<div class="prep-row"><span class="prep-lbl-s">'+d[1]+'</span><select class="prep-sel '+prepClr(v)+'" onchange="setPrep(\''+d[0]+'\',this)">'
+    h+='<div class="prep-row"><span class="prep-lbl-s">'+d[1]+'</span><select class="prep-sel '+prepClr(v)+'" id="prep-'+d[0]+'" onchange="setPrep(\''+d[0]+'\',this)">'
       +['','Sí','No','Parcial','No aplica'].map(function(o){return '<option value="'+o+'"'+(v===o?' selected':'')+'>'+(o||'— Sel —')+'</option>';}).join('')+'</select></div>';
   });
   h+='</div>';
@@ -1721,14 +1763,6 @@ function openEdit(id){
   h+='<div class="grid2">';
   h+='<div class="fg ot-field"><label class="fl">N° OT (Orden de Trabajo)</label><input class="fi" id="f-ot" value="'+escAttr(actOT(a))+'" placeholder="Ej. 109257278" oninput="setF(\'ot\',this.value)"></div>';
   h+='<div class="fg"><label class="fl">Disciplina</label><input class="fi" value="'+escAttr(a.disc||'')+'" disabled style="background:var(--gb);color:var(--gm)"></div>';
-  h+='</div>';
-
-  // Fechas inicio / término
-  var defIni=planDayISO(a,'first'),defFin=planDayISO(a,'last');
-  if(!e.fechaInicio)e.fechaInicio=defIni;if(!e.fechaTermino)e.fechaTermino=defFin;
-  h+='<div class="grid2">';
-  h+='<div class="fg"><label class="fl">Fecha inicio</label><input type="date" class="fi" value="'+(e.fechaInicio||'')+'" onchange="setF(\'fechaInicio\',this.value)"></div>';
-  h+='<div class="fg"><label class="fl">Fecha término</label><input type="date" class="fi" value="'+(e.fechaTermino||'')+'" onchange="setF(\'fechaTermino\',this.value)"></div>';
   h+='</div>';
 
   // Reprogramación — acción de Planificación
@@ -1761,8 +1795,8 @@ function openEdit(id){
     h+='<div class="quiebre-box replani-box"><div class="quiebre-on">⚠ <b>Quiebre desde Ejecución</b>'+(e.quiebre.by?' · '+esc(e.quiebre.by):'')+(e.quiebre.turno?' · turno '+esc(e.quiebre.turno):'')+'</div>'+(e.quiebre.comment?'<div class="repro-cmt">'+esc(e.quiebre.comment)+'</div>':'')+'<div class="replani-hint">↺ Replanifica esta actividad: usa <b>Reprogramar</b> o ajusta la dotación por día.</div></div>';
   }
 
-  // Estado de Bloqueo (LOTO) — corresponde a Ejecución
-  h+='<div class="shdg">🔒 Estado de Bloqueo (LOTO) · Ejecución</div>';
+  // Estado de Bloqueo — lo gestiona Planificación; Ejecución solo visualiza
+  h+='<div class="shdg">🔒 Bloqueo · '+(MODE==='ejec'?'<span style="color:var(--gm);font-weight:700">solo lectura · responsable: Planificación</span>':'responsable: Planificación')+'</div>';
   h+='<div id="bloq-wrap"></div>';
 
   // Observaciones → alimentan la Bitácora general
@@ -1776,12 +1810,14 @@ function openEdit(id){
     +'<button class="log-send" onclick="addObs()">Registrar</button>'
     +'</div></div>';
   h+='<button class="cl-ab" style="padding:8px 14px;margin-top:8px;background:transparent;border:1px solid var(--gm);color:var(--go)" onclick="goBitacora('+jsArg(a.id)+')">💬 Ver en bitácora general →</button>';
+  h+='<button class="msave-full" onclick="guardarModal()">💾 Guardar y cerrar</button>';
 
   document.getElementById('modal').innerHTML=h;
   clRender('mat');clRender('req');updTags();pendingPhoto=null;renderObsLog();renderBloqueo();
   document.getElementById('mo').classList.add('open');
 }
 function closeModal(){document.getElementById('mo').classList.remove('open');editId=null;refreshAll();}
+function guardarModal(){clearTimeout(_sv);save();toast('✓ Cambios guardados');closeModal();}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
 
 /* checklist render/ops */
@@ -1792,14 +1828,16 @@ function clRender(t){
   box.innerHTML=its.map(function(it,i){
     var tag=it.src==='ejec'?'<span class="cl-ejec" title="Agregado por Ejecución'+(it.by?' · '+esc(it.by):'')+'">EJEC</span>':'';
     var dbl=(MODE==='ejec')?'<label class="cl-v2" title="Doble-check de ejecución"><input type="checkbox" class="cl-cb cb2"'+(it.v2?' checked':'')+' onchange="clTog2(\''+t+'\','+i+',this.checked)">2ºch</label>':'';
-    return '<div class="cl-item"><input type="checkbox" class="cl-cb"'+(it.done?' checked':'')+' onchange="clTog(\''+t+'\','+i+',this.checked)"><span class="cl-tx'+(it.done?' done':'')+'">'+esc(it.text)+tag+'</span>'+dbl+'<button class="cl-del" onclick="clDel(\''+t+'\','+i+')">×</button></div>';
+    var lockMain=(MODE==='ejec');
+    var mainCb='<input type="checkbox" class="cl-cb"'+(it.done?' checked':'')+(lockMain?' disabled title="El check lo gestiona Planificación · Ejecución usa el 2º check"':' onchange="clTog(\''+t+'\','+i+',this.checked)"')+'>';
+    return '<div class="cl-item">'+mainCb+'<span class="cl-tx'+(it.done?' done':'')+'">'+esc(it.text)+tag+'</span>'+dbl+'<button class="cl-del" onclick="clDel(\''+t+'\','+i+')">×</button></div>';
   }).join('');
 }
 function clAdd(t){
   var inp=document.getElementById('add-'+t);var v=ct2(inp.value);if(!v)return;
   var src=(MODE==='ejec')?'ejec':'plani';
   ed(editId)[clKey(t)].push({text:v,done:false,src:src,by:userName(),ts:Date.now(),v2:false});
-  inp.value='';inp.focus();clRender(t);updTags();markUnsaved();
+  inp.value='';inp.focus();clRender(t);if(t==='mat')autoPrepMat();updTags();markUnsaved();
   if(src==='ejec'){
     var lbl=t==='mat'?'material':'requerimiento';
     ed(editId).log.push({ts:Date.now(),text:'🔧 Ejecución agregó '+lbl+': '+v,photo:null,by:userName(),turno:TURNO,mode:MODE,kind:'ejec',mode:MODE});
@@ -1811,9 +1849,22 @@ function clAdd(t){
   }
 }
 function clLbl(t){return t==='mat'?'Material':'Requerimiento';}
-function clTog(t,i,done){var it=ed(editId)[clKey(t)][i];it.done=done;logAction('Check',editId,(done?'✓ ':'○ ')+clLbl(t)+': '+it.text);clRender(t);updTags();markUnsaved();}
+function clTog(t,i,done){var it=ed(editId)[clKey(t)][i];it.done=done;if(done){it.doneMode=MODE;}else{it.doneMode=undefined;}logAction('Check',editId,(done?'✓ ':'○ ')+clLbl(t)+': '+it.text);clRender(t);if(t==='mat')autoPrepMat();updTags();markUnsaved();}
+/* Si todos los materiales del checklist están listos, marca Preparativos·Materiales = Sí automáticamente */
+function autoPrepMat(){
+  var e=ed(editId);var its=e.matItems||[];if(!its.length)return;
+  var cur=e.prepMat||'';if(cur==='No aplica')return;
+  var allDone=its.every(function(x){return x.done;});
+  var nv=allDone?'Sí':(cur==='Sí'?'Parcial':cur);
+  if(nv!==cur){
+    e.prepMat=nv;
+    var sel=document.getElementById('prep-prepMat');if(sel){sel.value=nv;sel.className='prep-sel '+prepClr(nv);}
+    logAction('Preparativo',editId,'Materiales (auto desde checklist): '+(cur||'—')+' → '+(nv||'—'));
+    updTags();
+  }
+}
 function clTog2(t,i,done){var it=ed(editId)[clKey(t)][i];it.v2=done;logAction('Doble-check',editId,(done?'✓✓ ':'○ ')+clLbl(t)+': '+it.text);clRender(t);markUnsaved();}
-function clDel(t,i){var it=ed(editId)[clKey(t)][i];logAction('Ítem eliminado',editId,clLbl(t)+': '+(it?it.text:''));ed(editId)[clKey(t)].splice(i,1);clRender(t);updTags();markUnsaved();}
+function clDel(t,i){var it=ed(editId)[clKey(t)][i];logAction('Ítem eliminado',editId,clLbl(t)+': '+(it?it.text:''));ed(editId)[clKey(t)].splice(i,1);clRender(t);if(t==='mat')autoPrepMat();updTags();markUnsaved();}
 function setPrep(field,sel){
   var old=ed(editId)[field]||'';ed(editId)[field]=sel.value;sel.className='prep-sel '+prepClr(sel.value);updTags();markUnsaved();
   if(old!==sel.value){var lbl=field;PREP_DEFS.forEach(function(d){if(d[0]===field)lbl=d[1];});logAction('Preparativo',editId,lbl+': '+(old||'—')+' → '+(sel.value||'—'));}
@@ -1989,6 +2040,7 @@ function openQuiebre(id){
   if(!ensureUser())return;editId=id;var a=findAct(id);if(!a)return;var e=ed(id);
   document.getElementById('quiebre-act').textContent=esc(a.id)+' · '+esc(a.nombre);
   document.getElementById('quiebre-cmt').value=e.quiebre?(e.quiebre.comment||''):'';
+  pendingPhoto=null;showPending('quiebre');
   document.getElementById('quiebre-mo').classList.add('open');
   setTimeout(function(){document.getElementById('quiebre-cmt').focus();},50);
 }
@@ -1997,9 +2049,10 @@ function confirmQuiebre(){
   var cmt=document.getElementById('quiebre-cmt').value.trim();
   if(!cmt){toast('Debes justificar el quiebre');return;}
   var e=ed(editId);var a=findAct(editId);
-  e.quiebre={comment:cmt,ts:Date.now(),by:userName(),turno:TURNO};
-  e.log.push({ts:Date.now(),text:'⚠ QUIEBRE: '+cmt,photo:null,by:userName(),turno:TURNO,mode:MODE,kind:'quiebre'});
+  e.quiebre={comment:cmt,ts:Date.now(),by:userName(),turno:TURNO,photo:pendingPhoto||null};
+  e.log.push({ts:Date.now(),text:'⚠ QUIEBRE: '+cmt,photo:pendingPhoto||null,by:userName(),turno:TURNO,mode:MODE,kind:'quiebre'});
   logAction('Quiebre',editId,(a?a.nombre:'')+' — '+cmt);
+  pendingPhoto=null;
   closeQuiebre();markUnsaved();refreshAll();
   if(document.getElementById('mo').classList.contains('open'))openEdit(editId);
   if(TAB==='bitacora')renderBitacora();
@@ -2072,8 +2125,56 @@ function renderHist(){
     var src=x.mode?'<span class="src-tag src-'+(x.mode==='ejec'?'ejec':'plani')+'" style="margin-left:7px">'+(x.mode==='ejec'?'🔧 Ejecución':'📋 Planificación')+'</span>':'';
     return '<div class="hist-row"'+(x.actId?' onclick="openEdit('+jsArg(x.actId)+')" style="cursor:pointer"':'')+'><span class="hist-ic">'+ic+'</span>'
       +'<div class="hist-main"><div class="hist-t"><b>'+esc(x.tipo)+'</b>'+(x.actId?' · '+esc(x.actId):'')+(x.texto?' — '+esc(x.texto):'')+src+'</div>'
-      +'<div class="hist-meta">'+dt.toLocaleDateString('es-CL')+' '+dt.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})+' · '+esc(x.by||'—')+' · turno '+esc(x.turno||'—')+(x.sid?' · sesión '+esc(x.sid):'')+'</div></div></div>';
+      +'<div class="hist-meta">'+dt.toLocaleDateString('es-CL')+' '+dt.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})+' · '+esc(x.by||'—')+' · turno '+esc(x.turno||'—')+(x.sid?' · sesión '+esc(x.sid):'')+'</div></div><button class="hist-del" title="Eliminar este movimiento del historial" onclick="event.stopPropagation();delAction('+x.ts+')">🗑</button></div>';
   }).join('');
+}
+/* Determina si un movimiento del historial se puede revertir y con qué efecto */
+function revertInfo(act){
+  var id=act.actId;var e=id?EDITS[id]:null;
+  switch(act.tipo){
+    case 'Quiebre':        return {can:!!(e&&e.quiebre),        label:'se quita el quiebre de la actividad'};
+    case 'Reprogramación': return {can:!!(e&&e.repro),          label:'se quita la reprogramación'};
+    case 'Adelanto':       return {can:!!(e&&e.adelanto!=null), label:'se quita el adelanto'};
+    case 'Criticidad':     return {can:!!e,                     label:'se restituye la criticidad original'};
+    case 'NP creada':      return {can:!!findAct(id),           label:'se elimina la actividad NP creada'};
+    default:               return {can:false,                  label:''};
+  }
+}
+/* Aplica la acción inversa de un movimiento revertible */
+function applyRevert(act){
+  var id=act.actId;var e=id?ed(id):null;
+  switch(act.tipo){
+    case 'Quiebre':
+      if(e){e.quiebre=null;e.log=(e.log||[]).filter(function(m){return !(m.kind==='quiebre'&&/^⚠ QUIEBRE/.test(m.text||''));});}
+      break;
+    case 'Reprogramación': if(e)e.repro=null; break;
+    case 'Adelanto':       if(e)e.adelanto=null; break;
+    case 'Criticidad':     if(e)e.critM=null; break;
+    case 'NP creada':
+      NPACTS=NPACTS.filter(function(n){return n.id!==id;});saveNP();
+      DATA.secs.forEach(function(s){s.actividades=s.actividades.filter(function(a){return a.id!==id;});});
+      DATA.secs=DATA.secs.filter(function(s){return s.actividades.length>0;});
+      delete EDITS[id];
+      if(editId===id){document.getElementById('mo').classList.remove('open');editId=null;}
+      buildChips();
+      break;
+  }
+}
+/* Elimina un movimiento del historial y revierte la acción cuando es posible */
+function delAction(ts){
+  var act=null;for(var i=0;i<ACTIONS.length;i++){if(ACTIONS[i].ts===ts){act=ACTIONS[i];break;}}
+  if(!act)return;
+  var rev=revertInfo(act);
+  var msg=rev.can
+    ? '¿Eliminar este movimiento y revertir la acción?\n\n• '+rev.label
+    : '¿Eliminar este movimiento del historial?\n\n(Este tipo de cambio no guarda el valor anterior, así que no se puede revertir solo; ajústalo manualmente en la actividad si hace falta.)';
+  if(!confirm(msg))return;
+  if(rev.can)applyRevert(act);
+  var done=false;ACTIONS=ACTIONS.filter(function(x){if(!done&&x.ts===ts){done=true;return false;}return true;});
+  saveActions();
+  if(rev.can){markUnsaved();refreshAll();if(editId&&document.getElementById('mo').classList.contains('open'))openEdit(editId);}
+  renderHist();
+  toast(rev.can?'✓ Movimiento eliminado y acción revertida':'Movimiento eliminado del historial');
 }
 /* Exporta la auditoría completa de la semana a CSV (respaldo / análisis externo) */
 function exportHistorial(){
@@ -2088,19 +2189,24 @@ function exportHistorial(){
   toast('✓ Historial exportado');
 }
 
-/* ── ESTADO DE BLOQUEO (LOTO) ── */
+/* ── ESTADO DE BLOQUEO ── */
 function bloqColor(f){return f>=5?'#2E9E5B':f>=1?'#0098AA':'#8A9299';}
 function renderBloqueo(){
   var box=document.getElementById('bloq-wrap');if(!box)return;var e=ed(editId);var f=e.bloqueo.fase||0;
-  var req=!!e.bloqueo.req;
-  var sw='<div class="bloq-req"><span class="bloq-req-lbl">¿Esta actividad requiere bloqueo (LOTO)?</span>'
-    +'<button class="switch'+(req?' on':'')+'" onclick="toggleBloqReq()" role="switch" aria-checked="'+req+'"><span class="switch-k"></span></button>'
-    +'<span class="bloq-req-st">'+(req?'Sí, requiere':'No requiere')+'</span></div>';
-  if(!req){box.innerHTML=sw+'<div class="cl-empty">El seguimiento de bloqueo está desactivado para esta actividad.</div>';return;}
+  var req=!!e.bloqueo.req;var ro=(MODE==='ejec');
+  var sw;
+  if(ro){
+    sw='<div class="bloq-req"><span class="bloq-req-lbl">Requiere bloqueo:</span><span class="bloq-req-st">'+(req?'Sí':'No')+'</span><span class="bloq-resp">👤 Responsable: Planificación</span></div>';
+  }else{
+    sw='<div class="bloq-req"><span class="bloq-req-lbl">¿Esta actividad requiere bloqueo?</span>'
+      +'<button class="switch'+(req?' on':'')+'" onclick="toggleBloqReq()" role="switch" aria-checked="'+req+'"><span class="switch-k"></span></button>'
+      +'<span class="bloq-req-st">'+(req?'Sí, requiere':'No requiere')+'</span></div>';
+  }
+  if(!req){box.innerHTML=sw+'<div class="cl-empty">'+(ro?'Esta actividad no requiere bloqueo.':'El seguimiento de bloqueo está desactivado para esta actividad.')+'</div>';return;}
   var steps='<div class="bloq-track">';
   for(var i=0;i<BLOQ_FASES.length;i++){
     var n=i+1;var done=f>=n;var cur=f===n;
-    steps+='<div class="bloq-step'+(done?' done':'')+(cur?' cur':'')+'" onclick="bloqSet('+n+')" title="Marcar: '+esc(BLOQ_FASES[i])+'">'
+    steps+='<div class="bloq-step'+(done?' done':'')+(cur?' cur':'')+(ro?' ro':'')+'"'+(ro?'':' onclick="bloqSet('+n+')"')+' title="'+esc(BLOQ_FASES[i])+'">'
       +'<div class="bloq-dot">'+(done?'✓':n)+'</div>'
       +'<div class="bloq-slbl">'+esc(BLOQ_FASES[i])+'</div></div>';
     if(i<BLOQ_FASES.length-1)steps+='<div class="bloq-line'+(f>=n+1?' on':'')+'"></div>';
@@ -2109,11 +2215,14 @@ function renderBloqueo(){
   var estLbl=f===0?'Sin solicitar':BLOQ_FASES[f-1];
   var pct=Math.round(f/BLOQ_FASES.length*100);
   var head='<div class="bloq-head"><span class="bloq-badge" style="background:'+bloqColor(f)+'1f;color:'+bloqColor(f)+';border:1px solid '+bloqColor(f)+'">🔒 '+esc(estLbl)+'</span><span class="bloq-pct">'+pct+'%</span></div>';
-  var btnLbl=f===0?'Solicitar bloqueo':f<5?'↑ Avanzar estado':'✓ Bloqueo listo';
-  var ctrl='<div class="bloq-ctrl">'
-    +'<textarea class="log-input" id="bloq-obs" rows="1" placeholder="Observación del bloqueo (opcional)…"></textarea>'
-    +'<button class="log-send" onclick="bloqAvanzar()"'+(f>=5?' disabled style="opacity:.5;cursor:default"':'')+'>'+btnLbl+'</button>'
-    +'</div>';
+  var ctrl='';
+  if(!ro){
+    var btnLbl=f===0?'Solicitar bloqueo':f<5?'↑ Avanzar estado':'✓ Bloqueo listo';
+    ctrl='<div class="bloq-ctrl">'
+      +'<textarea class="log-input" id="bloq-obs" rows="1" placeholder="Observación del bloqueo (opcional)…"></textarea>'
+      +'<button class="log-send" onclick="bloqAvanzar()"'+(f>=5?' disabled style="opacity:.5;cursor:default"':'')+'>'+btnLbl+'</button>'
+      +'</div>';
+  }
   var logh='';var items=(e.bloqueo.log||[]).slice().sort(function(x,y){return x.ts-y.ts;});
   if(items.length){
     logh='<div class="bloq-log">';
@@ -2300,7 +2409,7 @@ function attachPhoto(input,ctx){
     img.onerror=function(){toast('No se pudo leer la imagen');};img.src=ev.target.result;};
   r.readAsDataURL(f);input.value='';
 }
-function showPending(ctx){var box=document.getElementById(ctx==='bit'?'bit-pending':'log-pending');if(!box)return;box.innerHTML=pendingPhoto?'<span class="log-pending-chip"><img src="'+pendingPhoto+'"><span style="font-family:var(--fc);font-size:9px;font-weight:700;color:var(--te2)">Foto adjunta</span><button onclick="pendingPhoto=null;showPending(\''+ctx+'\')" title="Quitar">×</button></span>':'';}
+function showPending(ctx){var box=document.getElementById(ctx==='bit'?'bit-pending':ctx==='quiebre'?'quiebre-pending':'log-pending');if(!box)return;box.innerHTML=pendingPhoto?'<span class="log-pending-chip"><img src="'+pendingPhoto+'"><span style="font-family:var(--fc);font-size:9px;font-weight:700;color:var(--te2)">Foto adjunta</span><button onclick="pendingPhoto=null;showPending(\''+ctx+'\')" title="Quitar">×</button></span>':'';}
 function openLogPhoto(actId,idx){var it=ed(actId).log[idx];if(!it||!it.photo)return;document.getElementById('lb-img').src=it.photo;document.getElementById('lb').classList.add('open');}
 function closeLB(){document.getElementById('lb').classList.remove('open');}
 
@@ -2333,7 +2442,9 @@ var _tt;function toast(msg){var e=document.getElementById('toast');e.textContent
 /* ── Init ── */
 loadUser();
 loadTurno();
-if(!USER||!USER.nombre){setTimeout(function(){openReg(false);},200);}
+var _restored=restoreData();
+if(_restored){showDash(true);}
+if(!_restored&&(!USER||!USER.nombre)){setTimeout(function(){openReg(false);},200);}
 
 </script>
 </body>
