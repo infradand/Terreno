@@ -804,6 +804,19 @@ body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
 .brx-it{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border-radius:8px;cursor:pointer;font-size:12px;line-height:1.35}
 .brx-it:hover{background:var(--gb)}
 .brx-it .brx-b{font-size:10px;font-weight:800;border-radius:8px;padding:2px 7px;white-space:nowrap;margin-top:1px}
+
+/* ── Dashboard Global compacto (5 vistas) — estética original ── */
+.gx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gx-strip{display:grid;grid-template-columns:230px repeat(4,1fr);gap:12px;margin-bottom:14px}
+.gx-cell{display:flex;flex-direction:column;justify-content:center}
+.gx-cell .kv{font-size:26px}
+.gx-wf svg{max-width:560px;margin:0 auto}
+.gx-heat-wrap{overflow-x:auto}
+.gx-heat{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed;min-width:340px}
+.gx-heat th{font-size:9px;font-weight:700;letter-spacing:.02em;color:var(--gm);padding:4px 3px;text-align:center;vertical-align:bottom;line-height:1.2;word-break:break-word}
+.gx-heat th.gx-rl{text-align:right;width:128px;color:var(--go);padding-right:7px}
+.gx-heat td{height:30px;text-align:center;font-size:10px;font-weight:700;border-radius:7px}
+@media(max-width:980px){.gx-grid{grid-template-columns:1fr}.gx-strip{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -856,8 +869,7 @@ body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
   <button class="tab" id="tab-btn-brechas" onclick="showTab('brechas')">🌐 Dashboard Global</button>
   <button class="tab" id="tab-btn-plani" onclick="showTab('plani')">📋 Planificación</button>
   <button class="tab" id="tab-btn-ejec" onclick="showTab('ejec')">🔧 Ejecución</button>
-  <button class="tab" id="tab-btn-bitacora" onclick="showTab('bitacora')">✎ Bitácora <span class="tab-badge" id="tab-log-count">0</span></button>
-  <button class="tab" id="tab-btn-traspaso" onclick="showTab('traspaso')">⇄ Traspaso</button>
+  <button class="tab" id="tab-btn-traspaso" onclick="showTab('traspaso')">⇄ Traspaso de turno</button>
   <button class="tab" id="tab-btn-historial" onclick="showTab('historial')">🕘 Historial</button>
 </div>
 
@@ -914,6 +926,8 @@ body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
 
   <div id="tab-work" style="display:none">
     <div class="mode-banner" id="mode-banner"></div>
+    <div id="plani-top" style="display:none"></div>
+    <div id="ejec-top" style="display:none"></div>
     <div class="day-sel" id="day-sel"></div>
     <div class="flt">
       <span class="seg vseg"><button class="seg-b on" id="vm-cuadros" onclick="setVMode('cuadros')">▦ Cuadros</button><button class="seg-b" id="vm-lista" onclick="setVMode('lista')">≡ Lista</button></span>
@@ -946,48 +960,30 @@ body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
     <div id="hist-feed"></div>
   </div>
 
-  <div id="tab-bitacora" style="display:none">
-    <div class="sttl">Bitácora General</div>
-    <div class="bit-compose">
-      <div class="bit-compose-row">
-        <select class="fi bit-act-sel" id="bit-act"></select>
-      </div>
-      <div class="bit-compose-row" style="margin-top:8px">
-        <textarea class="log-input" id="bit-input" rows="1" placeholder="Escribe una nota para la actividad seleccionada…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();bitAdd();}"></textarea>
-        <input type="file" id="bit-photo" accept="image/*" capture="environment" style="display:none" onchange="attachPhoto(this,'bit')">
-        <button class="log-photo-btn" onclick="document.getElementById('bit-photo').click()" title="Adjuntar foto">📷</button>
-        <button class="log-send" onclick="bitAdd()">Enviar</button>
-      </div>
-      <div class="log-pending" id="bit-pending"></div>
-    </div>
-    <div class="flt" style="margin-top:12px">
-      <div class="sw"><span class="si">🔍</span><input class="sb" id="bit-q" placeholder="Buscar en notas, autor, actividad…" oninput="renderBitacora()"></div>
-      <select class="fsel" id="bit-turno" onchange="renderBitacora()"><option value="">Todos los turnos</option><option value="Día">☀ Turno Día</option><option value="Noche">☾ Turno Noche</option></select>
-      <select class="fsel" id="bit-filter" onchange="renderBitacora()"></select>
-      <span class="cbadge" id="bit-badge"></span>
-    </div>
-    <div class="bit-feed" id="bit-feed"></div>
-  </div>
-
   <div id="tab-traspaso" style="display:none">
     <div class="page-h">Traspaso de Turno</div>
-    <div class="page-sub">Resumen automático del estado + notas para el turno entrante. Se arma con el turno seleccionado arriba.</div>
+    <div class="page-sub">Bitácora de comentarios para la entrega de turno. Cada comentario queda firmado con tu nombre, turno y hora.</div>
 
-    <div class="tr-head" id="tr-head"></div>
-
-    <div class="sttl">Resumen automático del turno</div>
-    <div class="tr-auto" id="tr-auto"></div>
-
-    <div class="sttl">Mensaje para el turno entrante</div>
     <div class="bit-compose">
-      <textarea class="log-input" id="tr-msg" rows="3" placeholder="Instrucciones, pendientes y puntos de atención para quien recibe el turno…" style="min-height:100px"></textarea>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-        <button class="log-send" id="tr-btn" onclick="registrarTraspaso()">⇄ Registrar traspaso</button>
+      <textarea class="log-input" id="tr-input" rows="2" placeholder="Escribe un comentario para el turno entrante… (pendientes, riesgos, avisos)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();trAdd();}"></textarea>
+      <input type="file" id="tr-photo" accept="image/*" capture="environment" style="display:none" onchange="attachPhoto(this,'tr')">
+      <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap">
+        <span class="tr-turno t-dia" id="tr-cur-turno">☀ Turno Día</span>
+        <span style="display:flex;gap:8px">
+          <button class="log-photo-btn" onclick="document.getElementById('tr-photo').click()" title="Adjuntar foto">📷</button>
+          <button class="log-send" onclick="trAdd()">Enviar comentario</button>
+        </span>
       </div>
+      <div class="log-pending" id="tr-pending"></div>
     </div>
 
-    <div class="sttl">Traspasos registrados</div>
-    <div id="tr-history"></div>
+    <div class="flt" style="margin-top:12px">
+      <div class="sw"><span class="si">🔍</span><input class="sb" id="tr-q" placeholder="Buscar en comentarios o autor…" oninput="renderTraspaso()"></div>
+      <select class="fsel" id="tr-turno-f" onchange="renderTraspaso()"><option value="">Todos los turnos</option><option value="Día">☀ Turno Día</option><option value="Noche">☾ Turno Noche</option></select>
+      <span class="cbadge" id="tr-badge"></span>
+    </div>
+
+    <div class="bit-feed" id="tr-feed"></div>
   </div>
 </main>
 
@@ -1123,10 +1119,12 @@ var Store={
 };
 
 /* ===== Sincronización en la nube (Supabase) =====
-   Pega tu URL y tu anon public key para que TODOS los que abran el link vean lo mismo.
-   Si lo dejas en blanco, la app funciona solo en este navegador (como antes). */
-var SUPA_URL='https://pomvyygevurcavbifuss.supabase.co';
-var SUPA_KEY='';            /* ← pega aquí tu anon public key */
+   Configurado para el proyecto SINFRA. Cuando alguien sube el Excel, el estado
+   se guarda en Supabase y TODOS los que abran el link lo reciben.
+   Nota: la key 'publishable' (sb_publishable_...) va SOLO en el header apikey
+   (ver hdr() abajo); NO se manda como Authorization: Bearer. */
+var SUPA_URL='https://tdjabcxdksvdtcpzdlac.supabase.co';
+var SUPA_KEY='sb_publishable_mfmTr8guaof8Y8Q6cVYl3g_uyfWwd-c';
 var SUPA_TABLE='preparativos_estado';
 var SUPA_DOC='sinfra-prep'; /* id del tablero compartido (cámbialo para separar tableros) */
 
@@ -1137,7 +1135,7 @@ var CLOUD={
   cid:Math.random().toString(36).slice(2),
   _t:null,_applying:false,_seen:null,_pending:false,
   active:function(){return !!(SUPA_URL&&SUPA_KEY&&window.fetch);},
-  hdr:function(){return {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};},
+  hdr:function(){return {'apikey':SUPA_KEY,'Content-Type':'application/json'};},
   url:function(q){return SUPA_URL+'/rest/v1/'+SUPA_TABLE+(q||'');},
   collect:function(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(Store.ns)===0&&cloudShared(k))o[k]=localStorage.getItem(k);}return o;},
   apply:function(data){if(!data)return;this._applying=true;try{
@@ -1263,7 +1261,7 @@ function logTraceDeb(key,ms,fn){clearTimeout(_trc[key]);_trc[key]=setTimeout(fun
 function loadTurno(){var t=Store.get('turno','Día');TURNO=(t==='Noche')?'Noche':'Día';renderTurnoSeg();}
 function setTurno(t){TURNO=t;Store.set('turno',t);renderTurnoSeg();if(TAB==='bitacora')renderBitacora();if(TAB==='traspaso')renderTraspaso();}
 function renderTurnoSeg(){var d=document.getElementById('turno-dia'),n=document.getElementById('turno-noche');if(d)d.classList.toggle('on',TURNO==='Día');if(n)n.classList.toggle('on',TURNO==='Noche');}
-function loadHandovers(){var h=Store.get('traspasos_s'+(DATA?DATA.semana:''),[]);HANDOVERS=Array.isArray(h)?h:[];}
+function loadHandovers(){var h=Store.get('traspasos_s'+(DATA?DATA.semana:''),[]);HANDOVERS=Array.isArray(h)?h:[];migrateHandovers();}
 function saveHandovers(){if(!Store.set('traspasos_s'+(DATA?DATA.semana:''),HANDOVERS))toast('⚠ Almacenamiento lleno');}
 
 /* ── Actividades No Planificadas ── */
@@ -1433,8 +1431,7 @@ function showTab(t){
   var bp=document.getElementById('btn-ppt');if(bp)bp.style.display=(t==='plani')?'inline-flex':'none';
   if(t==='execdash'){renderExecDash();ekInitTip('tab-execdash');}
   if(t==='brechas'){renderBrechas();ekInitTip('tab-brechas');}
-  if(t==='plani'||t==='ejec'){MODE=t;if(!DIA_INIT){DIA=todayIndex();DIA_INIT=true;}renderModeBanner();renderDaySel();render();}
-  if(t==='bitacora'){pendingPhoto=null;buildBitFilters();renderBitacora();showPending('bit');}
+  if(t==='plani'||t==='ejec'){MODE=t;if(!DIA_INIT){DIA=todayIndex();DIA_INIT=true;}renderModeBanner();renderPlaniInd();renderEjecTop();renderDaySel();render();}
   if(t==='traspaso'){renderTraspaso();}
   if(t==='historial'){renderHist();}
 }
@@ -1679,7 +1676,7 @@ function recargar(){
   var ok=document.getElementById('u-ppt-ok');if(ok)ok.textContent='';
   document.getElementById('fi').value='';
 }
-function refreshAll(){renderKPIs();renderPeriod();renderAlerts();renderRepro();renderPlaniAnalytics();updateCharts();renderDayStrip();renderBar();renderExec();render();updTabCount();}
+function refreshAll(){renderKPIs();renderPeriod();renderAlerts();renderRepro();renderPlaniAnalytics();updateCharts();renderDayStrip();renderBar();renderExec();render();updTabCount();if(document.getElementById('plani-top')&&document.getElementById('plani-top').style.display!=='none')renderPlaniInd();if(document.getElementById('ejec-top')&&document.getElementById('ejec-top').style.display!=='none')renderEjecTop();}
 function renderPeriod(){
   var pw=document.getElementById('period-week');if(pw)pw.innerHTML='Semana '+(DATA.semana||'—')+(WSLOT===1?' <span class="wk-tag next">🔭 PRÓXIMA · PREPARATIVOS</span>':' <span class="wk-tag">📅 EN CURSO</span>');
   var d0=DATA.dates[0]||'',d6=DATA.dates[6]||'';var pr=document.getElementById('period-range');
@@ -1831,10 +1828,10 @@ function updateCharts(){
 /* ── Bar by disciplina ── */
 var DISC_CLR=['#E55302','#0098AA','#2E9E5B','#F4AA00','#C13832','#7B5EA7','#36424A','#8A9299'];
 var DISC_MODE='graf';
-function discMode(m){DISC_MODE=m;var g=document.getElementById('seg-graf'),n=document.getElementById('seg-num');if(g)g.classList.toggle('on',m==='graf');if(n)n.classList.toggle('on',m==='num');renderBar();}
-function renderBar(){
+function discMode(m){DISC_MODE=m;var g=document.getElementById('seg-graf'),n=document.getElementById('seg-num');if(g)g.classList.toggle('on',m==='graf');if(n)n.classList.toggle('on',m==='num');renderBar('bar-disc');if(document.getElementById('bar-disc-pl'))renderBar('bar-disc-pl');}
+function renderBar(boxId){
   var rows=DATA.secs.map(function(s){var tp=0;s.actividades.forEach(function(a){tp+=totPlan(a);});return {nombre:s.nombre,tp:tp,act:s.actividades.length};}).filter(function(r){return r.act>0;}).sort(function(a,b){return b.tp-a.tp;});
-  var box=document.getElementById('bar-disc');if(!box)return;
+  var box=document.getElementById(boxId||'bar-disc');if(!box)return;
   if(!rows.length){box.innerHTML='<div class="empty">Sin datos</div>';return;}
   if(DISC_MODE==='num'){
     box.innerHTML='<div class="disc-num"><div class="disc-num-row h"><span class="dn-h" style="text-align:left">Disciplina</span><span class="dn-h">Activid.</span><span class="dn-h">Personas</span></div>'
@@ -1870,12 +1867,106 @@ function renderExec(){
 }
 
 /* ── Daily strip ── */
-function renderDayStrip(){
+function renderDayStrip(boxId){
   var tdp=[0,0,0,0,0,0,0],tdr=[0,0,0,0,0,0,0];
   allActs().forEach(function(a){var rd=realDot(a);for(var d=0;d<7;d++){tdp[d]+=a.dp[d];tdr[d]+=rd[d];}});
   var h='';for(var d=0;d<7;d++){var p=tdp[d],rl=tdr[d];var clr=rl>=p&&p>0?'var(--ve)':rl>0?'var(--am)':'transparent';var rclr=rl>=p&&p>0?'var(--ve)':rl>0?'#8A6600':'var(--gl)';
     h+='<div class="day-c" style="border-bottom-color:'+clr+'"><div class="day-n">'+DSHORT[d]+'</div><div class="day-d">'+fmtFechaCorta(DATA.dates[d]||'')+'</div><div class="day-v">'+p+'</div><div class="day-r" style="color:'+rclr+'">'+(rl?'↻ '+rl:'—')+'</div></div>';}
-  document.getElementById('day-strip').innerHTML=h;
+  var box=document.getElementById(boxId||'day-strip');if(box)box.innerHTML=h;
+}
+
+/* ── Indicadores al inicio de la pestaña Planificación (copia de solo lectura) ── */
+function renderPlaniInd(){
+  var box=document.getElementById('plani-top');if(!box)return;
+  if(!DATA||MODE!=='plani'){box.style.display='none';box.innerHTML='';return;}
+  box.style.display='block';
+  var defs=[
+    {id:'est',ttl:'Ejecución',pl:'avance'},
+    {id:'req',ttl:'Requerimientos',pl:'actividades'},
+    {id:'mat',ttl:'Materiales',pl:'actividades'},
+    {id:'prep',ttl:'Preparativos',pl:'cumplim.'},
+    {id:'both',ttl:'Cumplimiento Total',pl:'req+mat+prep'}
+  ];
+  var pies=defs.map(function(d){
+    return '<div class="chc"><div class="ch-ttl">'+d.ttl+'</div>'
+      +'<div class="pw"><canvas id="pie-'+d.id+'-pl" width="104" height="104"></canvas>'
+      +'<div class="pcent"><div class="pp" id="pp-'+d.id+'-pl">—</div><div class="pl">'+d.pl+'</div></div></div>'
+      +'<div class="pie-leg" id="leg-'+d.id+'-pl"></div></div>';
+  }).join('');
+  box.innerHTML=''
+    +'<div class="sttl">Indicadores</div>'
+    +'<div class="ch-row">'+pies+'</div>'
+    +'<div class="bar-wrap"><div class="card-h"><div class="card-t">Dotación por Disciplina<span class="card-sub">plan acumulado · personas × turno</span></div>'
+      +'<div class="seg"><button class="seg-b'+(DISC_MODE==='graf'?' on':'')+'" onclick="discMode(\'graf\')">Gráfico</button><button class="seg-b'+(DISC_MODE==='num'?' on':'')+'" onclick="discMode(\'num\')">Numérico</button></div></div>'
+      +'<div class="bar-ch" id="bar-disc-pl"></div></div>'
+    +'<div class="sttl">Dotación Diaria</div>'
+    +'<div class="day-strip" id="day-strip-pl"></div>';
+  plDrawPies();
+  renderBar('bar-disc-pl');
+  renderDayStrip('day-strip-pl');
+}
+function plLeg(items){return items.map(function(i){return '<div class="li"><div class="ld" style="background:'+i.c+'"></div><span>'+i.t+'</span></div>';}).join('');}
+function plDrawPies(){
+  var acts=allActs();var tot=acts.length;
+  var ec={'Completada':0,'En proceso':0,'Sin iniciar':0,'Quiebre':0};
+  acts.forEach(function(a){if(isQuiebre(a)){ec['Quiebre']++;return;}var v=ed(a.id).estEj||'Sin iniciar';if(ec[v]===undefined)v='Sin iniciar';ec[v]++;});
+  var avgMida=tot?Math.round(acts.reduce(function(s,a){return s+(ed(a.id).mida||0);},0)/tot):0;
+  drawPie('pie-est-pl',[{v:ec['Completada'],c:'#2E9E5B'},{v:ec['En proceso'],c:'#0098AA'},{v:ec['Sin iniciar'],c:'#8A9299'},{v:ec['Quiebre'],c:'#C13832'}]);
+  document.getElementById('pp-est-pl').textContent=avgMida+'%';
+  document.getElementById('leg-est-pl').innerHTML=plLeg([{c:'#2E9E5B',t:ec['Completada']+' Completada'},{c:'#0098AA',t:ec['En proceso']+' En proceso'},{c:'#8A9299',t:ec['Sin iniciar']+' Sin iniciar'},{c:'#C13832',t:ec['Quiebre']+' Quiebre'}]);
+  var rOk=acts.filter(function(a){return calcReq(a).ok;}).length,rNd=acts.filter(function(a){var q=calcReq(a);return q.total>0&&!q.ok;}).length,rNa=acts.filter(function(a){return calcReq(a).total===0;}).length;
+  drawPie('pie-req-pl',[{v:rOk,c:'#2E9E5B'},{v:rNd,c:'#F4AA00'},{v:rNa,c:'#8A9299'}]);
+  document.getElementById('pp-req-pl').textContent=(rOk+rNd)?Math.round(rOk/(rOk+rNd)*100)+'%':'—';
+  document.getElementById('leg-req-pl').innerHTML=plLeg([{c:'#2E9E5B',t:rOk+' completas'},{c:'#F4AA00',t:rNd+' pendientes'},{c:'#8A9299',t:rNa+' sin definir'}]);
+  var mOk=acts.filter(function(a){return calcMat(a).ok;}).length,mNd=acts.filter(function(a){var q=calcMat(a);return q.total>0&&!q.ok;}).length,mNa=acts.filter(function(a){return calcMat(a).total===0;}).length;
+  drawPie('pie-mat-pl',[{v:mOk,c:'#2E9E5B'},{v:mNd,c:'#F4AA00'},{v:mNa,c:'#8A9299'}]);
+  document.getElementById('pp-mat-pl').textContent=(mOk+mNd)?Math.round(mOk/(mOk+mNd)*100)+'%':'—';
+  document.getElementById('leg-mat-pl').innerHTML=plLeg([{c:'#2E9E5B',t:mOk+' confirmados'},{c:'#F4AA00',t:mNd+' pendientes'},{c:'#8A9299',t:mNa+' sin definir'}]);
+  var pOk=acts.filter(function(a){return calcPrep(a).complete;}).length,pNd=acts.filter(function(a){var p=calcPrep(a);return p.total>0&&!p.complete;}).length,pNa=acts.filter(function(a){return calcPrep(a).total===0;}).length;
+  var withP=acts.filter(function(a){return calcPrep(a).total>0;});var avgP=withP.length?Math.round(withP.reduce(function(s,a){return s+calcPrep(a).pct;},0)/withP.length):0;
+  drawPie('pie-prep-pl',[{v:pOk,c:'#2E9E5B'},{v:pNd,c:'#F4AA00'},{v:pNa,c:'#0098AA'}]);
+  document.getElementById('pp-prep-pl').textContent=(pOk+pNd)?avgP+'%':'—';
+  document.getElementById('leg-prep-pl').innerHTML=plLeg([{c:'#2E9E5B',t:pOk+' completas'},{c:'#F4AA00',t:pNd+' pendientes'},{c:'#0098AA',t:pNa+' sin definir'}]);
+  var bOk=acts.filter(function(a){return calcReq(a).ok&&calcMat(a).ok&&calcPrep(a).complete;}).length;
+  var bNd=acts.filter(function(a){var has=calcReq(a).total>0||calcMat(a).total>0||calcPrep(a).total>0;return has&&!(calcReq(a).ok&&calcMat(a).ok&&calcPrep(a).complete);}).length;
+  var bNa=acts.filter(function(a){return calcReq(a).total===0&&calcMat(a).total===0&&calcPrep(a).total===0;}).length;
+  drawPie('pie-both-pl',[{v:bOk,c:'#2E9E5B'},{v:bNd,c:'#E55302'},{v:bNa,c:'#8A9299'}]);
+  document.getElementById('pp-both-pl').textContent=(bOk+bNd)?Math.round(bOk/(bOk+bNd)*100)+'%':'—';
+  document.getElementById('leg-both-pl').innerHTML=plLeg([{c:'#2E9E5B',t:bOk+' completas'},{c:'#E55302',t:bNd+' incompletas'},{c:'#8A9299',t:bNa+' sin ítems'}]);
+}
+/* ── Panel general al inicio de la pestaña Ejecución ── */
+function renderEjecTop(){
+  var box=document.getElementById('ejec-top');if(!box)return;
+  if(!DATA||MODE!=='ejec'){box.style.display='none';box.innerHTML='';return;}
+  box.style.display='block';
+  var acts=allActs();var tot=acts.length||1;
+  var comp=0,proc=0,sin=0,qb=0,np=0,midaSum=0;
+  acts.forEach(function(a){
+    if(a.np)np++;
+    midaSum+=(ed(a.id).mida||0);
+    if(isQuiebre(a)){qb++;return;}
+    var v=ed(a.id).estEj||'Sin iniciar';
+    if(v==='Completada')comp++;else if(v==='En proceso')proc++;else sin++;
+  });
+  var avance=Math.round(midaSum/tot);
+  function pct(n){return Math.round(n/tot*100);}
+  var cards=[
+    {cls:'k1',lbl:'Avance general',val:avance+'%',sub:'MiDA promedio'},
+    {cls:'k2',lbl:'Ejecutadas',val:pct(comp)+'%',sub:comp+' completadas'},
+    {cls:'k3',lbl:'En proceso',val:pct(proc)+'%',sub:proc+' actividades'},
+    {cls:'k4',lbl:'No ejecutadas',val:pct(sin)+'%',sub:sin+' sin iniciar'},
+    {cls:'k6',lbl:'Quiebres',val:qb,sub:pct(qb)+'% del total'},
+    {cls:'k5',lbl:'No planificadas',val:pct(np)+'%',sub:np+' actividades NP'}
+  ];
+  var kpi='<div class="kpi-g">'+cards.map(function(c){return '<div class="kc '+c.cls+'"><div class="kl">'+c.lbl+'</div><div class="kv">'+c.val+'</div><div class="ks">'+c.sub+'</div></div>';}).join('')+'</div>';
+  var estado='<div class="bar-wrap"><div class="card-h"><div class="card-t">Estado de las actividades<span class="card-sub">'+tot+' actividades · distribución por estado de ejecución</span></div></div>'
+    +'<div style="display:flex;align-items:center;gap:26px;flex-wrap:wrap">'
+    +'<div class="pw" style="cursor:default;flex:none"><canvas id="pie-ejec-top" width="104" height="104"></canvas><div class="pcent"><div class="pp">'+pct(comp)+'%</div><div class="pl">ejecutadas</div></div></div>'
+    +'<div class="pie-leg" id="leg-ejec-top" style="flex:1;min-width:180px"></div>'
+    +'</div></div>';
+  box.innerHTML='<div class="sttl">¿Cómo vamos? · Estado de la ejecución</div>'+kpi+estado;
+  drawPie('pie-ejec-top',[{v:comp,c:'#2E9E5B'},{v:proc,c:'#0098AA'},{v:sin,c:'#8A9299'},{v:qb,c:'#C13832'}]);
+  document.getElementById('leg-ejec-top').innerHTML=plLeg([{c:'#2E9E5B',t:comp+' Completadas'},{c:'#0098AA',t:proc+' En proceso'},{c:'#8A9299',t:sin+' Sin iniciar'},{c:'#C13832',t:qb+' Quiebre'}]);
 }
 
 /* ── Filters ── */
@@ -2264,7 +2355,6 @@ function openEdit(id){
     +'<button class="log-photo-btn" onclick="document.getElementById(\'log-photo\').click()" title="Adjuntar foto">📷</button>'
     +'<button class="log-send" onclick="addObs()">Registrar</button>'
     +'</div></div>';
-  h+='<button class="cl-ab" style="padding:8px 14px;margin-top:8px;background:transparent;border:1px solid var(--gm);color:var(--go)" onclick="goBitacora('+jsArg(a.id)+')">💬 Ver en bitácora general →</button>';
   h+='<button class="msave-full" onclick="guardarModal()">💾 Guardar y cerrar</button>';
 
   document.getElementById('modal').innerHTML=h;
@@ -2867,100 +2957,68 @@ function renderRepro(){
 }
 
 /* ── TRASPASO DE TURNO ── */
-function traspasoData(){
-  var acts=allActs();
-  var crit=acts.filter(isCrit);
-  var quiebre=acts.filter(isQuiebre);
-  var repro=acts.filter(function(a){return ed(a.id).repro;});
-  var sinIni=acts.filter(function(a){return (ed(a.id).estEj||'Sin iniciar')==='Sin iniciar'&&!isQuiebre(a);});
-  var enProc=acts.filter(function(a){return ed(a.id).estEj==='En proceso';});
-  var compl=acts.filter(function(a){return ed(a.id).estEj==='Completada';});
-  var dkey=new Date().toLocaleDateString('es-CL');var notes=[];
-  acts.forEach(function(a){(ed(a.id).log||[]).forEach(function(m){if((m.turno||'')===TURNO&&new Date(m.ts).toLocaleDateString('es-CL')===dkey)notes.push({a:a,m:m});});});
-  notes.sort(function(x,y){return y.m.ts-x.m.ts;});
-  return {acts:acts,crit:crit,quiebre:quiebre,repro:repro,sinIni:sinIni,enProc:enProc,compl:compl,notes:notes};
+/* ── TRASPASO DE TURNO · bitácora de comentarios ──
+   HANDOVERS es una lista plana de comentarios {ts,by,turno,text,photo,sid}.
+   Migra registros antiguos (con .comments/.summary) a comentarios individuales. */
+function migrateHandovers(){
+  var flat=[],changed=false;
+  HANDOVERS.forEach(function(r){
+    if(r&&typeof r.text==='string'){flat.push(r);return;}
+    changed=true;
+    if(r&&r.comments&&r.comments.length){
+      r.comments.forEach(function(c){flat.push({ts:c.ts||r.ts||Date.now(),by:c.by||r.by||'—',turno:r.turno||'Día',text:c.text||'',photo:null,sid:r.sid});});
+    }else if(r&&r.manual){
+      flat.push({ts:r.ts||Date.now(),by:r.by||'—',turno:r.turno||'Día',text:r.manual,photo:null,sid:r.sid});
+    }
+  });
+  if(changed){HANDOVERS=flat;saveHandovers();}
 }
-function lastNote(a){var l=ed(a.id).log||[];return l.length?l[l.length-1].text:'';}
 function renderTraspaso(){
-  if(!DATA)return;var d=traspasoData();var now=new Date();
-  document.getElementById('tr-head').innerHTML=
-    '<span class="tr-turno t-'+(TURNO==='Noche'?'noche':'dia')+'">'+(TURNO==='Noche'?'☾':'☀')+' Turno '+TURNO+'</span>'
-    +'<span class="tr-hmeta">'+now.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'})+' · '+now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})+'</span>'
-    +'<span class="tr-hmeta">Responsable: <b>'+esc(userName())+'</b></span>'
-    +'<span class="tr-hmeta">Semana '+DATA.semana+'</span>';
-  var stats=[['Críticas',d.crit.length,'var(--ro)'],['Quiebres',d.quiebre.length,'var(--ro)'],['Reprogramadas',d.repro.length,'var(--pu)'],['Sin iniciar',d.sinIni.length,'var(--gm)'],['En proceso',d.enProc.length,'var(--te2)'],['Completadas',d.compl.length,'var(--ve)']];
-  var h='<div class="tr-stats">'+stats.map(function(s){return '<div class="tr-stat"><div class="tr-stat-v" style="color:'+s[2]+'">'+s[1]+'</div><div class="tr-stat-l">'+s[0]+'</div></div>';}).join('')+'</div>';
-  h+=trSection('⚠ Quiebres del turno',d.quiebre.map(function(a){var qb=ed(a.id).quiebre;return '<div class="tr-li" onclick="openEdit('+jsArg(a.id)+')"><b>'+esc(a.id)+'</b> '+esc(a.nombre)+'<span class="tr-li-m">'+esc(qb&&qb.comment?qb.comment:lastNote(a))+'</span></div>';}));
-  h+=trSection('🔴 Actividades críticas',d.crit.map(function(a){var ej=ejInfo(ed(a.id).estEj||'');return '<div class="tr-li" onclick="openEdit('+jsArg(a.id)+')"><b>'+esc(a.id)+'</b> '+esc(a.nombre)+'<span class="tr-li-m" style="color:'+ej.c+'">'+ej.label+' '+(ed(a.id).mida||0)+'%</span></div>';}));
-  h+=trSection('↪ Reprogramaciones',d.repro.map(function(a){var r=ed(a.id).repro;return '<div class="tr-li" onclick="openEdit('+jsArg(a.id)+')"><b>'+esc(a.id)+'</b> '+esc(a.nombre)+'<span class="tr-li-m">→ Semana '+r.week+(r.comment?' · '+esc(r.comment):'')+'</span></div>';}));
-  h+=trSection('📝 Observaciones del turno ('+TURNO+', hoy)',d.notes.map(function(o){var t=new Date(o.m.ts).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});return '<div class="tr-li" onclick="openEdit('+jsArg(o.a.id)+')"><b>'+esc(o.a.id)+'</b> <span style="color:var(--gm)">'+t+' · '+esc(o.m.by||'—')+'</span><span class="tr-li-m">'+esc(o.m.text||'(foto)')+'</span></div>';}));
-  document.getElementById('tr-auto').innerHTML=h;
-  var today=new Date().toLocaleDateString('es-CL');var has=HANDOVERS.some(function(r){return r.turno===TURNO&&r.fecha===today;});
-  var btn=document.getElementById('tr-btn');if(btn)btn.textContent=has?'⇄ Actualizar traspaso del turno':'⇄ Registrar traspaso';
-  var msgEl=document.getElementById('tr-msg');if(msgEl)msgEl.placeholder=has?'Agregar otro comentario al traspaso de este turno…':'Instrucciones, pendientes y puntos de atención para quien recibe el turno…';
-  renderTraspasoHistory();
+  if(!DATA)return;
+  var cur=document.getElementById('tr-cur-turno');
+  if(cur){cur.className='tr-turno t-'+(TURNO==='Noche'?'noche':'dia');cur.textContent=(TURNO==='Noche'?'☾':'☀')+' Turno '+TURNO;}
+  var feed=document.getElementById('tr-feed');if(!feed)return;
+  var q=(document.getElementById('tr-q')?document.getElementById('tr-q').value:'').toLowerCase();
+  var tn=document.getElementById('tr-turno-f')?document.getElementById('tr-turno-f').value:'';
+  var all=HANDOVERS.filter(function(c){
+    if(tn&&(c.turno||'')!==tn)return false;
+    if(q){var s=((c.text||'')+' '+(c.by||'')+' '+(c.turno||'')).toLowerCase();if(s.indexOf(q)<0)return false;}
+    return true;
+  }).slice().sort(function(x,y){return y.ts-x.ts;});
+  var badge=document.getElementById('tr-badge');if(badge)badge.textContent=all.length+(all.length===1?' comentario':' comentarios');
+  if(!all.length){feed.innerHTML='<div class="empty">Aún no hay comentarios de traspaso. Escribe el primero para el turno entrante.</div>';return;}
+  var html='',lastDay='';
+  all.forEach(function(c){
+    var dt=new Date(c.ts);var dayKey=dt.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+    if(dayKey!==lastDay){html+='<div class="bit-day">'+dayKey+'</div>';lastDay=dayKey;}
+    var time=dt.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    html+='<div class="bit-card"><div class="bit-card-head">'
+      +(c.turno?'<span class="bit-turno t-'+(c.turno==='Noche'?'noche':'dia')+'">'+(c.turno==='Noche'?'☾':'☀')+' '+esc(c.turno)+'</span>':'')
+      +'<span class="bit-author">'+esc(c.by||'—')+'</span>'
+      +'<span class="bit-when">'+time+'</span>'
+      +'<button class="bit-del" onclick="delTrComment('+c.ts+')" title="Eliminar comentario">×</button></div>';
+    if(c.text)html+='<div class="bit-text">'+esc(c.text)+'</div>';
+    if(c.photo)html+='<img class="bit-photo" src="'+c.photo+'" onclick="openTrPhoto('+c.ts+')">';
+    html+='</div>';
+  });
+  feed.innerHTML=html;
 }
-function trSection(title,items){
-  return '<div class="tr-sec"><div class="tr-sec-h">'+title+' <span class="tr-sec-n">'+items.length+'</span></div>'+(items.length?items.join(''):'<div class="tr-empty">— sin registros —</div>')+'</div>';
-}
-function buildTraspasoText(d){
-  var L=[];L.push('TRASPASO DE TURNO — '+TURNO);
-  L.push('Semana '+DATA.semana+' · '+new Date().toLocaleDateString('es-CL')+' '+new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}));
-  L.push('Responsable: '+userName());
-  L.push('');
-  L.push('RESUMEN: Críticas '+d.crit.length+' | Quiebres '+d.quiebre.length+' | Reprogramadas '+d.repro.length+' | Sin iniciar '+d.sinIni.length+' | En proceso '+d.enProc.length+' | Completadas '+d.compl.length);
-  function blk(t,arr){L.push('');L.push(t+' ('+arr.length+')');if(!arr.length){L.push('  — sin registros —');}else arr.forEach(function(s){L.push('  • '+s);});}
-  blk('QUIEBRES',d.quiebre.map(function(a){var qb=ed(a.id).quiebre;return a.id+' '+a.nombre+' — '+(qb&&qb.comment?qb.comment:lastNote(a));}));
-  blk('CRÍTICAS',d.crit.map(function(a){return a.id+' '+a.nombre+' ('+(ed(a.id).estEj||'Sin iniciar')+' '+(ed(a.id).mida||0)+'%)';}));
-  blk('REPROGRAMACIONES',d.repro.map(function(a){var r=ed(a.id).repro;return a.id+' '+a.nombre+' → Semana '+r.week+(r.comment?' ('+r.comment+')':'');}));
-  blk('OBSERVACIONES DEL TURNO',d.notes.map(function(o){return new Date(o.m.ts).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})+' '+o.a.id+' ['+(o.m.by||'—')+']: '+(o.m.text||'(foto)');}));
-  return L.join('\n');
-}
-function registrarTraspaso(){
+function trAdd(){
   if(!ensureUser())return;
-  var msg=(document.getElementById('tr-msg').value||'').trim();
-  var d=traspasoData();var today=new Date().toLocaleDateString('es-CL');
-  var now=Date.now();var hora=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-  var rec=null;for(var i=0;i<HANDOVERS.length;i++){if(HANDOVERS[i].turno===TURNO&&HANDOVERS[i].fecha===today){rec=HANDOVERS[i];break;}}
-  if(rec){
-    if(!rec.comments)rec.comments=rec.manual?[{ts:rec.ts,by:rec.by,text:rec.manual}]:[];
-    rec.summary=buildTraspasoText(d);
-    if(msg)rec.comments.push({ts:now,by:userName(),text:msg});
-    rec.updated=now;rec.hora=hora;
-    logAction('Traspaso','','Actualizado · turno '+TURNO+' · '+today);
-    toast('⇄ Traspaso actualizado');
-  }else{
-    rec={ts:now,updated:now,turno:TURNO,by:userName(),fecha:today,hora:hora,sid:SID,comments:(msg?[{ts:now,by:userName(),text:msg}]:[]),summary:buildTraspasoText(d)};
-    HANDOVERS.unshift(rec);
-    logAction('Traspaso','','Registrado · turno '+TURNO+' · '+today);
-    toast('⇄ Traspaso registrado');
-  }
-  saveHandovers();document.getElementById('tr-msg').value='';renderTraspaso();
+  var inp=document.getElementById('tr-input');var txt=inp?inp.value.trim():'';
+  if(!txt&&!pendingPhoto){toast('Escribe un comentario o adjunta una foto');return;}
+  var c={ts:Date.now(),by:userName(),turno:TURNO,text:txt,photo:pendingPhoto||null,sid:SID};
+  HANDOVERS.unshift(c);saveHandovers();
+  logAction('Traspaso','',(txt||'(foto)').slice(0,120)+' · turno '+TURNO);
+  if(inp){inp.value='';inp.style.height='auto';}
+  pendingPhoto=null;showPending('tr');renderTraspaso();
 }
-function renderTraspasoHistory(){
-  var box=document.getElementById('tr-history');if(!box)return;
-  if(!HANDOVERS.length){box.innerHTML='<div class="repro-empty">Aún no hay traspasos registrados esta semana.</div>';return;}
-  box.innerHTML=HANDOVERS.map(function(r,i){
-    if(!r.comments)r.comments=r.manual?[{ts:r.ts,by:r.by,text:r.manual}]:[];
-    var cmts=r.comments.length?'<div class="tr-cmts">'+r.comments.slice().sort(function(x,y){return x.ts-y.ts;}).map(function(c){var dt=new Date(c.ts);
-      return '<div class="tr-cmt"><div class="tr-cmt-h"><b>'+esc(c.by||'—')+'</b><span>'+dt.toLocaleDateString('es-CL')+' '+dt.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})+'</span></div><div class="tr-cmt-tx">'+esc(c.text)+'</div></div>';
-    }).join('')+'</div>':'';
-    return '<div class="tr-rec"><div class="tr-rec-h"><span class="tr-turno t-'+(r.turno==='Noche'?'noche':'dia')+'">'+(r.turno==='Noche'?'☾':'☀')+' '+esc(r.turno)+'</span>'
-      +'<span class="tr-rec-meta">'+esc(r.fecha)+' · act. '+esc(r.hora)+' · '+esc(r.by)+'</span>'
-      +'<span style="margin-left:auto;display:flex;gap:6px"><button class="tr-mini" onclick="copyTraspaso('+i+')">⧉ Copiar</button><button class="tr-mini" onclick="exportTraspaso('+i+')">⬇ TXT</button><button class="tr-mini del" onclick="delTraspaso('+i+')">×</button></span></div>'
-      +(cmts?'<div class="tr-rec-msg-h">Comentarios del turno</div>'+cmts:'')
-      +'<pre class="tr-rec-sum">'+esc(r.summary)+'</pre></div>';
-  }).join('');
+function delTrComment(ts){
+  var c=null;for(var i=0;i<HANDOVERS.length;i++){if(HANDOVERS[i].ts===ts){c=HANDOVERS[i];HANDOVERS.splice(i,1);break;}}
+  if(c)logAction('Traspaso eliminado','',(c.text||'(foto)').slice(0,120));
+  saveHandovers();renderTraspaso();
 }
-function traspasoFull(r){
-  if(!r.comments)r.comments=r.manual?[{ts:r.ts,by:r.by,text:r.manual}]:[];
-  var c='';
-  if(r.comments.length){c='\n\nCOMENTARIOS DEL TURNO:\n'+r.comments.slice().sort(function(x,y){return x.ts-y.ts;}).map(function(m){var dt=new Date(m.ts);return '['+dt.toLocaleDateString('es-CL')+' '+dt.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})+' · '+(m.by||'—')+'] '+m.text;}).join('\n');}
-  return r.summary+c;
-}
-function copyTraspaso(i){var t=traspasoFull(HANDOVERS[i]);if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('⧉ Copiado al portapapeles');},function(){toast('No se pudo copiar');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('⧉ Copiado');}catch(e){toast('No se pudo copiar');}document.body.removeChild(ta);}}
-function exportTraspaso(i){var r=HANDOVERS[i];var bl=new Blob(['\uFEFF'+traspasoFull(r)],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='Traspaso_'+r.turno+'_Sem'+DATA.semana+'_'+r.fecha.replace(/\//g,'-')+'.txt';a.click();}
-function delTraspaso(i){var r=HANDOVERS[i];logAction('Traspaso eliminado','',(r?r.turno+' · '+r.fecha:''));HANDOVERS.splice(i,1);saveHandovers();renderTraspasoHistory();}
+function openTrPhoto(ts){for(var i=0;i<HANDOVERS.length;i++){if(HANDOVERS[i].ts===ts&&HANDOVERS[i].photo){document.getElementById('lb-img').src=HANDOVERS[i].photo;document.getElementById('lb').classList.add('open');return;}}}
 
 /* ── NP: agregar / guardar / eliminar ── */
 function openNP(){
@@ -3033,7 +3091,7 @@ function attachPhoto(input,ctx){
     img.onerror=function(){toast('No se pudo leer la imagen');};img.src=ev.target.result;};
   r.readAsDataURL(f);input.value='';
 }
-function showPending(ctx){var box=document.getElementById(ctx==='bit'?'bit-pending':ctx==='quiebre'?'quiebre-pending':'log-pending');if(!box)return;box.innerHTML=pendingPhoto?'<span class="log-pending-chip"><img src="'+pendingPhoto+'"><span style="font-family:var(--fc);font-size:9px;font-weight:700;color:var(--te2)">Foto adjunta</span><button onclick="pendingPhoto=null;showPending(\''+ctx+'\')" title="Quitar">×</button></span>':'';}
+function showPending(ctx){var box=document.getElementById(ctx==='bit'?'bit-pending':ctx==='quiebre'?'quiebre-pending':ctx==='tr'?'tr-pending':'log-pending');if(!box)return;box.innerHTML=pendingPhoto?'<span class="log-pending-chip"><img src="'+pendingPhoto+'"><span style="font-family:var(--fc);font-size:9px;font-weight:700;color:var(--te2)">Foto adjunta</span><button onclick="pendingPhoto=null;showPending(\''+ctx+'\')" title="Quitar">×</button></span>':'';}
 function openLogPhoto(actId,idx){var it=ed(actId).log[idx];if(!it||!it.photo)return;document.getElementById('lb-img').src=it.photo;document.getElementById('lb').classList.add('open');}
 function closeLB(){document.getElementById('lb').classList.remove('open');}
 
@@ -3129,6 +3187,7 @@ function ekDrillPred(f){
     if(f.emp&&execEmp(a).toLowerCase().indexOf(f.emp.toLowerCase())<0)return false;
     if(f.tipo&&pbiTipo(a)!==f.tipo)return false;
     if(f.area&&(a.area||'—')!==f.area)return false;
+    if(f.areaG&&(dispArea(a)||'Sin área')!==f.areaG)return false;
     if(f.estatus&&pbiEstatusAct(a)!==f.estatus)return false;
     if(f.causa){var q=ed(a.id).quiebre;if(!q||q.causa!==f.causa)return false;}
     if(f.rc22&&!/rc\s*-?\s*22/.test(pbiNorm((a.area||'')+' '+(a.nombre||''))))return false;
@@ -3326,114 +3385,92 @@ function ek_waterfall(steps,unit){
 }
 
 var PREP_GAP_CAUSAS=['Falta de materiales','Falta andamios','Falta de herramientas/maquinaria','Falta de planos'];
+/* ── Dashboard Global · 5 vistas compactas ──
+   1 Cumplimiento · 2 Descomposición de HH · 3 Pareto de causas · 4 Brechas por área · 5 Causa × Área */
+function gx_kpi(cls,val,lbl,sub){return '<div class="gx-cell kc '+cls+'"><div class="kl">'+lbl+'</div><div class="kv">'+val+'</div><div class="ks">'+sub+'</div></div>';}
+function gx_heat(rows,cols,cell,unit){
+  var max=0;rows.forEach(function(r){cols.forEach(function(c){max=Math.max(max,cell(r,c));});});
+  if(max<=0)return '<div class="ek-empty">Sin brechas registradas ✔</div>';
+  var h='<div class="gx-heat-wrap"><table class="gx-heat"><thead><tr><th class="gx-rl"></th>'+cols.map(function(c){return '<th>'+esc(c)+'</th>';}).join('')+'</tr></thead><tbody>';
+  rows.forEach(function(r){
+    h+='<tr><th class="gx-rl">'+esc(r)+'</th>'+cols.map(function(c){
+      var v=cell(r,c);var t=v/max;
+      var bg=v>0?'rgba(193,56,50,'+(0.08+0.82*t).toFixed(2)+')':'var(--gb)';
+      var fg=t>0.45?'#fff':'var(--go)';
+      var tip=r+' × '+c+': '+ek_fmt(v)+(unit||'');
+      return '<td class="ek-hit" style="background:'+bg+';color:'+fg+'" data-tip="'+escAttr(tip)+'" data-drill="'+escAttr(JSON.stringify({causa:r,areaG:c,title:r+' · '+c}))+'">'+(v>0?ek_fmt(v):'')+'</td>';
+    }).join('')+'</tr>';
+  });
+  return h+'</tbody></table></div>';
+}
 function renderBrechas(){
   var box=document.getElementById('tab-brechas');if(!box)return;
   if(!DATA){box.innerHTML='<div class="ek-empty" style="padding:56px;text-align:center">Carga un programa semanal para ver el Dashboard Global.</div>';return;}
   var A=allActs();
-  var PAL=['var(--te)','var(--na)','var(--am)','var(--pu)','var(--ve)','var(--te2)','var(--ro)','var(--gm)'];
 
-  /* Métricas base */
-  var hhPlan=0,hhReal=0,hrsPerd=0,diasPlan=0,cumSum=0,diasAct=0,diasNorm=0;
-  var hhPlanPL=0,hhRealPL=0,hhNPr=0,_stC={'Terminado':0,'En curso':0,'Sin iniciar':0,'A reprogramar':0};
-  var quiebres=[],interfs=[];
-  var empCum={},empN={};
+  /* Métricas base (solo PL para cumplimiento y brechas; NP se suma aparte) */
+  var hhPlanPL=0,hhRealPL=0,hhNPr=0,diasPlan=0,cumSum=0,brTot=0,nQ=0,nTerm=0,nPL=0;
+  var causaHH={},areaHH={},cellHH={},causaCnt={},areaCnt={},cellCnt={};
   A.forEach(function(a){
     var e=ed(a.id);var rd=realDot(a);var hp=planHora(a),hr=realHora(a);var qb=isQuiebre(a);
-    hhPlan+=_hhArr(a.dp,hp);hhReal+=_hhArr(rd,hr);
-    if(a.np){hhNPr+=_hhArr(rd,hr);}else{hhPlanPL+=_hhArr(a.dp,hp);hhRealPL+=_hhArr(rd,hr);var _st=pbiEstatusAct(a);if(_stC[_st]!==undefined)_stC[_st]++;}
-    if(e.interf){var hz=+e.interf.horas||0;interfs.push({a:a,tipo:e.interf.tipo||'Otros',horas:hz});hrsPerd+=hz;}
-    if(qb)quiebres.push({a:a,causa:(e.quiebre&&e.quiebre.causa)||'Sin causa registrada',prepIncomp:calcEstado(a)!=='LISTO'});
-    var emp=execEmp(a);
-    for(var d=0;d<7;d++){var p=a.dp[d]||0,r=rd[d]||0;
-      if(p>0){diasPlan++;var c=pbiCumplDia(p,r,qb);cumSum+=c;empCum[emp]=(empCum[emp]||0)+c;empN[emp]=(empN[emp]||0)+1;}
-      if(p>0||r>0){diasAct++;if(pbiCumplDia(p,r,qb)>=1&&!qb)diasNorm++;}
+    var hpS=_hhArr(a.dp,hp),hrS=_hhArr(rd,hr);
+    if(a.np){hhNPr+=hrS;return;}
+    nPL++;hhPlanPL+=hpS;hhRealPL+=hrS;
+    if(pbiEstatusAct(a)==='Terminado')nTerm++;
+    if(qb)nQ++;
+    for(var d=0;d<7;d++){var pd=a.dp[d]||0,rl=rd[d]||0;if(pd>0){diasPlan++;cumSum+=pbiCumplDia(pd,rl,qb);}}
+    var br=Math.max(0,hpS-hrS);
+    if(br>0||qb){
+      var causa=qb?((e.quiebre&&e.quiebre.causa)||'Sin causa registrada'):(e.interf?('Interferencia: '+(e.interf.tipo||'Otros')):'Sin causa registrada');
+      var ar=dispArea(a)||'Sin área';
+      brTot+=br;
+      causaHH[causa]=(causaHH[causa]||0)+br;areaHH[ar]=(areaHH[ar]||0)+br;cellHH[causa+'§'+ar]=(cellHH[causa+'§'+ar]||0)+br;
+      causaCnt[causa]=(causaCnt[causa]||0)+1;areaCnt[ar]=(areaCnt[ar]||0)+1;cellCnt[causa+'§'+ar]=(cellCnt[causa+'§'+ar]||0)+1;
     }
   });
+  var R=diasPlan>0?cumSum/diasPlan:(hhPlanPL>0?Math.min(1,hhRealPL/hhPlanPL):1);
+  var pR=Math.round(R*1000)/10;
+  var hhPct=hhPlanPL>0?Math.round(hhRealPL/hhPlanPL*100):100;
 
-  /* OEE adaptado a mantenimiento */
-  var D=hhPlan>0?Math.max(0,Math.min(1,(hhPlan-hrsPerd)/hhPlan)):1;
-  var R=diasPlan>0?cumSum/diasPlan:0;
-  var C=diasAct>0?diasNorm/diasAct:1;
-  var OEE=Math.round(D*R*C*1000)/10;
+  /* Si no hay HH de brecha pero sí quiebres → ponderar por n° de eventos */
+  var useHH=brTot>0;
+  var cHH=useHH?causaHH:causaCnt, aHH=useHH?areaHH:areaCnt, xHH=useHH?cellHH:cellCnt;
+  var unit=useHH?' h':'';
+  var causaItems=Object.keys(cHH).map(function(k){return {label:k,val:cHH[k]};}).sort(function(x,y){return y.val-x.val;});
+  var areaItems=Object.keys(aHH).map(function(k){return {label:k,val:aHH[k],color:'var(--ro)',drill:{areaG:k,title:'Área: '+k}};}).sort(function(x,y){return y.val-x.val;});
+  var heatRows=causaItems.slice(0,7).map(function(i){return i.label;});
+  var heatCols=areaItems.slice(0,7).map(function(i){return i.label;});
 
-  /* Paretos */
-  var causaCnt={};quiebres.forEach(function(q){causaCnt[q.causa]=(causaCnt[q.causa]||0)+1;});
-  var causaItems=Object.keys(causaCnt).map(function(k){return {label:k,val:causaCnt[k]};}).sort(function(x,y){return y.val-x.val;});
-  var itfMap={},itfHay=false;interfs.forEach(function(i){itfMap[i.tipo]=(itfMap[i.tipo]||0)+(i.horas>0?(itfHay=true,i.horas):0);});
-  if(!itfHay){itfMap={};interfs.forEach(function(i){itfMap[i.tipo]=(itfMap[i.tipo]||0)+1;});}
-  var itfItems=Object.keys(itfMap).map(function(k){return {label:k,val:itfMap[k]};}).sort(function(x,y){return y.val-x.val;});
-
-  /* Brecha Plani↔Ejec */
-  var qPrep=quiebres.filter(function(q){return PREP_GAP_CAUSAS.indexOf(q.causa)>=0;});
-  var qPrepIncomp=quiebres.filter(function(q){return q.prepIncomp;});
-
-  /* Cumplimiento por empresa vs meta */
-  var META=90;
-  var empItems=Object.keys(empCum).map(function(k){return {label:k,val:Math.round(empCum[k]/empN[k]*100)};}).sort(function(x,y){return x.val-y.val;});
-  empItems.forEach(function(i){i.color=i.val>=META?'var(--ve)':i.val>=70?'var(--am)':'var(--ro)';i.drill={emp:i.label,title:'Empresa: '+i.label};});
-
-  var h='<div class="ek-head"><div><b>🌐 Dashboard Global</b><span class="ek-hsub"> · Semana '+esc(DATA.semana)+(WSLOT===1?' (próxima 🔭)':' (en curso)')+' · '+esc(DATA.anio)+' · foco: identificar brechas · Cascada · Pareto · OEE</span></div></div>';
-
-  /* ── Cascadas: del plan a la realidad ── */
+  /* Cascada HH: en qué se convierte el plan */
   var difHH=hhPlanPL-hhRealPL;
   var wfHH=[{label:'HH Plan PL',val:hhPlanPL,type:'start'}];
   if(difHH>=0)wfHH.push({label:'No ejecutado',val:difHH,type:'down'});
   else wfHH.push({label:'Sobre-ejecución',val:-difHH,type:'up'});
   wfHH.push({label:'Ejecutado PL',val:hhRealPL,type:'total'});
-  wfHH.push({label:'Correctivo NP',val:hhNPr,type:'up'});
-  wfHH.push({label:'Total terreno',val:hhRealPL+hhNPr,type:'total'});
-  var nProgPL=_stC['Terminado']+_stC['En curso']+_stC['Sin iniciar']+_stC['A reprogramar'];
-  var wfAct=[
-    {label:'Programadas PL',val:nProgPL,type:'start'},
-    {label:'Quiebres',val:_stC['A reprogramar'],type:'down'},
-    {label:'Sin iniciar',val:_stC['Sin iniciar'],type:'down'},
-    {label:'En proceso',val:_stC['En curso'],type:'down'},
-    {label:'Terminadas',val:_stC['Terminado'],type:'total'}];
-  h+=ek_sec('Cascada · ¿dónde se pierde la semana?');
-  h+='<div class="ek-grid">';
-  h+='<div class="ek-card ek-wide"><div class="ek-h"><span class="ek-n">W1</span>Cascada de actividades · del programa a lo terminado</div><div class="ek-b">'+ek_waterfall(wfAct,'')+'</div><div class="ek-note">Cada barra roja es una brecha: quiebres, actividades sin iniciar y en proceso explican la distancia entre lo programado (PL) y lo terminado.</div></div>';
-  h+='<div class="ek-card ek-wide"><div class="ek-h"><span class="ek-n">W2</span>Cascada de HH · del plan al terreno</div><div class="ek-b">'+ek_waterfall(wfHH,' h')+'</div><div class="ek-note">HH planificadas PL, la brecha no ejecutada, y el correctivo NP que se sumó en terreno. La barra roja es la HH que la próxima planificación debe recuperar o explicar.</div></div>';
+  if(hhNPr>0){wfHH.push({label:'Correctivo NP',val:hhNPr,type:'up'});wfHH.push({label:'Total terreno',val:hhRealPL+hhNPr,type:'total'});}
+
+  var h='<div class="ek-head"><div><b>🌐 Dashboard Global</b><span class="ek-hsub"> · Semana '+esc(DATA.semana)+(WSLOT===1?' (próxima 🔭)':' (en curso)')+' · '+esc(DATA.anio)+' · cumplimiento → HH → causas → áreas → patrón</span></div></div>';
+
+  /* 1 · Cumplimiento */
+  h+=ek_sec('1 · Cumplimiento · ¿cumplimos el plan?');
+  h+='<div class="gx-strip" style="margin-bottom:14px">';
+  h+='<div class="gx-cell kc">'+ek_semi(pR,'cumplimiento diario promedio (dotación real vs plan)')+'</div>';
+  h+=gx_kpi('k1',ek_fmt(hhPlanPL),'HH Planificadas','programa PL de la semana');
+  h+=gx_kpi('k3',ek_fmt(hhRealPL),'HH Ejecutadas',hhPct+'% del plan'+(hhNPr>0?' · +'+ek_fmt(hhNPr)+' h NP':''));
+  h+=gx_kpi('k6',ek_fmt(Math.max(0,difHH)),'HH de Brecha',difHH>=0?'plan no ejecutado':'se ejecutó de más');
+  h+=gx_kpi('k2',nQ,'Quiebres',nTerm+' de '+nPL+' act. terminadas');
   h+='</div>';
 
-  /* Hero OEE */
-  h+=ek_sec('OEE de mantenimiento · ¿dónde se pierde la eficiencia?');
-  h+='<div class="ek-grid">';
-  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">1</span>OEE global</div><div class="ek-b">'+ek_semi(OEE,'D × R × C')+'</div><div class="ek-note">OEE = Disponibilidad × Rendimiento × Calidad, adaptado al programa semanal.</div></div>';
-  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">2</span>Disponibilidad</div><div class="ek-b">'+ek_semi(Math.round(D*1000)/10,ek_fmt(hrsPerd)+' h perdidas por interferencias de '+ek_fmt(hhPlan)+' HH plan')+'</div><div class="ek-note">(HH plan − horas perdidas) / HH plan. Registra las horas en el modal de Interferencia.</div></div>';
-  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">3</span>Rendimiento</div><div class="ek-b">'+ek_semi(Math.round(R*1000)/10,'cumplimiento en '+diasPlan+' días·actividad programados')+'</div><div class="ek-note">Promedio del cumplimiento diario (dotación real vs planificada), igual que la hoja Base_de_datos.</div></div>';
-  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">4</span>Calidad</div><div class="ek-b">'+ek_semi(Math.round(C*1000)/10,diasNorm+' de '+diasAct+' días·actividad sin desviación')+'</div><div class="ek-note">Días ejecutados "Normal" (sin quiebre ni desviación) sobre el total con actividad.</div></div>';
+  /* 2 y 3 */
+  h+='<div class="gx-grid" style="margin-bottom:14px">';
+  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">2</span>Descomposición de HH · ¿en qué se convierte el plan?</div><div class="ek-b gx-wf">'+ek_waterfall(wfHH,' h')+'</div><div class="ek-note">Del plan PL: lo ejecutado, la brecha (rojo) y el correctivo NP que se sumó en terreno.</div></div>';
+  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">3</span>Pareto de causas · ¿por qué no se cumple?'+(useHH?'':' (n° de eventos)')+'</div><div class="ek-b">'+ek_pareto(causaItems,unit,'causa','Causa: ')+'</div></div>';
   h+='</div>';
 
-  /* Paretos */
-  h+=ek_sec('Pareto de brechas · pocos vitales, muchos triviales');
-  h+='<div class="ek-grid">';
-  h+='<div class="ek-card ek-wide"><div class="ek-h"><span class="ek-n">5</span>Causas de no cumplimiento (quiebres: '+quiebres.length+')</div><div class="ek-b">'+ek_pareto(causaItems,'','causa','Causa: ')+'</div></div>';
-  h+='<div class="ek-card ek-wide"><div class="ek-h"><span class="ek-n">6</span>Interferencias por tipo'+(itfHay?' (horas perdidas)':' (n° de registros)')+'</div><div class="ek-b">'+ek_pareto(itfItems,itfHay?' h':'')+'</div>'+(itfHay?'':'<div class="ek-note">Tip: registra las horas de tiempo perdido en cada interferencia para ponderar este Pareto por impacto real.</div>')+'</div>';
-  h+='</div>';
-
-  /* Brecha Plani ↔ Ejec */
-  h+=ek_sec('Brecha Planificación ↔ Ejecución · el corazón de la comunicación');
-  h+='<div class="ek-grid">';
-  h+=ek_card(7,'Quiebres atribuibles a preparativos',ek_donut([
-    {label:'Atribuibles a preparativos',val:qPrep.length,color:'var(--ro)'},
-    {label:'Causas externas',val:quiebres.length-qPrep.length,color:'var(--gm)',drill:{quiebre:true,title:'Todos los quiebres'}}
-  ]),'Materiales, andamios, herramientas o planos: brechas que Planificación puede cerrar ANTES, con visibilidad de 2 semanas.');
-  var qpl=qPrepIncomp.slice(0,8).map(function(q){var a=q.a;
-    return '<div class="brx-it" onclick="openEdit('+jsArg(a.id)+')"><span class="brx-b" style="background:#fdecea;color:#c0392b">⚠ quiebre</span><div><b>'+esc(a.id)+'</b> '+esc(a.nombre)+'<div style="font-size:10.5px;color:var(--gm)">'+esc(q.causa)+' · preparativos '+calcPrep(a).pct+'% al momento del quiebre</div></div></div>';}).join('');
-  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">8</span>Quiebres con preparativos incompletos ('+qPrepIncomp.length+')</div><div class="ek-b brx-list">'+(qpl||'<div class="ek-empty">Ningún quiebre tenía preparativos incompletos ✔</div>')+'</div><div class="ek-note">Señal directa de brecha de comunicación: la actividad entró a terreno sin estar LISTA.</div></div>';
-  h+='</div>';
-
-  /* Cumplimiento vs meta + anticipación */
-  h+=ek_sec('Cumplimiento vs meta y anticipación');
-  h+='<div class="ek-grid">';
-  h+='<div class="ek-card ek-wide"><div class="ek-h"><span class="ek-n">9</span>Cumplimiento por empresa · meta '+META+'%</div><div class="ek-b">'+ek_bars(empItems,'%')+'</div><div class="ek-note">Rojo &lt;70% · Ámbar 70–89% · Verde ≥'+META+'%. Click para ver las actividades de cada empresa.</div></div>';
-  var oth=weekPrepSummary(WSLOT===1?0:1);
-  if(oth){
-    var lbl=WSLOT===1?'📅 Semana '+esc(oth.semana)+' · en curso':'🔭 Semana '+esc(oth.semana)+' · próxima';
-    h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">10</span>Anticipación · '+lbl+'</div><div class="ek-b">'+ek_semi(oth.avg,oth.listo+' de '+oth.n+' actividades con preparativos 100%')+'</div><div class="ek-note">Cada punto de preparación anticipada reduce los quiebres "atribuibles a preparativos" de la tarjeta 7.</div></div>';
-  }else{
-    h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">10</span>Anticipación</div><div class="ek-b"><div class="ek-empty">Carga el programa de la otra semana para medir la anticipación de preparativos.</div></div></div>';
-  }
+  /* 4 y 5 */
+  h+='<div class="gx-grid">';
+  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">4</span>Brechas por área · ¿dónde se concentran las HH perdidas?</div><div class="ek-b">'+ek_bars(areaItems,unit,'var(--ro)')+'</div><div class="ek-note">Suma de '+(useHH?'HH no ejecutadas':'eventos de brecha')+' por área. Click para ver las actividades.</div></div>';
+  h+='<div class="ek-card"><div class="ek-h"><span class="ek-n">5</span>Causa × Área · ¿qué causa golpea a qué planta?</div><div class="ek-b">'+gx_heat(heatRows,heatCols,function(r,c){return xHH[r+'§'+c]||0;},unit)+'</div><div class="ek-note">Intensidad relativa al peor cruce: lee el patrón, no el total. Click en una celda para ver sus actividades.</div></div>';
   h+='</div>';
 
   box.innerHTML=h;
