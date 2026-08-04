@@ -1184,6 +1184,7 @@ body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
       </div></span>
     <button class="user-chip" id="user-chip" onclick="openReg(true)" title="Cambiar usuario" style="display: inline-flex;"><span id="user-name">renata perez</span></button>
     <span class="save-ind" id="save-ind" style="display: flex;"><span class="save-dot" id="save-dot"></span><span id="save-lbl">Guardado</span></span>
+    <button class="btn bp" id="btn-publish" onclick="publicarSemana()" title="Envía la semana cargada a la nube para que TODOS los usuarios la vean al instante">🌐 Publicar para todos</button>
     <button class="btn bp show" id="btn-finweek" onclick="openFinWeek()">✓ Finalizar semana</button>
     <button class="btn bo show" id="btn-reload" onclick="recargar()">↺ Cambiar archivo</button>
     <button class="btn bp show" id="btn-export" onclick="exportar()">⬇ Exportar CSV</button>
@@ -1845,6 +1846,24 @@ function hideProg(){document.getElementById('pw').style.display='none';}
    programa publicado y registra su trabajo, pero no puede alterar la semana
    de todos. La clave se pide una vez por sesión. */
 var ADMIN_OK=false;
+/* ── Publicar para todos (solo encargado): empuja la semana cargada a la nube
+      con confirmación visible. Si el servidor rechaza, muestra el error completo
+      para diagnosticar (tabla/columnas/políticas). ── */
+function publicarSemana(){
+  if(!DATA){toast('Primero carga el programa de la semana');return;}
+  if(typeof CLOUD==='undefined'||!CLOUD.active()){toast('Sincronización no configurada (falta la clave de Supabase)');return;}
+  if(!requireAdmin())return;
+  showBusy('Publicando la semana para todos los usuarios…');
+  try{clearTimeout(_sv);save();}catch(e){}
+  var stamp=new Date().toISOString();
+  var body=JSON.stringify({id:SUPA_DOC,data:CLOUD.collect(),cid:CLOUD.cid,updated_at:stamp});
+  fetch(CLOUD.url(''),{method:'POST',headers:Object.assign({'Prefer':'resolution=merge-duplicates,return=minimal'},CLOUD.hdr()),body:body})
+    .then(function(r){
+      if(r.ok){hideBusy();CLOUD._seen=stamp;toast('🌐 ✓ Semana '+(DATA?DATA.semana:'')+' publicada — todos los usuarios ya la ven (se actualiza sola en ~5 s)');logAction('Publicación','','Semana '+(DATA?DATA.semana:'')+' publicada para todos');}
+      else{return r.text().then(function(t){hideBusy();toast('⚠ Supabase rechazó la publicación ('+r.status+'): '+String(t||'').slice(0,180));});}
+    })
+    .catch(function(e){hideBusy();toast('⚠ Sin conexión con la nube: '+e.message);});
+}
 /* Reinicio total (solo encargado): borra todo lo guardado por la app en este
    navegador y vacía el tablero compartido en la nube; los demás usuarios
    vuelven solos a la pantalla de carga. Luego recarga la página limpia. */
@@ -2070,6 +2089,7 @@ function showDash(silent){
   document.getElementById('tabs').style.display='flex';
   var hw=document.getElementById('hweek');hw.style.display='inline-flex';renderWeekPills();document.body.classList.toggle('wk-next',WSLOT===1);
   document.getElementById('btn-finweek').classList.add('show');
+  var _bp2=document.getElementById('btn-publish');if(_bp2&&typeof CLOUD!=='undefined'&&CLOUD.active())_bp2.classList.add('show');
   document.getElementById('btn-reload').classList.add('show');
   document.getElementById('btn-export').classList.add('show');
   document.getElementById('save-ind').style.display='flex';setSaved(true);
@@ -2104,6 +2124,7 @@ function recargar(force){
   document.getElementById('tabs').style.display='none';
   document.getElementById('hweek').style.display='none';
   document.getElementById('btn-finweek').classList.remove('show');
+  var _bp3=document.getElementById('btn-publish');if(_bp3)_bp3.classList.remove('show');
   document.getElementById('btn-reload').classList.remove('show');
   document.getElementById('btn-export').classList.remove('show');
   document.getElementById('btn-ppt').classList.remove('show');document.getElementById('btn-ppt').style.display='none';
@@ -4429,7 +4450,7 @@ function uiReset(){
   document.getElementById('dash').style.display='none';
   document.getElementById('tabs').style.display='none';
   var hw=document.getElementById('hweek');if(hw)hw.style.display='none';
-  ['btn-finweek','btn-reload','btn-export','btn-ppt'].forEach(function(i){var el=document.getElementById(i);if(el)el.classList.remove('show');});
+  ['btn-finweek','btn-reload','btn-export','btn-ppt','btn-publish'].forEach(function(i){var el=document.getElementById(i);if(el)el.classList.remove('show');});
   var bp=document.getElementById('btn-ppt');if(bp)bp.style.display='none';
   var ts=document.getElementById('turno-seg');if(ts)ts.style.display='none';
   var ot=document.getElementById('ot-toggle');if(ot)ot.style.display='none';
