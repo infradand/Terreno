@@ -1503,7 +1503,10 @@ var CLOUD={
   _send:function(){if(!this.active())return;var self=this;var stamp=new Date().toISOString();
     var body=JSON.stringify({id:SUPA_DOC,data:this.collect(),cid:this.cid,updated_at:stamp});
     fetch(this.url(''),{method:'POST',headers:Object.assign({'Prefer':'resolution=merge-duplicates,return=minimal'},this.hdr()),body:body})
-      .then(function(r){if(r&&r.ok){self._seen=stamp;}}).catch(function(){});},
+      .then(function(r){
+        if(r&&r.ok){self._seen=stamp;self._werr=null;}
+        else if(r&&self._werr!==r.status){self._werr=r.status;toast('⚠ No se pudo guardar en la nube ('+r.status+') — revisa las políticas insert/update de la tabla «'+SUPA_TABLE+'» en Supabase');}
+      }).catch(function(){});},
   poll:function(){var self=this;if(!this.active())return;
     fetch(this.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=cid,updated_at'),{headers:this.hdr()})
       .then(function(r){return r.json();})
@@ -1575,7 +1578,7 @@ function reloadFromStore(){
     try{
       DATA=null;PPTINFO={};
       if(restoreData()){showDash(true);toast('Semana finalizada en otro dispositivo — mostrando la otra semana cargada');}
-      else{recargar();toast('✓ Semana finalizada — esperando el programa de la nueva semana');}
+      else{recargar(true);toast('✓ Semana finalizada — esperando el programa de la nueva semana');}
     }finally{CLOUD._applying=false;}
     return;
   }
@@ -1651,7 +1654,7 @@ function applyOT(){document.body.classList.toggle('hide-ot',!SHOW_OT);var b=docu
 function toggleOT(){SHOW_OT=!SHOW_OT;Store.set('showot',SHOW_OT);applyOT();}
 function loadPpt(){var x=Store.get('ppt_s'+(DATA?DATA.semana:''),{});PPTINFO=(x&&typeof x==='object')?x:{};}
 function savePpt(){if(!Store.set('ppt_s'+(DATA?DATA.semana:''),PPTINFO))toast('⚠ Almacenamiento lleno (PPT)');}
-function openFinWeek(){if(!DATA)return;document.getElementById('fin-ttl').textContent='Finalizar Semana '+DATA.semana;document.getElementById('fin-mo').classList.add('open');}
+function openFinWeek(){if(!DATA)return;if(!requireAdmin())return;document.getElementById('fin-ttl').textContent='Finalizar Semana'+DATA.semana;document.getElementById('fin-mo').classList.add('open');}
 function closeFinWeek(){document.getElementById('fin-mo').classList.remove('open');}
 function finalizarSemana(){
   if(!DATA){closeFinWeek();return;}
@@ -1659,7 +1662,7 @@ function finalizarSemana(){
   logAction('Cierre de semana','','Semana '+wk+' finalizada');
   try{save();saveActions();saveHandovers();saveNP();savePpt();}catch(e){}
   Store.set('fin_s'+wk,{ts:Date.now(),by:userName(),sid:SID});
-  closeFinWeek();recargar();
+  closeFinWeek();recargar(true);
   toast('✓ Semana '+wk+' finalizada y guardada');
 }
 // lee enteros LE
@@ -1716,6 +1719,7 @@ function showBusy(msg){var o=document.getElementById('busy');if(o){document.getE
 function hideBusy(){var o=document.getElementById('busy');if(o)o.style.display='none';}
 function handlePptx(file){
   if(!file){return;}
+  if(!requireAdmin()){var _fp=document.getElementById('fippt');if(_fp)_fp.value='';return;}
   if(MODE==='ejec'){toast('La carga del PPT se hace en Planificación');return;}
   if(typeof pako==='undefined'){toast('No se pudo cargar el lector de PPT (sin conexión)');return;}
   if(!/\.pptx$/i.test(file.name)){toast('El archivo debe ser .pptx');return;}
@@ -1834,8 +1838,23 @@ function dLeave(e){document.getElementById('uz').classList.remove('drag');}
 function dDrop(e){e.preventDefault();document.getElementById('uz').classList.remove('drag');var f=e.dataTransfer.files[0];if(!f)return;if(/\.pptx$/i.test(f.name))handlePptx(f);else handleFile(f);}
 function prog(lbl,pct){var w=document.getElementById('pw');w.style.display='flex';document.getElementById('pwf').style.width=pct+'%';document.getElementById('pwl').textContent=lbl;}
 function hideProg(){document.getElementById('pw').style.display='none';}
+/* ── Rol encargado del programa ──
+   Solo la persona encargada (con clave) puede subir el Excel/PPT de la semana,
+   cambiar el archivo o finalizar la semana. El resto de los usuarios ve el
+   programa publicado y registra su trabajo, pero no puede alterar la semana
+   de todos. La clave se pide una vez por sesión. */
+var ADMIN_OK=false;
+function requireAdmin(){
+  if(ADMIN_OK)return true;
+  var k=prompt('Función reservada a la persona encargada del programa semanal.\nClave:');
+  if(k===null)return false;
+  if(k==='BeKa'){ADMIN_OK=true;toast('🔓 Modo encargado activo por esta sesión');return true;}
+  toast('Clave incorrecta — solo la persona encargada puede subir o finalizar la semana');
+  return false;
+}
 function handleFile(file){
   if(!file)return;
+  if(!requireAdmin()){var _fi=document.getElementById('fi');if(_fi)_fi.value='';return;}
   if(UP_SLOT!==null){WSLOT=UP_SLOT;UP_SLOT=null;}var ext=file.name.split('.').pop().toLowerCase();
   if(['csv','xlsx','xls'].indexOf(ext)<0){toast('Formato no permitido: usa .xlsx, .xls o .csv');return;}
   if(file.size>30*1048576){toast('Archivo demasiado grande (máx. 30 MB)');return;}
@@ -2045,10 +2064,14 @@ function showDash(silent){
   DIA_INIT=false;
   showTab('plani');
   buildCharts();buildChips();refreshAll();
-  hideProg();if(!silent)toast('✓ '+DATA.filename+' cargado'+(Object.keys(PPTINFO).length?' · PPT vinculado':''));
+  hideProg();if(!silent)toast('✓ '+DATA.filename+' cargado'+(Object.keys(PPTINFO).length?' · PPT vinculado':'')+(CLOUD.active()?' · 🌐 publicado para todos los usuarios':''));
   ensureUser();
 }
-function recargar(){
+function recargar(force){
+  /* «Cambiar archivo» borra la semana para todos → solo encargado. Los flujos
+     internos (cierre propio ya validado, o cierre recibido desde la nube)
+     llaman recargar(true) para no pedir clave. */
+  if(force!==true&&!requireAdmin())return;
   var _cleared=WSLOT;
   DATA=null;FLT='';FILT={disc:'',loc:'',crit:'',estado:''};CHFLT={type:null,val:null};PPTINFO={};Store.del(dataKey());
   var _other=Store.get(dataKey(_cleared===1?0:1),null);
@@ -4380,15 +4403,35 @@ function escAttr(s){return esc(s).replace(/"/g,'&quot;');}
 var _tt;function toast(msg){var e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){e.classList.remove('show');},2600);}
 
 /* ── Init ── */
+/* Limpia la interfaz "congelada" que el archivo trae de fábrica (una semana
+   antigua renderizada al guardar la página). Un visitante sin datos debe ver
+   la pantalla de carga limpia, no ese fantasma. No toca Store ni la nube. */
+function uiReset(){
+  document.getElementById('hero').style.display='flex';
+  document.getElementById('dash').style.display='none';
+  document.getElementById('tabs').style.display='none';
+  var hw=document.getElementById('hweek');if(hw)hw.style.display='none';
+  ['btn-finweek','btn-reload','btn-export','btn-ppt'].forEach(function(i){var el=document.getElementById(i);if(el)el.classList.remove('show');});
+  var bp=document.getElementById('btn-ppt');if(bp)bp.style.display='none';
+  var ts=document.getElementById('turno-seg');if(ts)ts.style.display='none';
+  var ot=document.getElementById('ot-toggle');if(ot)ot.style.display='none';
+  var si=document.getElementById('save-ind');if(si)si.style.display='none';
+}
 function boot(){
   loadUser();
   loadTurno();
   var _restored=restoreData();
   if(_restored){showDash(true);}
+  else{uiReset();}
   if(!_restored&&(!USER||!USER.nombre)){setTimeout(function(){openReg(false);},200);}
-  if(CLOUD.active()){setSaved(true);CLOUD.start();}
+  if(CLOUD.active()){
+    setSaved(true);CLOUD.start();
+    /* Si este dispositivo tiene la semana cargada pero la nube está vacía
+       (primera vez con sincronización), publica el estado local para todos. */
+    if(_restored&&window._CLOUD_EMPTY===true){CLOUD.push();toast('🌐 Semana publicada en la nube para todos los usuarios');}
+  }
 }
-if(CLOUD.active()){CLOUD.pull().then(boot,boot);}else{boot();}
+if(CLOUD.active()){CLOUD.pull().then(function(had){window._CLOUD_EMPTY=(had===false);boot();},function(){boot();});}else{boot();}
 
 </script>
 
