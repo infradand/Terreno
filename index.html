@@ -1475,8 +1475,8 @@ var SUPA_URL='https://pomvyygevurcavbifuss.supabase.co';
    ║  semana en vivo apenas se sube el Excel/PPT, y deja de verse al   ║
    ║  presionar «Finalizar semana». Sin clave, funciona solo local.    ║
    ╚══════════════════════════════════════════════════════════════════╝ */
-var SUPA_KEY='';            /* ← pega aquí tu anon public key, entre las comillas */
-var SUPA_TABLE='preparativos_estado';
+var SUPA_KEY='sb_publishable_LsXP8hsA6JfiV-YcY4IbYg_-4UJrxhp';
+var SUPA_TABLE='terreno';
 var SUPA_DOC='sinfra-prep'; /* id del tablero compartido (cámbialo para separar tableros) */
 
 /* Claves personales que NO se comparten (quedan en cada navegador) */
@@ -1486,7 +1486,7 @@ var CLOUD={
   cid:Math.random().toString(36).slice(2),
   _t:null,_applying:false,_seen:null,_pending:false,
   active:function(){return !!(SUPA_URL&&SUPA_KEY&&window.fetch);},
-  hdr:function(){return {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};},
+  hdr:function(){var h={'apikey':SUPA_KEY,'Content-Type':'application/json'};if(SUPA_KEY.indexOf('sb_')!==0)h['Authorization']='Bearer '+SUPA_KEY;return h;},
   url:function(q){return SUPA_URL+'/rest/v1/'+SUPA_TABLE+(q||'');},
   collect:function(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(Store.ns)===0&&cloudShared(k))o[k]=localStorage.getItem(k);}return o;},
   apply:function(data){if(!data)return;this._applying=true;try{
@@ -1519,7 +1519,12 @@ var CLOUD={
     if((mo&&mo.classList.contains('open'))||(qb&&qb.classList.contains('open'))){this._pending=true;return;}
     reloadFromStore();
   },
-  start:function(){var self=this;if(!this.active())return;setInterval(function(){self.poll();},5000);}
+  start:function(){var self=this;if(!this.active())return;
+    /* Sonda de diagnóstico: si la tabla o sus políticas están mal, avisa en pantalla */
+    fetch(this.url('?select=id&limit=1'),{headers:this.hdr()})
+      .then(function(r){if(!r.ok)toast('⚠ Sincronización: Supabase respondió '+r.status+' — revisa que exista la tabla «'+SUPA_TABLE+'» con sus políticas (SQL Editor)');})
+      .catch(function(){toast('⚠ Sin conexión con la nube — trabajando en modo local');});
+    setInterval(function(){self.poll();},5000);}
 };
 
 /* Recarga el estado desde Store (tras recibir cambios de otro usuario) y refresca la vista */
