@@ -1417,23 +1417,35 @@ body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
   <div class="modal" style="max-width:480px">
     <div class="mhdr"><div><div class="mey">No Planificada</div><div class="mttl">Agregar actividad No Planificada</div></div><button class="mcl" onclick="closeNP()">×</button></div>
     <div style="font-size:12px;color:var(--gm);margin-bottom:12px">Se agrega a la semana actual marcada como NP y se cuenta en el indicador.</div>
-    <div class="fg"><label class="fl">Nombre de la actividad *</label><input class="fi" id="np-nombre" placeholder="Título corto de la actividad"></div>
-    <div class="fg"><label class="fl">Descripción de la actividad</label><textarea class="fi" id="np-desc" rows="3" placeholder="Describe en qué consiste la actividad, alcance, ubicación, etc."></textarea></div>
+    <div class="fg"><label class="fl">Actividad *</label><input class="fi" id="np-nombre" placeholder="Título corto de la actividad"></div>
     <div class="grid2">
-      <div class="fg"><label class="fl">Disciplina *</label><input class="fi" id="np-disc" list="np-disc-list" placeholder="Disciplina"><datalist id="np-disc-list"></datalist></div>
-      <div class="fg"><label class="fl">Ubicación</label><input class="fi" id="np-area" list="np-area-list" placeholder="Área / ubicación"><datalist id="np-area-list"></datalist></div>
+      <div class="fg"><label class="fl">Área</label><select class="fi" id="np-pbi-area" onchange="npAreaChange(this.value)"></select></div>
+      <div class="fg"><label class="fl">Sector</label><select class="fi" id="np-pbi-sector"><option value="">—</option></select></div>
     </div>
-    <div style="font-size:10px;color:var(--te2);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin:2px 0 6px">Datos PBI (hoja Base de datos)</div>
     <div class="grid2">
+      <div class="fg"><label class="fl">Especialidad</label><select class="fi" id="np-espec"><option>Piping</option><option>Infraestructura</option></select></div>
       <div class="fg"><label class="fl">Tipo Actividad</label><select class="fi" id="np-pbi-tipo"></select></div>
-      <div class="fg" style="display:flex;align-items:flex-end"><span style="font-size:10px;color:var(--gm);line-height:1.4">Área, Sector y Especialidad se infieren de la ubicación y el título.</span></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label class="fl">Criticidad</label><select class="fi" id="np-crit"><option>Normal</option><option>Importante</option><option>Crítico</option></select></div>
+      <div class="fg"><label class="fl">Ejecutor</label><select class="fi" id="np-ejec"><option value="">—</option><option>Equans</option><option>RyQ</option><option>DAND</option><option>Steeln</option><option>Rs</option><option>MIES</option><option>MDP</option></select></div>
+      <div class="fg"><label class="fl">Dotación</label><input class="fi" id="np-dot" type="number" min="0" step="1" inputmode="numeric" placeholder="N° de personas"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label class="fl">Horas de mantenimiento</label><input class="fi" id="np-hh" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Horas del día"></div>
       <div class="fg"><label class="fl">N° OT</label><input class="fi" id="np-ot" placeholder="Opcional"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label class="fl">Ejecutor</label><input class="fi" id="np-ejec" placeholder="Opcional"></div>
+      <div class="fg"><label class="fl">Estatus OT</label><select class="fi" id="np-otst"></select></div>
+      <div class="fg"><label class="fl">Fecha ejecución NP</label><input class="fi" id="np-fecha" type="date"></div>
+    </div>
+    <div style="font-size:10px;color:var(--gm);line-height:1.4;margin:-4px 0 10px">La dotación y las horas se asignan al día de la fecha de ejecución; puedes ajustarlas por día al editar la actividad.</div>
+    <div class="fg"><label class="fl">Detalle de la actividad</label><textarea class="fi" id="np-desc" rows="2" placeholder="Breve descripción: alcance, ubicación, etc."></textarea></div>
+    <div class="fg"><label class="fl">Porcentaje de avance</label>
+      <div class="mida-slider-row"><input type="range" class="mida-range" id="np-mida" min="0" max="100" step="5" value="0" oninput="npMida(this.value)"><input type="number" class="mida-num" id="np-mida-num" min="0" max="100" value="0" oninput="npMida(this.value)"><span class="mida-range-val" id="np-mida-val">0%</span></div>
+      <div style="font-size:11px;color:var(--gm);margin-top:4px" id="np-estact">Estatus actividad: <b>Sin iniciar</b></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label class="fl">Criticidad</label><select class="fi" id="np-crit"><option>Normal</option><option>Importante</option><option>Crítico</option></select></div>
       <div class="fg"><label class="fl">Supervisor</label><input class="fi" id="np-sup" placeholder="Opcional"></div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button class="fclear" onclick="closeNP()">Cancelar</button><button class="cl-ab" style="padding:9px 18px" onclick="guardarNP()">+ Agregar</button></div>
@@ -1954,6 +1966,7 @@ function parseAvances(rows,filename){
     e.pbiArea=area;e.pbiSector=sector;if(estOT)e.pbiEstatusOT=estOT;if(ot)e.ot=ot;
     if(estN==='Terminado')e.estEj='Completada';else if(estN==='En curso'||estN==='En proceso')e.estEj='En proceso';else e.estEj='Sin iniciar';
     e.mida=(avance!=null?Math.round(avance*100):(cumpl!=null?Math.round(cumpl*100):(estN==='Terminado'?100:0)));
+    if(resp)e.responsable=resp;
     var exec=(estN==='Terminado'||estN==='En curso'||HHr>0||(avance||0)>0);
     if(exec&&H>0){var dr=[0,0,0,0,0,0,0];dr[di]=H;e.dr=dr;var hr=[0,0,0,0,0,0,0];hr[di]=(HHr>0?HHr/H:I);e.hr=hr;}
     if(causa&&estN!=='Terminado')e.quiebre={causa:causa,comment:coment||'',ts:Date.now(),by:resp||'Importado',turno:''};
@@ -2958,6 +2971,7 @@ function setF(field,val){
   else if(field==='fechaInicio')logAction('Fechas',editId,'Inicio: '+(val||'—'));
   else if(field==='fechaTermino')logAction('Fechas',editId,'Término: '+(val||'—'));
   else if(field==='ot'){var id=editId;logTraceDeb('ot:'+id,1500,function(){if(EDITS[id])logAction('OT',id,'N° OT: '+(EDITS[id].ot||'—'));});}
+  else if(field==='responsable'){var idr=editId;logTraceDeb('resp:'+idr,1500,function(){if(EDITS[idr])logAction('Responsable',idr,EDITS[idr].responsable||'—');});}
 }
 function setReal(d,val){
   var e=ed(editId);var a=findAct(editId);if(!e.dr)e.dr=realDot(a).slice();e.dr[d]=parseInt(val)||0;
@@ -3547,37 +3561,76 @@ function openTrPhoto(ts){for(var i=0;i<HANDOVERS.length;i++){if(HANDOVERS[i].ts=
 /* ── NP: agregar / guardar / eliminar ── */
 function openNP(){
   if(!ensureUser())return;
-  var dl=document.getElementById('np-disc-list');var disc={};DATA.secs.forEach(function(s){disc[s.nombre]=true;});
-  dl.innerHTML=Object.keys(disc).map(function(d){return '<option value="'+esc(d)+'">';}).join('');
-  var al=document.getElementById('np-area-list');var loc={};allActs().forEach(function(a){var g=normLoc(a.area);if(g&&LOC_LABELS[g])loc[LOC_LABELS[g]]=true;});
-  al.innerHTML=Object.keys(loc).map(function(d){return '<option value="'+esc(d)+'">';}).join('');
-  ['np-nombre','np-desc','np-disc','np-area','np-ot','np-ejec','np-sup'].forEach(function(id){document.getElementById(id).value='';});
+  ['np-nombre','np-desc','np-dot','np-hh','np-ot','np-sup'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('np-crit').value='Normal';
+  document.getElementById('np-espec').selectedIndex=0;
+  document.getElementById('np-ejec').selectedIndex=0;
   npFillPbiSelects();
+  /* Fecha ejecución NP predeterminada: hoy */
+  var now=new Date();
+  document.getElementById('np-fecha').value=now.getFullYear()+'-'+pad2(now.getMonth()+1)+'-'+pad2(now.getDate());
+  npMida(0);
   document.getElementById('np-mo').classList.add('open');
   setTimeout(function(){document.getElementById('np-nombre').focus();},50);
 }
 function npFillPbiSelects(){
   document.getElementById('np-pbi-tipo').innerHTML=PBI_TIPOS.map(function(x){return '<option value="'+esc(x)+'"'+(x==='Ejecución'?' selected':'')+'>'+esc(x)+'</option>';}).join('');
+  document.getElementById('np-pbi-area').innerHTML='<option value="">—</option>'+PBI_AREAS.map(function(x){return '<option value="'+escAttr(x)+'">'+esc(x)+'</option>';}).join('');
+  document.getElementById('np-pbi-sector').innerHTML='<option value="">—</option>';
+  document.getElementById('np-otst').innerHTML=PBI_ESTATUS_OT.filter(function(x){return x;}).map(function(x){return '<option value="'+escAttr(x)+'"'+(x==='LIB-CEsC'?' selected':'')+'>'+esc(x)+'</option>';}).join('');
+}
+/* Sector depende del Área elegida (misma taxonomía del PBI) */
+function npAreaChange(v){document.getElementById('np-pbi-sector').innerHTML=pbiSectorOpts(v,'');}
+/* Avance de la NP: mismo método de la línea (slider + número). Según el % se
+   deduce el estatus: 0 → Sin iniciar · 1-99 → En proceso · 100 → Terminado */
+function npMida(val){
+  var v=Math.max(0,Math.min(100,parseInt(val)||0));
+  var rng=document.getElementById('np-mida');if(rng&&+rng.value!==v)rng.value=v;
+  var num=document.getElementById('np-mida-num');if(num&&num.value!==String(v))num.value=v;
+  var lbl=document.getElementById('np-mida-val');if(lbl)lbl.textContent=v+'%';
+  var st=document.getElementById('np-estact');if(st)st.innerHTML='Estatus actividad: <b>'+(v>=100?'Terminado':v>0?'En proceso':'Sin iniciar')+'</b>';
 }
 function closeNP(){document.getElementById('np-mo').classList.remove('open');}
 function guardarNP(){
   var nombre=ct2(document.getElementById('np-nombre').value);
-  var disc=ct2(document.getElementById('np-disc').value)||'No Planificadas';
   if(!nombre){toast('Indica el nombre de la actividad');return;}
-  var np={id:npNextId(),nombre:nombre,disc:disc,area:ct2(document.getElementById('np-area').value),
+  var pbiArea=document.getElementById('np-pbi-area').value;
+  var pbiSector=document.getElementById('np-pbi-sector').value;
+  var dot=Math.max(0,parseInt(document.getElementById('np-dot').value,10)||0);
+  var hh=Math.max(0,parseFloat(document.getElementById('np-hh').value)||0);
+  /* Día de la semana según la Fecha ejecución NP (predeterminada hoy).
+     Si la fecha no cae dentro de la semana cargada, se usa hoy o el lunes. */
+  var fecha=document.getElementById('np-fecha').value;
+  var di=-1;
+  if(fecha){var fp=fecha.split('-');
+    for(var i=0;i<7;i++){var m=String(DATA.dates[i]||'').match(/(\d{1,2})[\/\-.](\d{1,2})/);if(m&&('0'+m[1]).slice(-2)===fp[2]&&('0'+m[2]).slice(-2)===fp[1]){di=i;break;}}}
+  if(di<0){di=todayIndex();if(di<0)di=0;if(fecha)toast('⚠ La fecha no está dentro de la semana cargada — se asignó a '+DSHORT[di]+' '+(DATA.dates[di]||''));}
+  var dp=[0,0,0,0,0,0,0];dp[di]=dot;
+  var hp=[0,0,0,0,0,0,0];hp[di]=hh;
+  var mida=Math.max(0,Math.min(100,parseInt(document.getElementById('np-mida-num').value)||0));
+  var np={id:npNextId(),nombre:nombre,disc:'No Planificadas',area:pbiSector||pbiArea,
     descNP:ct2(document.getElementById('np-desc').value),
-    ejec:ct2(document.getElementById('np-ejec').value),sup:ct2(document.getElementById('np-sup').value),
+    especialidad:document.getElementById('np-espec').value,
+    ejec:document.getElementById('np-ejec').value,sup:ct2(document.getElementById('np-sup').value),
     crit:document.getElementById('np-crit').value,ot:ct2(document.getElementById('np-ot').value),
     tipoAct:document.getElementById('np-pbi-tipo').value,
-    dp:[0,0,0,0,0,0,0],dr0:[0,0,0,0,0,0,0],hp:[0,0,0,0,0,0,0],np:true};
+    dp:dp,dr0:[0,0,0,0,0,0,0],hp:hp,np:true};
   NPACTS.push(np);saveNP();addNPToData(np);
   var _e=ed(np.id);
   if(np.tipoAct)_e.pbiTipo=np.tipoAct;
-  if(np.ot)ed(np.id).ot=np.ot;
-  if(document.getElementById('np-crit').value==='Crítico')ed(np.id).critM=true;
+  if(pbiArea)_e.pbiArea=pbiArea;
+  if(pbiSector)_e.pbiSector=pbiSector;
+  var otst=document.getElementById('np-otst').value;if(otst)_e.pbiEstatusOT=otst;
+  if(np.ot)_e.ot=np.ot;
+  if(fecha){_e.fechaInicio=fecha;_e.fechaTermino=fecha;}
+  /* Avance → estatus automático (mismo criterio que setMida) */
+  _e.mida=mida;_e.estEj=mida>=100?'Completada':mida>0?'En proceso':'';
+  /* Si ya hay avance, se registra la dotación/horas reales del día para que
+     el cierre de semana exporte cumplimiento y fecha real de ejecución */
+  if(mida>0&&dot>0){_e.dr=dp.slice();_e.hr=hp.slice();}
+  if(document.getElementById('np-crit').value==='Crítico')_e.critM=true;
   closeNP();buildChips();refreshAll();markUnsaved();
-  logAction('NP creada',np.id,nombre);
+  logAction('NP creada',np.id,nombre+' · '+(mida)+'%');
   toast('✓ Actividad No Planificada agregada');
   showTab(MODE==='ejec'?'ejec':'plani');openEdit(np.id);
 }
@@ -4145,6 +4198,7 @@ var PBI_CAUSAS=['Cambio de prioridad','Falta mano de obra','Condiciones climatic
 var PBI_ESPECIALIDADES=['Infraestructura','Piping'];
 var PBI_TIPO_INTERF=['Sin interferencia','Falta de aseo operaciones','No entrega equipo operaciones','Falta de personal','Seguridad','Falta de materiales','Condiciones climáticas','Corte de energía','Interferencia con operaciones','Otros'];
 var PBI_TIPOS=['Ejecución','Inspección','Plan Matriz','Levantamiento','Alta presión','Proyecto de Ing. Estructural','Topografía','ODS'];
+var PBI_RESPONSABLES=['Glinnis Aburto','Luciano Torres','Mauricio Segovia','Misael Fuentes','Hector Reinoso','Claudio Valenzuela','Jose Poblete','Tamara Herrera'];
 var PBI_ESTATUS_OT=['','LIB','LIB-NOTP','LIB-CEsC','LIB-NOTI','LIB-DOCU','CTEC-NOTI','CTEC-NOTP','CTEC-CEsC','ABIERTA'];
 
 /* Índice inverso sector→área (normalizado) para resolver la ubicación libre */
@@ -4171,7 +4225,25 @@ function pbiEspecialidad(a){
   var t=pbiNorm((a.disc||'')+' '+(a.nombre||''));
   return /\bpiping\b|\bpng\b/.test(t)?'Piping':'Infraestructura';
 }
-function pbiTipo(a){var e=ed(a.id);return e.pbiTipo||a.tipoAct||'Ejecución';}
+/* ── Tipo Actividad automático ──
+   Se deduce primero desde el NOMBRE de la actividad y, si no dice nada, desde la
+   SECCIÓN/disciplina del programa (p. ej. «ACTIVIDADES MECÁNICAS PIPING PLAN MATRIZ»,
+   «INSPECCIONES PERSONAL DAND», «ACTIVIDADES EMPRESAS ALTA PRESION»). Si nada
+   coincide → Ejecución. El override manual (pbiTipo del modal) y el tipo importado
+   del archivo de avances (tipoAct) siempre tienen prioridad. */
+function pbiTipoDetect(t){
+  if(!t)return '';t=pbiNorm(t);
+  if(/plan\s*matriz/.test(t))return 'Plan Matriz';
+  if(/inspecc|\binsp\b/.test(t))return 'Inspección';
+  if(/levantamiento/.test(t))return 'Levantamiento';
+  if(/alta\s*presion/.test(t))return 'Alta presión';
+  if(/estructural/.test(t)&&/proyecto|ingenier|\bing\b/.test(t))return 'Proyecto de Ing. Estructural';
+  if(/topograf/.test(t))return 'Topografía';
+  if(/\bods\b/.test(t))return 'ODS';
+  return '';
+}
+function pbiTipoAuto(a){return pbiTipoDetect(a.nombre)||pbiTipoDetect(a.disc)||pbiTipoDetect(a.area)||'Ejecución';}
+function pbiTipo(a){var e=ed(a.id);return e.pbiTipo||a.tipoAct||pbiTipoAuto(a);}
 function pbiOrigen(a){if(a.np)return 'NP';var o=(a.origen||'').toUpperCase();return o==='NP'?'NP':'PL';}
 function pbiEjecutor(a){var x=(a.ejec||'').trim();return x.toUpperCase()==='RYQ'?'RyQ':x;}
 function pbiEstatusAct(a){if(isQuiebre(a))return 'A reprogramar';var ej=ed(a.id).estEj||'';if(ej==='Completada')return 'Terminado';if(ej==='En proceso')return 'En curso';return 'Sin iniciar';}
@@ -4194,6 +4266,7 @@ function pbiBuildRows(){
     var e=ed(a.id);var rd=realDot(a);var qb=isQuiebre(a);var hpd=planHora(a),hrd=realHora(a);var interfPut=false;
     var as=pbiAreaSector(a);var esp=pbiEspecialidad(a);var tipo=pbiTipo(a);var orig=pbiOrigen(a);
     var ejec=pbiEjecutor(a);var estAct=pbiEstatusAct(a);var mida=e.mida||0;
+    var respA=ct2(e.responsable||'')||resp; /* responsable asignado a la actividad; si no hay, el usuario que exporta */
     var causa=(e.quiebre&&e.quiebre.causa)?e.quiebre.causa:'';
     var comentario=(e.quiebre&&e.quiebre.comment)?e.quiebre.comment:((e.interf&&e.interf.obs)?e.interf.obs:'');
     var ot=actOT(a);var estOT=e.pbiEstatusOT||'LIB-CEsC';
@@ -4229,7 +4302,7 @@ function pbiBuildRows(){
         cumpl,                   // 20 Cumplimiento
         cumpl<1?causa:'',        // 21 Causas de no cumplimiento
         comentario,              // 22 comentario
-        resp,                    // 23 Responsable planificación
+        respA,                   // 23 Responsable planificación (asignado por actividad)
         Math.round(mida)/100,    // 24 Avance real actividad (el maestro usa fracción 0–1)
         fechaReal,               // 25 Fecha real ejecución
         (e.interf?'Sí':'No'),                          // 26 Interferencia
@@ -4251,7 +4324,12 @@ function exportarBaseDatos(){
   var ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true});
   // formato de fecha chileno en las columnas de fecha (L=12,M=13,Y=25 → idx 11,12,24)
   var dateCols=[11,12,24];var range=XLSX.utils.decode_range(ws['!ref']);
-  for(var r=1;r<=range.e.r;r++){dateCols.forEach(function(c){var ref=XLSX.utils.encode_cell({r:r,c:c});var cell=ws[ref];if(cell&&cell.v instanceof Date){cell.t='d';cell.z='dd-mm-yyyy';}});}
+  // formato porcentaje en Cumplimiento (T=20 → idx 19) y Avance real actividad (X=24 → idx 23), igual que el maestro
+  var pctCols=[19,23];
+  for(var r=1;r<=range.e.r;r++){
+    dateCols.forEach(function(c){var ref=XLSX.utils.encode_cell({r:r,c:c});var cell=ws[ref];if(cell&&cell.v instanceof Date){cell.t='d';cell.z='dd-mm-yyyy';}});
+    pctCols.forEach(function(c){var ref=XLSX.utils.encode_cell({r:r,c:c});var cell=ws[ref];if(cell&&typeof cell.v==='number'){cell.z='0%';}});
+  }
   ws['!cols']=PBI_HEADERS.map(function(h){return {wch:Math.max(10,Math.min(28,h.length+4))};});
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Base_de_datos');
@@ -4312,6 +4390,26 @@ function _zInflate(e){if(e.method===0)return e.data;if(e.method===8)return pako.
 function _xmlEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');}
 var _PBI_COLS=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC'];
 var _PBI_DATECOLS={11:1,12:1,24:1}; /* Fecha inicio, Fecha termino, Fecha real ejecución */
+var _PBI_PCTCOLS={19:1,23:1};       /* Cumplimiento, Avance real actividad → formato 0% como en el maestro */
+/* Busca en xl/styles.xml del maestro un estilo de celda con formato porcentaje (numFmtId 9 = «0%»).
+   Si no existe, agrega uno al final de <cellXfs> y reescribe styles.xml. Devuelve el índice s="…"
+   para usar en las celdas nuevas, o null si no se pudo (las celdas quedan sin formato, como antes). */
+function _xlsmPctStyle(entries){
+  try{
+    var st=null;for(var i=0;i<entries.length;i++)if(entries[i].name==='xl/styles.xml'){st=entries[i];break;}
+    if(!st)return null;
+    var xml=new TextDecoder('utf-8').decode(_zInflate(st));
+    var m=xml.match(/<cellXfs[^>]*>([\s\S]*?)<\/cellXfs>/);if(!m)return null;
+    var xfs=m[1].match(/<xf\b[^>]*?(?:\/>|>[\s\S]*?<\/xf>)/g)||[];
+    for(var j=0;j<xfs.length;j++){var f=xfs[j].match(/numFmtId="(\d+)"/);if(f&&f[1]==='9')return j;}
+    var idx=xfs.length;
+    xml=xml.replace(/<\/cellXfs>/,'<xf numFmtId="9" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs>')
+           .replace(/(<cellXfs[^>]*count=")(\d+)(")/,function(_,a,n,c){return a+(+n+1)+c;});
+    var nb=new TextEncoder().encode(xml);
+    st.data=pako.deflateRaw(nb,{level:6});st.method=8;st.csz=st.data.length;st.usz=nb.length;st.crc=_crc32(nb);
+    return idx;
+  }catch(e){return null;}
+}
 function _xlSerial(d){return Math.round(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000)+25569;}
 /* Anexa las filas de la semana dentro del XML de la hoja Base_de_datos */
 function xlsmAppendWeek(buf){
@@ -4338,6 +4436,8 @@ function xlsmAppendWeek(buf){
   /* Última fila existente */
   var li=xml.lastIndexOf('<row r="');var last=li>=0?parseInt(xml.slice(li+8,li+20),10):1;
   var dm=xml.match(/<dimension ref="[A-Z]+\d+:[A-Z]+(\d+)"/);if(dm&&+dm[1]>last)last=+dm[1];
+  /* Estilo porcentaje del maestro para Cumplimiento y Avance real actividad */
+  var pctS=_xlsmPctStyle(entries);
   /* Construye las filas nuevas */
   var add='';
   rows.forEach(function(r,ri){
@@ -4346,7 +4446,7 @@ function xlsmAppendWeek(buf){
       if(v===''||v==null)return;
       var ref=_PBI_COLS[ci]+rn;
       if(v instanceof Date){add+='<c r="'+ref+'" s="14"><v>'+_xlSerial(v)+'</v></c>';}
-      else if(typeof v==='number'){add+='<c r="'+ref+'"'+(_PBI_DATECOLS[ci]?' s="14"':'')+'><v>'+v+'</v></c>';}
+      else if(typeof v==='number'){var _s=_PBI_DATECOLS[ci]?' s="14"':(_PBI_PCTCOLS[ci]&&pctS!=null?' s="'+pctS+'"':'');add+='<c r="'+ref+'"'+_s+'><v>'+v+'</v></c>';}
       else if(/^[1-9]\d{0,14}$/.test(v)){add+='<c r="'+ref+'"><v>'+v+'</v></c>';} /* N° OT y similares: numérico como en el maestro */
       else{add+='<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+_xmlEsc(v)+'</t></is></c>';}
     });
@@ -4411,6 +4511,14 @@ function pbiEditBlock(a,e){
   }else{
     h+='<div class="fg"></div>';
   }
+  h+='</div>';
+  /* Responsable de la actividad: lista desplegable (datalist) con el equipo,
+     permite escribir otro nombre si es necesario. Va a la columna
+     «Responsable planificación» del maestro. */
+  h+='<div class="grid2">';
+  h+='<div class="fg"><label class="fl">Responsable</label><input class="fi" id="e-pbi-resp" list="pbi-resp-list" value="'+escAttr(e.responsable||'')+'" placeholder="Selecciona o escribe un nombre" oninput="setF(\'responsable\',this.value)">'
+    +'<datalist id="pbi-resp-list">'+PBI_RESPONSABLES.map(function(x){return '<option value="'+escAttr(x)+'">';}).join('')+'</datalist></div>';
+  h+='<div class="fg"></div>';
   h+='</div>';
   return h;
 }
