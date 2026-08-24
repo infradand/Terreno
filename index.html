@@ -1162,6 +1162,80 @@ body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
 .gx-heat th.gx-rl{text-align:right;width:128px;color:var(--go);padding-right:7px}
 .gx-heat td{height:30px;text-align:center;font-size:10px;font-weight:700;border-radius:7px}
 @media(max-width:980px){.gx-grid{grid-template-columns:1fr}.gx-strip{grid-template-columns:1fr 1fr}}
+
+/* ══ KPIs de gestión (06 · 10 · 13) ══ */
+.kpi3-wrap{display:flex;flex-direction:column;gap:16px}
+.kpi3-row{position:relative;display:grid;grid-template-columns:252px 1fr;gap:20px;align-items:stretch;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:18px 22px 16px 24px;box-shadow:var(--sh);overflow:hidden}
+.kpi3-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--kacc,var(--te))}
+.kpi3-side{display:flex;flex-direction:column;justify-content:center;gap:10px}
+.kpi3-n{font-size:9.5px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--te2);background:var(--te1);border:1px solid rgba(0,152,170,.22);border-radius:999px;padding:3px 11px;align-self:flex-start}
+.kpi3-t{font-size:15.5px;font-weight:800;color:var(--bk);line-height:1.3;letter-spacing:-.01em}
+.kpi3-meta{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:var(--bk);background:var(--gb);border:1px solid var(--bd);border-radius:999px;padding:4px 13px;align-self:flex-start}
+.kpi3-meta i{width:8px;height:8px;border-radius:50%;font-style:normal;background:var(--kacc,var(--gm));flex:none}
+.kpi3-f{font-size:10px;color:var(--gm);line-height:1.5}
+.kpi3-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi3-c{border:1px solid var(--bd);border-radius:var(--r2);padding:12px 10px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(180deg,#FCFCFB 0%,var(--wh) 55%);transition:box-shadow .18s,transform .18s,border-color .18s}
+.kpi3-c[data-drill]{cursor:pointer}
+.kpi3-c[data-drill]:hover{box-shadow:var(--sh2);transform:translateY(-2px);border-color:var(--gl)}
+.kpi3-ct{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--go);text-align:center;line-height:1.4;min-height:28px;display:flex;align-items:center;justify-content:center}
+.kpi3-g{width:100%;max-width:236px}
+.kpi3-g svg{width:100%;display:block}
+.kpi3-gs{font-size:10px;color:var(--gm);text-align:center;font-variant-numeric:tabular-nums}
+.kpi3-gs b{color:var(--go);font-weight:700}
+.kpi3-d{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;border-radius:999px;padding:3px 10px;margin-top:5px;letter-spacing:.02em}
+.kpi3-d.ok{color:var(--ve);background:var(--ve1)}
+.kpi3-d.mid{color:#9A6B00;background:var(--am1)}
+.kpi3-d.bad{color:var(--ro);background:var(--ro1)}
+.kpi3-d.na{color:var(--gm);background:var(--gb)}
+.kpi3-lg{display:flex;gap:16px;flex-wrap:wrap;font-size:10px;font-weight:600;color:var(--gm);margin:2px 2px 4px}
+.kpi3-lg span i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:-1px;font-style:normal}
+.kpi3-note{font-size:10.5px;color:var(--gm);margin:0 2px 14px;font-weight:600}
+@media(max-width:1080px){.kpi3-row{grid-template-columns:1fr;gap:14px}.kpi3-side{flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px}.kpi3-f{flex-basis:100%}}
+@media(max-width:760px){.kpi3-cards{grid-template-columns:1fr}.kpi3-g{max-width:280px;margin:0 auto}}
+
+/* ══ Detalle Actividades ══ */
+.da-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:0 0 14px}
+.da-sc{position:relative;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r2);padding:10px 14px 9px;box-shadow:var(--sh);overflow:hidden}
+.da-sc::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--sacc,var(--gl))}
+.da-sc span{display:block;font-size:9px;font-weight:800;letter-spacing:.8px;color:var(--gm);text-transform:uppercase;margin-bottom:3px}
+.da-sc b{display:block;font-size:21px;font-weight:800;line-height:1.1;color:var(--bk)}
+.da-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r2);padding:9px 10px;margin:0 0 14px;box-shadow:var(--sh)}
+.da-tools input,.da-tools select{font-family:var(--fc);font-size:11px;font-weight:600;border:1px solid var(--bd);border-radius:8px;padding:7px 10px;background:#FCFCFB;color:var(--bk);outline:none;transition:border-color .15s,box-shadow .15s}
+.da-tools input{flex:1 1 230px;min-width:190px}
+.da-tools input:focus,.da-tools select:focus{border-color:var(--te);box-shadow:0 0 0 3px var(--te1);background:var(--wh)}
+.da-tools select:hover{border-color:var(--gl)}
+.da-title{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(135deg,var(--te) 0%,var(--te2) 100%);color:#fff;font-weight:800;font-size:12.5px;letter-spacing:.4px;text-transform:uppercase;padding:9px 16px;border-radius:var(--r2) var(--r2) 0 0}
+.da-title small{font-weight:600;font-size:10px;letter-spacing:.2px;text-transform:none;opacity:.85}
+.da-wrap{border:1px solid var(--bd);border-top:none;border-radius:0 0 var(--r2) var(--r2);overflow:auto;background:var(--wh);box-shadow:var(--sh);max-height:68vh}
+table.da{border-collapse:separate;border-spacing:0;width:100%;font-size:10.5px;font-family:var(--fc)}
+table.da th{position:sticky;top:0;z-index:3;background:#F7F6F3;color:var(--go);font-weight:800;font-size:9px;letter-spacing:.6px;text-transform:uppercase;text-align:left;padding:8px 9px;border-bottom:2px solid var(--bd);white-space:nowrap}
+table.da td{padding:7px 9px;border-bottom:1px solid #F1EFEA;vertical-align:top;color:var(--bk)}
+tr.da-grp td{background:rgba(0,152,170,.06);border-bottom:1px solid rgba(0,152,170,.18);border-top:1px solid rgba(0,152,170,.18);font-weight:800;font-size:11px;cursor:pointer;color:var(--te2);padding:8px 9px}
+tr.da-grp:hover td{background:rgba(0,152,170,.10)}
+tr.da-grp td b{font-variant-numeric:tabular-nums}
+tr.da-grp .da-gmeta{color:var(--gm);font-weight:600;font-size:10px}
+tr.da-r{cursor:pointer}
+tr.da-r:nth-child(even) td{background:#FCFBF9}
+tr.da-r:hover td{background:var(--te1)}
+td.da-nm{min-width:185px;max-width:250px;font-weight:700;padding-left:22px;line-height:1.35}
+td.da-det{min-width:280px;max-width:440px;white-space:pre-line;line-height:1.45;color:#4A5460;font-size:10px}
+td.da-num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+td.da-c{text-align:center;white-space:nowrap}
+td.da-ot{font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap;color:var(--go)}
+.da-bdg{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:.03em;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.da-bdg i{width:6px;height:6px;border-radius:50%;font-style:normal;flex:none;background:currentColor}
+.da-bdg.term{color:var(--ve);background:var(--ve1)}
+.da-bdg.curso{color:#9A6B00;background:var(--am1)}
+.da-bdg.repro{color:var(--ro);background:var(--ro1)}
+.da-bdg.sini{color:var(--gm);background:var(--gb)}
+.da-tag{display:inline-block;font-size:9px;font-weight:800;border-radius:6px;padding:2px 7px;background:var(--gb);color:var(--go)}
+.da-tag.np{background:var(--na1);color:var(--na2)}
+td.da-av{min-width:86px}
+.da-pbw{display:flex;align-items:center;gap:7px}
+.da-pb{flex:1;height:5px;border-radius:99px;background:var(--gb);overflow:hidden;min-width:34px}
+.da-pb i{display:block;height:100%;border-radius:99px}
+.da-pv{font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;min-width:33px;text-align:right}
+.da-empty{padding:40px;text-align:center;color:var(--gm);font-size:12px}
 </style>
 </head>
 <body>
@@ -1216,11 +1290,43 @@ body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
        Sus paneles siguen en el DOM ocultos para no romper funciones internas. -->
   <button class="tab active" id="tab-btn-plani" onclick="showTab(&#39;plani&#39;)">📋 Planificación</button>
   <button class="tab" id="tab-btn-ejec" onclick="showTab(&#39;ejec&#39;)">🔧 Ejecución</button>
+  <button class="tab" id="tab-btn-kpis" onclick="showTab(&#39;kpis&#39;)">📊 KPIs</button>
+  <button class="tab" id="tab-btn-detalle" onclick="showTab(&#39;detalle&#39;)">📄 Detalle Actividades</button>
   <button class="tab" id="tab-btn-traspaso" onclick="showTab(&#39;traspaso&#39;)">⇄ Traspaso de turno</button>
   <button class="tab" id="tab-btn-historial" onclick="showTab(&#39;historial&#39;)">🕘 Historial</button>
 </div>
 
 <main class="dash" id="dash" style="display: block;">
+  <div id="tab-kpis" style="display:none">
+    <div class="page-h">Indicadores de gestión</div>
+    <div class="page-sub">KPI 06, 10 y 13 calculados sobre la semana cargada, abiertos por especialidad (General · Infraestructura · Piping). La marca negra sobre el arco es la meta; haz clic en un medidor para ver las actividades que lo componen.</div>
+    <div class="kpi3-lg">
+      <span><i style="background:var(--ve)"></i>Cumple la meta</span>
+      <span><i style="background:var(--am)"></i>Hasta 10 pts bajo la meta</span>
+      <span><i style="background:var(--ro)"></i>Más de 10 pts bajo la meta</span>
+      <span><i style="background:var(--bk)"></i>Marca de meta</span>
+    </div>
+    <div class="kpi3-note" id="kpi3-note"></div>
+    <div id="kpi3-box" class="kpi3-wrap"></div>
+  </div>
+
+  <div id="tab-detalle" style="display:none">
+    <div class="page-h">Detalle Actividades</div>
+    <div class="page-sub">Una fila por actividad de la semana, agrupada por ejecutor. «Consolidado detalles» reúne las notas de bitácora fechadas. Haz clic en una fila para abrir la actividad.</div>
+    <div class="da-sum" id="da-sum"></div>
+    <div class="da-tools">
+      <input id="da-q" autocomplete="off" placeholder="Buscar actividad, OT, ejecutor o detalle…" oninput="daSetF('q',this.value)">
+      <select id="da-esp" onchange="daSetF('esp',this.value)"></select>
+      <select id="da-tipo" onchange="daSetF('tipo',this.value)"></select>
+      <select id="da-est" onchange="daSetF('est',this.value)"></select>
+      <select id="da-ejec" onchange="daSetF('ejec',this.value)"></select>
+      <button class="btn bo" onclick="daClearF()">✕ Limpiar</button>
+      <button class="btn bo" onclick="daExport()" title="Exporta a Excel exactamente lo que ves">⬇ Exportar Excel</button>
+    </div>
+    <div class="da-title"><span>Detalle Actividades</span><small id="da-count"></small></div>
+    <div class="da-wrap"><div id="da-box"></div></div>
+  </div>
+
   <div id="tab-dashboard" style="display: none;">
     <div class="page-h">Dashboard Planificación</div>
     <div class="page-sub">Todo lo de Planificación en un solo lugar: resumen semanal, alertas, estado de preparativos, carga planificada y dotación. Las pestañas Planificación y Ejecución muestran las actividades por día.</div>
@@ -1842,14 +1948,16 @@ function showTab(t){
   /* v1 simplificada: los dashboards ya no son pestañas accesibles */
   if(t==='dashboard'||t==='execdash'||t==='brechas')t='plani';
   TAB=t;
-  var map={plani:'tab-work',ejec:'tab-work',bitacora:'tab-bitacora',traspaso:'tab-traspaso',historial:'tab-historial'};
-  ['tab-dashboard','tab-execdash','tab-brechas','tab-work','tab-bitacora','tab-traspaso','tab-historial'].forEach(function(id){var c=document.getElementById(id);if(c)c.style.display='none';});
+  var map={plani:'tab-work',ejec:'tab-work',kpis:'tab-kpis',detalle:'tab-detalle',bitacora:'tab-bitacora',traspaso:'tab-traspaso',historial:'tab-historial'};
+  ['tab-dashboard','tab-execdash','tab-brechas','tab-work','tab-kpis','tab-detalle','tab-bitacora','tab-traspaso','tab-historial'].forEach(function(id){var c=document.getElementById(id);if(c)c.style.display='none';});
   var show=map[t];if(document.getElementById(show))document.getElementById(show).style.display='block';
-  ['plani','ejec','bitacora','traspaso','historial'].forEach(function(x){var b=document.getElementById('tab-btn-'+x);if(b)b.classList.toggle('active',x===t);});
+  ['plani','ejec','kpis','detalle','bitacora','traspaso','historial'].forEach(function(x){var b=document.getElementById('tab-btn-'+x);if(b)b.classList.toggle('active',x===t);});
   var bp=document.getElementById('btn-ppt');if(bp)bp.style.display=(t==='plani')?'inline-flex':'none';
   if(t==='plani'||t==='ejec'){MODE=t;if(!DIA_INIT){DIA=todayIndex();DIA_INIT=true;}renderModeBanner();renderPlaniInd();renderEjecTop();renderDaySel();render();}
   if(t==='traspaso'){renderTraspaso();}
   if(t==='historial'){renderHist();}
+  if(t==='kpis'){renderKpiTab();}
+  if(t==='detalle'){renderDetalleAct();}
 }
 function todayIndex(){if(!DATA)return -1;var now=new Date();var dd=('0'+now.getDate()).slice(-2),mm=('0'+(now.getMonth()+1)).slice(-2);for(var i=0;i<7;i++){var s=String(DATA.dates[i]||'');var m=s.match(/(\d{1,2})[\/\-.](\d{1,2})/);if(m&&('0'+m[1]).slice(-2)===dd&&('0'+m[2]).slice(-2)===mm)return i;}return -1;}
 function renderModeBanner(){
@@ -2180,7 +2288,7 @@ function recargar(force){
   var ok=document.getElementById('u-ppt-ok');if(ok)ok.textContent='';
   document.getElementById('fi').value='';
 }
-function refreshAll(){renderKPIs();renderPeriod();renderAlerts();renderRepro();renderPlaniAnalytics();updateCharts();renderDayStrip();renderBar();renderExec();render();updTabCount();if(document.getElementById('plani-top')&&document.getElementById('plani-top').style.display!=='none')renderPlaniInd();if(document.getElementById('ejec-top')&&document.getElementById('ejec-top').style.display!=='none')renderEjecTop();}
+function refreshAll(){refreshNuevos();renderKPIs();renderPeriod();renderAlerts();renderRepro();renderPlaniAnalytics();updateCharts();renderDayStrip();renderBar();renderExec();render();updTabCount();if(document.getElementById('plani-top')&&document.getElementById('plani-top').style.display!=='none')renderPlaniInd();if(document.getElementById('ejec-top')&&document.getElementById('ejec-top').style.display!=='none')renderEjecTop();}
 function renderPeriod(){
   var pw=document.getElementById('period-week');if(pw)pw.innerHTML='Semana '+(DATA.semana||'—')+(WSLOT===1?' <span class="wk-tag next">🔭 PRÓXIMA · PREPARATIVOS</span>':' <span class="wk-tag">📅 EN CURSO</span>');
   var d0=DATA.dates[0]||'',d6=DATA.dates[6]||'';var pr=document.getElementById('period-range');
@@ -4597,6 +4705,307 @@ function uiReset(){
   var ot=document.getElementById('ot-toggle');if(ot)ot.style.display='none';
   var si=document.getElementById('save-ind');if(si)si.style.display='none';
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   KPIs DE GESTIÓN · 06 · 10 · 13
+   Cada KPI se abre en tres medidores: General · Infraestructura · Piping.
+   · KPI 06  HH en terreno ÷ HH planificadas          (meta 80%)
+   · KPI 10  actividades terminadas ÷ planificadas     (meta 80%)
+   · KPI 13  actividades Plan Matriz terminadas ÷ total (meta 85%)
+   Universo: la semana cargada. Se consideran sólo actividades planificadas
+   (Origen PL); las NP no tienen programa contra el cual medirse.
+   ═════════════════════════════════════════════════════════════════════ */
+var KPI_ESPS=[['','General'],['Infraestructura','Infraestructura'],['Piping','Piping']];
+
+function kpiActs(esp,soloPlanMatriz){
+  if(!DATA)return [];
+  return allActs().filter(function(a){
+    if(a.np)return false;                                   /* sólo programa planificado */
+    if(esp&&pbiEspecialidad(a)!==esp)return false;
+    if(soloPlanMatriz&&pbiTipo(a)!=='Plan Matriz')return false;
+    return true;
+  });
+}
+/* Días ya transcurridos de la semana cargada: las HH de terreno sólo se cuentan
+   hasta hoy (los días futuros aún no se ejecutan). Semana pasada → los 7 días.
+   Semana futura → ninguno. */
+function kpiDayMask(){
+  var m=[1,1,1,1,1,1,1],d;
+  if(!DATA)return m;
+  var ti=todayIndex();
+  if(ti>=0){for(d=0;d<7;d++)m[d]=(d<=ti)?1:0;return m;}
+  var iso=ddmmToISO(DATA.dates[0],DATA.anio);
+  if(iso){var d0=new Date(iso+'T00:00:00');if(!isNaN(d0)&&d0>new Date())return [0,0,0,0,0,0,0];}
+  return m;
+}
+function kpiDayNote(){
+  var m=kpiDayMask(),n=0;for(var d=0;d<7;d++)n+=m[d];
+  if(n===0)return 'Semana futura: a\u00fan sin ejecuci\u00f3n registrada.';
+  if(n===7)return 'Semana completa (7 d\u00edas considerados).';
+  return 'HH de terreno contadas hasta hoy \u00b7 '+n+' de 7 d\u00edas.';
+}
+/* KPI 06 — HH */
+function kpiHH(esp){
+  var mask=kpiDayMask(),num=0,den=0;
+  kpiActs(esp,false).forEach(function(a){
+    var dp=a.dp,hp=planHora(a),rd=realDot(a),hr=realHora(a),qb=isQuiebre(a);
+    for(var d=0;d<7;d++){
+      den+=(+dp[d]||0)*(+hp[d]||0);
+      if(mask[d]&&!qb)num+=(+rd[d]||0)*(+hr[d]||0);
+    }
+  });
+  return {num:num,den:den};
+}
+/* KPI 10 y 13 — actividades terminadas */
+function kpiActCount(esp,soloPlanMatriz){
+  var list=kpiActs(esp,soloPlanMatriz),num=0;
+  list.forEach(function(a){if(pbiEstatusAct(a)==='Terminado')num++;});
+  return {num:num,den:list.length};
+}
+function kpiColor(p,meta){return p>=meta?'#2E9E5B':(p>=meta-10?'#DE9B00':'#C13832');}
+function kpiArcPt(pct,r){var ang=Math.PI*(1-Math.max(0,Math.min(100,pct))/100);return [100+r*Math.cos(ang),112-r*Math.sin(ang)];}
+
+/* Medidor semicircular: arco de estado + marca de meta + valor central */
+function kpiGauge(num,den,meta){
+  var p=den>0?(num/den*100):0,pc=Math.max(0,Math.min(100,p));
+  var col=kpiColor(p,meta),R=80,C=Math.PI*R,off=C*(1-pc/100);
+  var mI=kpiArcPt(meta,R-11),mO=kpiArcPt(meta,R+11);
+  return '<div class="kpi3-g"><svg viewBox="0 0 200 128" preserveAspectRatio="xMidYMid meet" role="img">'
+    +'<path d="M20,110 A80,80 0 0 1 180,110" fill="none" stroke="#EEF0F2" stroke-width="13" stroke-linecap="round"/>'
+    +(den>0&&pc>0?'<path d="M20,110 A80,80 0 0 1 180,110" fill="none" stroke="'+col+'" stroke-width="13" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/>':'')
+    +'<line x1="'+mI[0].toFixed(1)+'" y1="'+mI[1].toFixed(1)+'" x2="'+mO[0].toFixed(1)+'" y2="'+mO[1].toFixed(1)+'" stroke="#27313A" stroke-width="2.4" stroke-linecap="round"/>'
+    +'<text x="100" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="29" font-weight="800" fill="'+(den>0?col:'#B9BEC4')+'">'+(den>0?(Math.round(p*10)/10).toFixed(1):'—')+'<tspan font-size="14" font-weight="700" dx="2">'+(den>0?'%':'')+'</tspan></text>'
+    +'<text x="12" y="124" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#B9BEC4">0</text>'
+    +'<text x="188" y="124" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#B9BEC4" text-anchor="end">'+ek_fmt(den)+'</text>'
+    +'</svg></div>';
+}
+/* Chip de estado bajo el medidor */
+function kpiDelta(num,den,meta){
+  if(den<=0)return '<span class="kpi3-d na">Sin datos</span>';
+  var p=num/den*100,d=Math.round((p-meta)*10)/10;
+  if(p>=meta)return '<span class="kpi3-d ok">✓ Meta cumplida · +'+d+' pts</span>';
+  if(p>=meta-10)return '<span class="kpi3-d mid">▾ '+Math.abs(d)+' pts bajo la meta</span>';
+  return '<span class="kpi3-d bad">▾ '+Math.abs(d)+' pts bajo la meta</span>';
+}
+function kpiCard(title,r,meta,unit,drill){
+  var p=r.den>0?(r.num/r.den*100):0;
+  var tip=title+': '+ek_fmt(r.num)+' de '+ek_fmt(r.den)+' '+unit+' · '+(Math.round(p*10)/10)+'% · meta '+meta+'%';
+  var dr=drill?' data-drill="'+escAttr(JSON.stringify(drill))+'"':'';
+  return '<div class="kpi3-c" data-tip="'+escAttr(tip)+'"'+dr+'>'
+    +'<div class="kpi3-ct">'+esc(title)+'</div>'
+    +kpiGauge(r.num,r.den,meta)
+    +'<div class="kpi3-gs"><b>'+ek_fmt(r.num)+'</b> / '+ek_fmt(r.den)+' '+esc(unit)+'</div>'
+    +kpiDelta(r.num,r.den,meta)+'</div>';
+}
+function kpiRow(n,titulo,meta,unit,formula,calc,drillBase){
+  var gen=calc('');
+  var p=gen.den>0?(gen.num/gen.den*100):0;
+  var col=gen.den>0?kpiColor(p,meta):'#B9BEC4';
+  var titles={
+    '06':function(l){return '% Cumplimiento HH planificadas '+l;},
+    '10':function(l){return '% Cumplimiento actividades planificadas '+l;},
+    '13':function(l){return '% Cumplimiento Plan Matriz '+l;}
+  };
+  var cards=KPI_ESPS.map(function(pair){
+    var esp=pair[0],lbl=pair[1];
+    var d=null;
+    if(drillBase){d={};for(var k in drillBase)d[k]=drillBase[k];if(esp)d.esp=esp;d.title='KPI '+n+' · '+lbl;}
+    return kpiCard((titles[n]||titles['10'])(lbl),calc(esp),meta,unit,d);
+  }).join('');
+  return '<div class="kpi3-row" style="--kacc:'+col+'">'
+    +'<div class="kpi3-side"><span class="kpi3-n">KPI '+n+'</span>'
+    +'<div class="kpi3-t">'+esc(titulo)+'</div>'
+    +'<span class="kpi3-meta"><i></i>Meta '+meta+'%</span>'
+    +'<div class="kpi3-f">'+esc(formula)+'</div></div>'
+    +'<div class="kpi3-cards">'+cards+'</div></div>';
+}
+function renderKpiTab(){
+  var box=document.getElementById('kpi3-box');if(!box)return;
+  if(!DATA){box.innerHTML='<div class="da-empty">Carga primero un programa semanal para calcular los indicadores.</div>';return;}
+  box.innerHTML=
+     kpiRow('06','% Cumplimiento Trabajo Planificado HH',80,'HH',
+            'HH en terreno \u00f7 HH planificadas del programa de la semana.',
+            function(esp){return kpiHH(esp);},{origen:'PL'})
+    +kpiRow('10','% Cumplimiento Programa semanal',80,'act.',
+            'Actividades planificadas terminadas \u00f7 actividades planificadas.',
+            function(esp){return kpiActCount(esp,false);},{origen:'PL',done:true})
+    +kpiRow('13','% Cumplimiento Plan Matriz',85,'act.',
+            'Actividades Plan Matriz terminadas \u00f7 actividades Plan Matriz.',
+            function(esp){return kpiActCount(esp,true);},{origen:'PL',tipo:'Plan Matriz'});
+  var nt=document.getElementById('kpi3-note');
+  if(nt)nt.textContent='Semana '+(DATA.semana||'\u2014')+' \u00b7 '+kpiDayNote()+' Los quiebres no suman HH de terreno.';
+  ekInitTip('tab-kpis');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DETALLE ACTIVIDADES — una fila por actividad, agrupada por ejecutor
+   ═════════════════════════════════════════════════════════════════════ */
+var DA_F={q:'',esp:'',tipo:'',est:'',ejec:''};
+var DA_OPEN={};
+var DA_HEADERS=['Ejecutor','Actividad','N° OT','Origen','Semanas Actividad ejecutada','Tipo Actividad','Fecha inicio real','Fecha término real','Consolidado detalles','Estatus Actividad','Estatus OT','% avance real actividad','HH Planificadas','HH Terreno'];
+
+function daFecha(d){var iso=ddmmToISO(DATA.dates[d],DATA.anio);if(!iso)return '';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+
+/* Consolida la bitácora de una actividad agrupada por fecha:
+   «DD/MM/AAAA: nota 1 — nota 2», una línea por día, en orden cronológico. */
+function daConsolidado(a){
+  var e=ed(a.id),porDia={},orden=[];
+  (e.log||[]).slice().sort(function(x,y){return (x.ts||0)-(y.ts||0);}).forEach(function(m){
+    if(!m.text)return;
+    var dt=new Date(m.ts||0);if(isNaN(dt))return;
+    var k=pad2(dt.getDate())+'/'+pad2(dt.getMonth()+1)+'/'+dt.getFullYear();
+    if(!porDia[k]){porDia[k]=[];orden.push(k);}
+    porDia[k].push(String(m.text).trim());
+  });
+  var out=orden.map(function(k){return k+': '+porDia[k].join(' — ');});
+  if(a.np&&a.descNP)out.unshift(a.descNP);
+  if(e.quiebre&&(e.quiebre.causa||e.quiebre.comment))
+    out.push('⚠ Quiebre — '+(e.quiebre.causa||'')+(e.quiebre.comment?': '+e.quiebre.comment:''));
+  if(e.interf&&e.interf.obs)out.push('⇄ Interferencia — '+e.interf.obs);
+  return out.join('\n');
+}
+function daRows(){
+  if(!DATA)return [];
+  var sem='Semana '+(parseInt(DATA.semana,10)||DATA.semana||'');
+  var mask=kpiDayMask();
+  return allActs().map(function(a){
+    var e=ed(a.id),rd=realDot(a),ini=-1,fin=-1,d;
+    var sinIniciar=(pbiEstatusAct(a)==='Sin iniciar');
+    if(!sinIniciar){for(d=0;d<7;d++){if(mask[d]&&(rd[d]||0)>0){if(ini<0)ini=d;fin=d;}}}
+    var det=daConsolidado(a);
+    return {id:a.id,act:a,
+      ejec:pbiEjecutor(a)||'\u2014',nombre:a.nombre||'',ot:actOT(a)||'',
+      origen:pbiOrigen(a),sem:sem,tipo:pbiTipo(a),
+      ini:ini>=0?daFecha(ini):'',fin:fin>=0?daFecha(fin):'',
+      det:det,
+      est:pbiEstatusAct(a),estOT:e.pbiEstatusOT||'LIB-CEsC',
+      mida:Math.round(+e.mida||0),
+      hhp:_hhArr(a.dp,planHora(a)),hhr:_hhArr(rd,realHora(a)),
+      esp:pbiEspecialidad(a)};
+  });
+}
+function daPass(r){
+  if(DA_F.esp&&r.esp!==DA_F.esp)return false;
+  if(DA_F.tipo&&r.tipo!==DA_F.tipo)return false;
+  if(DA_F.est&&r.est!==DA_F.est)return false;
+  if(DA_F.ejec&&r.ejec!==DA_F.ejec)return false;
+  if(DA_F.q){var q=pbiNorm(DA_F.q);if(pbiNorm(r.nombre+' '+r.ot+' '+r.ejec+' '+r.det+' '+r.tipo+' '+r.est).indexOf(q)<0)return false;}
+  return true;
+}
+function daSetF(k,v){DA_F[k]=v;renderDetalleAct();}
+function daClearF(){DA_F={q:'',esp:'',tipo:'',est:'',ejec:''};renderDetalleAct();}
+function daTog(g){DA_OPEN[g]=(DA_OPEN[g]===false);renderDetalleAct();}
+function daEstBadge(est){
+  var m={'Terminado':'term','En curso':'curso','A reprogramar':'repro','Sin iniciar':'sini'};
+  return '<span class="da-bdg '+(m[est]||'sini')+'"><i></i>'+esc(est)+'</span>';
+}
+function daAvCell(v){
+  var col=v>=100?'var(--ve)':v>0?'var(--am)':'var(--ro)';
+  return '<div class="da-pbw"><div class="da-pb"><i style="width:'+Math.max(0,Math.min(100,v))+'%;background:'+col+'"></i></div><span class="da-pv" style="color:'+col+'">'+v+' %</span></div>';
+}
+function daSel(id,val,ph,opts){
+  return '<option value="">'+ph+'</option>'+opts.map(function(o){return '<option value="'+escAttr(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>';}).join('');
+}
+function daFillSelects(all){
+  function uniq(f){var m={};all.forEach(function(r){var v=f(r);if(v)m[v]=1;});return Object.keys(m).sort();}
+  var s;
+  s=document.getElementById('da-esp'); if(s)s.innerHTML=daSel(0,DA_F.esp,'Especialidad: todas',uniq(function(r){return r.esp;}));
+  s=document.getElementById('da-tipo');if(s)s.innerHTML=daSel(0,DA_F.tipo,'Tipo: todos',uniq(function(r){return r.tipo;}));
+  s=document.getElementById('da-est'); if(s)s.innerHTML=daSel(0,DA_F.est,'Estatus: todos',uniq(function(r){return r.est;}));
+  s=document.getElementById('da-ejec');if(s)s.innerHTML=daSel(0,DA_F.ejec,'Ejecutor: todos',uniq(function(r){return r.ejec;}));
+}
+
+function renderDetalleAct(){
+  var box=document.getElementById('da-box');if(!box)return;
+  var sum=document.getElementById('da-sum');
+  if(!DATA){box.innerHTML='<div class="da-empty">Carga primero un programa semanal.</div>';if(sum)sum.innerHTML='';return;}
+  var all=daRows();
+  daFillSelects(all);
+  var rows=all.filter(daPass);
+
+  /* Resumen */
+  if(sum){
+    var thh=0,rhh=0,term=0;
+    rows.forEach(function(r){thh+=r.hhp;rhh+=r.hhr;if(r.est==='Terminado')term++;});
+    var cuCol=(thh>0&&rhh/thh>=0.8)?'var(--ve)':(thh>0&&rhh/thh>=0.7)?'var(--am)':'var(--ro)';
+    sum.innerHTML=
+       '<div class="da-sc" style="--sacc:var(--te)"><span>Actividades</span><b>'+rows.length+'</b></div>'
+      +'<div class="da-sc" style="--sacc:var(--ve)"><span>Terminadas</span><b style="color:var(--ve)">'+term+'</b></div>'
+      +'<div class="da-sc" style="--sacc:var(--na)"><span>HH planificadas</span><b>'+ek_fmt(thh)+'</b></div>'
+      +'<div class="da-sc" style="--sacc:var(--te2)"><span>HH terreno</span><b>'+ek_fmt(rhh)+'</b></div>'
+      +'<div class="da-sc" style="--sacc:'+cuCol+'"><span>Cumpl. HH</span><b style="color:'+cuCol+'">'+(thh>0?Math.round(rhh/thh*1000)/10:0)+'%</b></div>';
+  }
+
+  var cnt=document.getElementById('da-count');
+  if(cnt)cnt.textContent='Semana '+(DATA.semana||'—')+' · '+rows.length+' de '+all.length+' actividades';
+  if(!rows.length){box.innerHTML='<div class="da-empty">No hay actividades que coincidan con los filtros.</div>';return;}
+
+  /* Agrupar por ejecutor */
+  var gs={},order=[];
+  rows.forEach(function(r){if(!gs[r.ejec]){gs[r.ejec]=[];order.push(r.ejec);}gs[r.ejec].push(r);});
+  order.sort();
+
+  var html='<table class="da"><thead><tr>'+DA_HEADERS.map(function(h){return '<th>'+esc(h)+'</th>';}).join('')+'</tr></thead><tbody>';
+  order.forEach(function(g){
+    var list=gs[g],hp=0,hr=0,tr=0;
+    list.forEach(function(r){hp+=r.hhp;hr+=r.hhr;if(r.est==='Terminado')tr++;});
+    var open=DA_OPEN[g]!==false;
+    html+='<tr class="da-grp" onclick="daTog('+jsArg(g)+')"><td colspan="'+(DA_HEADERS.length-2)+'">'
+      +(open?'\u25be':'\u25b8')+'&nbsp; '+esc(g)+' <span class="da-gmeta">\u00b7 '+list.length+' actividad'+(list.length===1?'':'es')+' \u00b7 '+tr+' terminada'+(tr===1?'':'s')+'</span></td>'
+      +'<td class="da-num"><b>'+ek_fmt(hp)+'</b></td><td class="da-num"><b>'+ek_fmt(hr)+'</b></td></tr>';
+    if(!open)return;
+    list.forEach(function(r){
+      html+='<tr class="da-r" onclick="daOpen('+jsArg(r.id)+')">'
+        +'<td></td>'
+        +'<td class="da-nm">'+esc(r.nombre)+'</td>'
+        +'<td class="da-ot">'+esc(r.ot)+'</td>'
+        +'<td class="da-c"><span class="da-tag'+(r.origen==='NP'?' np':'')+'">'+esc(r.origen)+'</span></td>'
+        +'<td class="da-c">'+esc(r.sem)+'</td>'
+        +'<td class="da-c">'+esc(r.tipo)+'</td>'
+        +'<td class="da-c">'+esc(r.ini)+'</td>'
+        +'<td class="da-c">'+esc(r.fin)+'</td>'
+        +'<td class="da-det">'+esc(r.det)+'</td>'
+        +'<td class="da-c">'+daEstBadge(r.est)+'</td>'
+        +'<td class="da-c">'+esc(r.estOT)+'</td>'
+        +'<td class="da-av">'+daAvCell(r.mida)+'</td>'
+        +'<td class="da-num">'+ek_fmt(r.hhp)+'</td>'
+        +'<td class="da-num">'+ek_fmt(r.hhr)+'</td></tr>';
+    });
+  });
+  html+='</tbody></table>';
+  box.innerHTML=html;
+}
+function daOpen(id){if(typeof MODE==='undefined'||!MODE)MODE='ejec';openEdit(id);}
+
+function daExport(){
+  if(!DATA){toast('Carga primero un programa');return;}
+  if(typeof XLSX==='undefined'){toast('Librer\u00eda Excel no disponible');return;}
+  var rows=daRows().filter(daPass);
+  if(!rows.length){toast('No hay filas que exportar');return;}
+  var aoa=[DA_HEADERS].concat(rows.map(function(r){
+    return [r.ejec,r.nombre,r.ot,r.origen,r.sem,r.tipo,r.ini,r.fin,r.det,r.est,r.estOT,(r.mida||0)/100,r.hhp,r.hhr];
+  }));
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+  var range=XLSX.utils.decode_range(ws['!ref']);
+  for(var i=1;i<=range.e.r;i++){
+    var ref=XLSX.utils.encode_cell({r:i,c:11});var cell=ws[ref];
+    if(cell&&typeof cell.v==='number')cell.z='0%';
+  }
+  ws['!cols']=[{wch:16},{wch:38},{wch:12},{wch:9},{wch:16},{wch:16},{wch:14},{wch:14},{wch:60},{wch:16},{wch:12},{wch:12},{wch:14},{wch:12}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Detalle_Actividades');
+  XLSX.writeFile(wb,'Detalle_Actividades_Sem'+DATA.semana+'_'+DATA.anio+'.xlsx');
+  logAction('Exportaci\u00f3n','','Detalle Actividades \u00b7 '+rows.length+' filas');
+  toast('\u2713 Detalle exportado \u00b7 '+rows.length+' actividades');
+}
+
+/* Mantiene sincronizadas las pestañas nuevas cuando cambia cualquier dato */
+function refreshNuevos(){
+  var k=document.getElementById('tab-kpis'),d=document.getElementById('tab-detalle');
+  if(k&&k.style.display!=='none')renderKpiTab();
+  if(d&&d.style.display!=='none')renderDetalleAct();
+}
+
 function boot(){
   loadUser();
   loadTurno();
