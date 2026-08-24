@@ -1640,6 +1640,19 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
 
 <div class="lb" id="lb" onclick="closeLB()"><img id="lb-img" alt="Foto bitácora"></div>
 <div class="busy" id="busy"><div class="busy-card"><div class="busy-spin"></div><div class="busy-msg" id="busy-msg">Procesando…</div></div></div>
+<input type="file" id="fipbix" accept=".xlsx" style="display:none" onchange="handlePbiBase(this.files[0]);this.value='';">
+<div class="mo" id="pbi-mo">
+  <div class="modal" style="max-width:460px">
+    <div class="mhdr"><div><div class="mey">Cierre de semana</div><div class="mttl">Base de datos Power BI</div></div></div>
+    <div style="font-size:12px;color:var(--gm);line-height:1.55;margin-bottom:12px">La base acumulativa <b>PBI_SINFRA_Base.xlsx</b> reúne todas las semanas en un solo archivo (Base_de_datos · KPIs · Detalle_Actividades · Interferencias). Selecciona la base existente para <b>agregarle esta semana</b> y guárdala sobre la anterior; el PBI conectado a ese archivo se actualiza solo.</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="cl-ab" style="padding:11px 16px" onclick="pbiAcumElegir()">➕ Agregar esta semana a la base existente…</button>
+      <button class="fclear" style="padding:10px 16px" onclick="pbiAcumNueva()">🆕 Primera vez · crear base nueva</button>
+      <button class="fclear" style="padding:8px 16px;border:none;color:var(--gm)" onclick="pbiAcumCancelar()">Cancelar cierre</button>
+    </div>
+  </div>
+</div>
+
 <div class="mo" id="fin-mo" onclick="if(event.target===this)closeFinWeek()">
   <div class="modal" style="max-width:430px">
     <div class="mhdr"><div><div class="mey">Cierre de semana</div><div class="mttl" id="fin-ttl">Finalizar semana</div></div><button class="mcl" onclick="closeFinWeek()">×</button></div>
@@ -1890,8 +1903,118 @@ function loadPpt(){var x=Store.get('ppt_s'+(DATA?DATA.semana:''),{});PPTINFO=(x&
 function savePpt(){if(!Store.set('ppt_s'+(DATA?DATA.semana:''),PPTINFO))toast('⚠ Almacenamiento lleno (PPT)');}
 function openFinWeek(){if(!DATA)return;if(!requireAdmin())return;document.getElementById('fin-ttl').textContent='Finalizar Semana'+DATA.semana;document.getElementById('fin-mo').classList.add('open');}
 function closeFinWeek(){document.getElementById('fin-mo').classList.remove('open');}
+/* ── Base de datos PBI acumulativa ──
+   Un solo archivo fijo: PBI_SINFRA_Base.xlsx. Al finalizar cada semana se
+   selecciona la base existente, se AGREGAN las filas de la semana (si la
+   semana ya estaba, se reemplaza — sin duplicados) y se descarga la base
+   actualizada para guardarla sobre la anterior. 4 hojas: Base_de_datos,
+   KPIs, Detalle_Actividades, Interferencias. El PBI se conecta a ese único
+   archivo y solo requiere Actualizar. */
+function pbiParts(){
+  var wk=DATA.semana,anio=parseInt(DATA.anio,10)||DATA.anio;
+  var semLbl='Semana '+pad2(parseInt(wk,10)||wk);
+  var kdefs=[
+    ['KPI 06','% Cumplimiento Trabajo Planificado HH','HH',80,function(e){return kpiHH(e);}],
+    ['KPI 10','% Cumplimiento Programa semanal','Actividades',80,function(e){return kpiActCount(e,false);}],
+    ['KPI 13','% Cumplimiento Plan Matriz','Actividades',85,function(e){return kpiActCount(e,true);}]
+  ];
+  var krows=[];
+  kdefs.forEach(function(d){KPI_ESPS.forEach(function(pr){
+    var rr=d[4](pr[0]);
+    krows.push([semLbl,anio,d[0],d[1],pr[1],d[2],rr.num,rr.den,(rr.den>0?rr.num/rr.den:''),d[3]/100]);
+  });});
+  var det=daRows().map(function(x){
+    return [semLbl,anio,x.ejec,x.nombre,x.ot,x.origen,x.sem,x.tipo,x.ini,x.fin,x.det,x.est,x.estOT,x.causa,(x.mida||0)/100,x.hhp,x.hhr];
+  });
+  var irows=[];
+  allActs().forEach(function(a){
+    var e=ed(a.id);if(!e.interf)return;
+    irows.push([semLbl,anio,a.nombre||'',actOT(a)||'',pbiEjecutor(a),pbiEspecialidad(a),e.interf.tipo||'Otros',+e.interf.horas||0,e.interf.obs||'',e.interf.by||'']);
+  });
+  return {semLbl:semLbl,anio:anio,base:pbiBuildRows(),kpis:krows,det:det,interf:irows};
+}
+/* conserva las filas históricas de la hoja, reemplazando las de la semana actual */
+function pbiMergeSheet(oldWs,headers,newRows,semLbl,anio,semIdx,anioIdx){
+  var hist=[];
+  if(oldWs){
+    var aoa=XLSX.utils.sheet_to_json(oldWs,{header:1,raw:true,defval:''});
+    for(var i=1;i<aoa.length;i++){
+      var r=aoa[i];if(!r||!r.length)continue;
+      var vacia=true;for(var c=0;c<r.length;c++){if(r[c]!==''&&r[c]!=null){vacia=false;break;}}
+      if(vacia)continue;
+      if(String(r[semIdx])===semLbl&&String(r[anioIdx])===String(anio))continue;
+      hist.push(r);
+    }
+  }
+  return [headers].concat(hist).concat(newRows);
+}
+function pbiFmt(ws,kind){
+  var rg=XLSX.utils.decode_range(ws['!ref']);
+  for(var r=1;r<=rg.e.r;r++){
+    if(kind==='base'){
+      [11,12,24].forEach(function(c){var cl=ws[XLSX.utils.encode_cell({r:r,c:c})];if(cl&&cl.v instanceof Date){cl.t='d';cl.z='dd-mm-yyyy';}});
+      [19,23].forEach(function(c){var cl=ws[XLSX.utils.encode_cell({r:r,c:c})];if(cl&&typeof cl.v==='number')cl.z='0%';});
+    }else if(kind==='kpis'){
+      [8,9].forEach(function(c){var cl=ws[XLSX.utils.encode_cell({r:r,c:c})];if(cl&&typeof cl.v==='number')cl.z='0.0%';});
+    }else if(kind==='det'){
+      var cl=ws[XLSX.utils.encode_cell({r:r,c:14})];if(cl&&typeof cl.v==='number')cl.z='0%';
+    }
+  }
+}
+function buildPbiBase(oldWb){
+  var pts=pbiParts();
+  var KH=['Semana','Año','KPI','Indicador','Especialidad','Unidad','Numerador','Denominador','Cumplimiento','Meta'];
+  var DH=['Semana','Año'].concat(DA_HEADERS);
+  var IH=['Semana','Año','Actividad','N° OT','Ejecutor','Especialidad','Tipo de interferencia','Horas perdidas','Observación','Registrado por'];
+  function oldSheet(n){return (oldWb&&oldWb.Sheets&&oldWb.Sheets[n])?oldWb.Sheets[n]:null;}
+  var wb=XLSX.utils.book_new();
+  var a1=pbiMergeSheet(oldSheet('Base_de_datos'),PBI_HEADERS,pts.base,pts.semLbl,pts.anio,18,28);
+  var ws1=XLSX.utils.aoa_to_sheet(a1,{cellDates:true});pbiFmt(ws1,'base');
+  ws1['!cols']=PBI_HEADERS.map(function(h){return {wch:Math.max(10,Math.min(28,h.length+4))};});
+  XLSX.utils.book_append_sheet(wb,ws1,'Base_de_datos');
+  var a2=pbiMergeSheet(oldSheet('KPIs'),KH,pts.kpis,pts.semLbl,pts.anio,0,1);
+  var ws2=XLSX.utils.aoa_to_sheet(a2);pbiFmt(ws2,'kpis');
+  ws2['!cols']=[{wch:11},{wch:7},{wch:8},{wch:36},{wch:15},{wch:12},{wch:11},{wch:12},{wch:13},{wch:7}];
+  XLSX.utils.book_append_sheet(wb,ws2,'KPIs');
+  var a3=pbiMergeSheet(oldSheet('Detalle_Actividades'),DH,pts.det,pts.semLbl,pts.anio,0,1);
+  var ws3=XLSX.utils.aoa_to_sheet(a3);pbiFmt(ws3,'det');
+  ws3['!cols']=[{wch:11},{wch:7},{wch:16},{wch:38},{wch:12},{wch:8},{wch:12},{wch:15},{wch:13},{wch:13},{wch:55},{wch:15},{wch:11},{wch:28},{wch:9},{wch:13},{wch:11}];
+  XLSX.utils.book_append_sheet(wb,ws3,'Detalle_Actividades');
+  var a4=pbiMergeSheet(oldSheet('Interferencias'),IH,pts.interf,pts.semLbl,pts.anio,0,1);
+  var ws4=XLSX.utils.aoa_to_sheet(a4);
+  ws4['!cols']=[{wch:11},{wch:7},{wch:38},{wch:12},{wch:14},{wch:15},{wch:24},{wch:13},{wch:40},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws4,'Interferencias');
+  XLSX.writeFile(wb,'PBI_SINFRA_Base.xlsx',{cellDates:true});
+  logAction('Exportación','','Base PBI acumulativa · semana '+pts.semLbl+' · '+(a1.length-1)+' filas base');
+  return {filas:a1.length-1,semanas:(function(){var m={};for(var i=1;i<a2.length;i++)m[a2[i][0]+'·'+a2[i][1]]=1;return Object.keys(m).length;})()};
+}
+function openPbiAcum(){document.getElementById('pbi-mo').classList.add('open');}
+function pbiAcumCancelar(){document.getElementById('pbi-mo').classList.remove('open');toast('Cierre de semana cancelado');}
+function pbiAcumNueva(){
+  try{var r=buildPbiBase(null);toast('⬇ PBI_SINFRA_Base.xlsx creado · '+r.filas+' filas');}
+  catch(e){toast('⚠ Error al crear la base: '+e.message);}
+  document.getElementById('pbi-mo').classList.remove('open');_finCore();
+}
+function pbiAcumElegir(){document.getElementById('fipbix').click();}
+function handlePbiBase(file){
+  if(!file)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var old=XLSX.read(ev.target.result,{type:'array',cellDates:true});
+      var res=buildPbiBase(old);
+      toast('⬇ Base PBI actualizada · '+res.semanas+' semanas · '+res.filas+' filas · guárdala sobre la anterior');
+    }catch(e){toast('⚠ No se pudo leer la base: '+e.message);return;}
+    document.getElementById('pbi-mo').classList.remove('open');_finCore();
+  };
+  r.readAsArrayBuffer(file);
+}
 function finalizarSemana(){
   if(!DATA){closeFinWeek();return;}
+  closeFinWeek();
+  openPbiAcum();
+}
+function _finCore(){
   var wk=DATA.semana;
   logAction('Cierre de semana','','Semana '+wk+' finalizada');
   try{save();saveActions();saveHandovers();saveNP();savePpt();}catch(e){}
@@ -4803,7 +4926,7 @@ function _dlBlob(u8,fn,mime){
 }
 /* Botones del modal de cierre */
 function finalizarConMaestro(){if(!DATA)return;var fi=document.getElementById('fixlsm');fi.value='';fi.click();}
-function finalizarConRespaldo(){if(!DATA)return;try{exportarBaseDatos();}catch(e){toast('Error al exportar: '+e.message);}finalizarSemana();}
+function finalizarConRespaldo(){if(!DATA)return;finalizarSemana();/* el Excel PBI (4 hojas, incluye Base_de_datos) se genera dentro de finalizarSemana */}
 function handleMasterXlsm(file){
   if(!file)return;
   if(!/\.xlsm$/i.test(file.name)){toast('Selecciona el archivo maestro .xlsm');return;}
