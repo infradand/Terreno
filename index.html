@@ -1330,8 +1330,7 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
     <button class="btn bp" id="btn-publish" onclick="publicarSemana()" title="Envía la semana cargada a la nube para que TODOS los usuarios la vean al instante">🌐 Publicar para todos</button>
     <button class="btn bp show" id="btn-finweek" onclick="openFinWeek()">✓ Finalizar semana</button>
     <button class="btn bo show" id="btn-reload" onclick="recargar()">↺ Cambiar archivo</button>
-    <button class="btn bp show" id="btn-export" onclick="exportar()">⬇ Exportar CSV</button>
-    <button class="btn bp" id="btn-export-pbi" onclick="exportarBaseDatos()" title="Llena la estructura de la hoja Base_de_datos que alimenta el PBI general de SINFRA">⬇ Base de datos (PBI)</button>
+    <button class="btn bp show" id="btn-export" onclick="exportarPBIBase()" title="Genera/actualiza PBI_SINFRA_Base.xlsx — la misma base acumulativa que alimenta el Power BI — sin finalizar la semana">⬇ Base de datos PBI</button>
     <button class="btn bo" id="btn-resetall" style="display:inline-flex" onclick="resetTotal()" title="Borra TODA la información guardada (local y nube) y reinicia la app desde cero — solo encargado">♻ Reiniciar app</button>
   </div>
 </header>
@@ -1645,10 +1644,11 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
   <div class="modal" style="max-width:460px">
     <div class="mhdr"><div><div class="mey">Cierre de semana</div><div class="mttl">Base de datos Power BI</div></div></div>
     <div style="font-size:12px;color:var(--gm);line-height:1.55;margin-bottom:12px">La base acumulativa <b>PBI_SINFRA_Base.xlsx</b> reúne todas las semanas en un solo archivo (Base_de_datos · KPIs · Detalle_Actividades · Interferencias). Selecciona la base existente para <b>agregarle esta semana</b> y guárdala sobre la anterior; el PBI conectado a ese archivo se actualiza solo.</div>
+    <div id="pbi-sub" style="font-size:11px;font-weight:700;color:var(--te2);margin:-6px 0 12px"></div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="cl-ab" style="padding:11px 16px" onclick="pbiAcumElegir()">➕ Agregar esta semana a la base existente…</button>
       <button class="fclear" style="padding:10px 16px" onclick="pbiAcumNueva()">🆕 Primera vez · crear base nueva</button>
-      <button class="fclear" style="padding:8px 16px;border:none;color:var(--gm)" onclick="pbiAcumCancelar()">Cancelar cierre</button>
+      <button class="fclear" id="pbi-cancel-btn" style="padding:8px 16px;border:none;color:var(--gm)" onclick="pbiAcumCancelar()">Cancelar cierre</button>
     </div>
   </div>
 </div>
@@ -1988,12 +1988,26 @@ function buildPbiBase(oldWb){
   logAction('Exportación','','Base PBI acumulativa · semana '+pts.semLbl+' · '+(a1.length-1)+' filas base');
   return {filas:a1.length-1,semanas:(function(){var m={};for(var i=1;i<a2.length;i++)m[a2[i][0]+'·'+a2[i][1]]=1;return Object.keys(m).length;})()};
 }
-function openPbiAcum(){document.getElementById('pbi-mo').classList.add('open');}
-function pbiAcumCancelar(){document.getElementById('pbi-mo').classList.remove('open');toast('Cierre de semana cancelado');}
+var PBI_FIN_PEND=false;
+function openPbiAcum(fin){
+  PBI_FIN_PEND=!!fin;
+  var cb=document.getElementById('pbi-cancel-btn');
+  if(cb)cb.textContent=fin?'Cancelar cierre':'Cancelar';
+  var st=document.getElementById('pbi-sub');
+  if(st)st.textContent=fin?'Al terminar este paso, la semana se finaliza.':'Exportación de la base sin finalizar la semana (los datos siguen editables).';
+  document.getElementById('pbi-mo').classList.add('open');
+}
+/* Botón «Base de datos PBI» del encabezado: misma base, sin cerrar la semana */
+function exportarPBIBase(){
+  if(!DATA){toast('Carga primero un programa');return;}
+  openPbiAcum(false);
+}
+function pbiAcumCancelar(){document.getElementById('pbi-mo').classList.remove('open');if(PBI_FIN_PEND){PBI_FIN_PEND=false;toast('Cierre de semana cancelado');}}
 function pbiAcumNueva(){
   try{var r=buildPbiBase(null);toast('⬇ PBI_SINFRA_Base.xlsx creado · '+r.filas+' filas');}
   catch(e){toast('⚠ Error al crear la base: '+e.message);}
-  document.getElementById('pbi-mo').classList.remove('open');_finCore();
+  document.getElementById('pbi-mo').classList.remove('open');
+  if(PBI_FIN_PEND){PBI_FIN_PEND=false;_finCore();}
 }
 function pbiAcumElegir(){document.getElementById('fipbix').click();}
 function handlePbiBase(file){
@@ -2005,14 +2019,15 @@ function handlePbiBase(file){
       var res=buildPbiBase(old);
       toast('⬇ Base PBI actualizada · '+res.semanas+' semanas · '+res.filas+' filas · guárdala sobre la anterior');
     }catch(e){toast('⚠ No se pudo leer la base: '+e.message);return;}
-    document.getElementById('pbi-mo').classList.remove('open');_finCore();
+    document.getElementById('pbi-mo').classList.remove('open');
+    if(PBI_FIN_PEND){PBI_FIN_PEND=false;_finCore();}
   };
   r.readAsArrayBuffer(file);
 }
 function finalizarSemana(){
   if(!DATA){closeFinWeek();return;}
   closeFinWeek();
-  openPbiAcum();
+  openPbiAcum(true);
 }
 function _finCore(){
   var wk=DATA.semana;
