@@ -1132,6 +1132,43 @@ body.hide-ot .ac-ot,body.hide-ot .ot-head,body.hide-ot .ot-field{display:none!im
 .wkp.add{border-style:dashed;opacity:.85;font-weight:700}
 .wk-note{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#ede9fe,#f5f3ff);border:1px solid #c4b5fd;color:#4c1d95;font-size:12.5px;padding:8px 14px;border-radius:10px;margin:10px auto 0;max-width:1280px}
 body.wk-next .tabs .tab.active{box-shadow:inset 0 -3px 0 #7c3aed}
+/* ── Terreno / móvil: objetivos táctiles más grandes, sin zoom automático en iOS ── */
+.qsel{font-family:var(--fn);font-size:11px;font-weight:700;border:1px solid var(--bd);border-radius:9px;padding:5px 6px;background:var(--wh);color:var(--bk);cursor:pointer;max-width:120px}
+.qsel:focus{outline:2px solid var(--na)}
+.g-av .qsel{margin-left:auto;font-size:10px;padding:3px 4px}
+.mic{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:none;background:transparent;font-size:15px;cursor:pointer;padding:4px 6px;opacity:.7;line-height:1}
+.sw .sb{padding-right:34px}
+.mic:hover{opacity:1}.mic.rec{animation:micpulse 1s infinite;opacity:1}
+@keyframes micpulse{0%{transform:translateY(-50%) scale(1)}50%{transform:translateY(-50%) scale(1.25)}100%{transform:translateY(-50%) scale(1)}}
+@media(max-width:640px){
+  .btn,.fclear,.cl-ab,.u-btn,.u-btn2,.ac-edit,.ac-qb,.tab{min-height:44px}
+  .tab{padding:12px 14px;font-size:13.5px}
+  .fsel,.sb,.fi,select,input[type=text],input[type=number],textarea{font-size:16px!important}
+  .qsel{font-size:13px;min-height:40px}
+  .mo .modal{max-height:96vh}
+  .save-ind{padding:6px 10px}
+  /* en celular la cabecera ocupaba media pantalla fija: ahora se desplaza y solo las pestañas quedan pegadas */
+  .hdr{position:static}.tabs{top:0}
+}
+/* ── Archivo de semanas ── */
+.sem-row{display:flex;gap:14px;align-items:center;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh);animation:fadeUp .25s ease both}
+.sem-row.cur{border-color:#b45309;background:#fff7e6}
+.sem-wk{min-width:56px;text-align:center}.sem-n{font-size:21px;font-weight:800;color:var(--go);line-height:1}.sem-y{font-size:11px;color:var(--gm);font-weight:700;margin-top:3px}
+.sem-main{flex:1;min-width:0}.sem-t{font-size:13px;font-weight:700;color:var(--bk);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sem-stats{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:var(--gm);margin-top:5px}.sem-stats b{color:var(--bk)}
+.sem-meta{font-size:11px;color:var(--gm);margin-top:4px}
+.sem-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid var(--bd);color:var(--gm);white-space:nowrap}
+.sem-tag.fin{color:#2E9E5B;border-color:#2E9E5B;background:#eaf7ee}.sem-tag.rep{color:#DE9B00;border-color:#DE9B00;background:#fff7e6}.sem-tag.imp{color:#6d28d9;border-color:#6d28d9;background:#f5f3ff}
+.sem-tag.pend{color:#C13832;border-color:#C13832}.sem-tag.cloud{color:#0098AA;border-color:#0098AA}.sem-tag.loc{color:var(--gm)}
+.sem-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.wkp.hist.on{color:#b45309}
+body.wk-hist .hdr{background:linear-gradient(90deg,#fff7e6,#fff 60%)}
+body.wk-hist .tabs .tab.active{box-shadow:inset 0 -3px 0 #b45309}
+body.wk-hist #btn-ppt,body.wk-hist #btn-finweek,body.wk-hist #btn-reload,body.wk-hist #btn-publish,body.wk-hist #btn-export,body.wk-hist .hist-del,body.wk-hist #save-ind{display:none!important}
+body.wk-hist #btn-archback{display:inline-flex}
+body.wk-hist #mo input,body.wk-hist #mo select,body.wk-hist #mo textarea{pointer-events:none;background:#f3f4f6;opacity:.85}
+body.wk-hist .wk-note{background:linear-gradient(90deg,#fff7e6,#fffbeb);border-color:#f5c26b;color:#7c3a00}
+@media(max-width:700px){.sem-row{flex-wrap:wrap}.sem-acts{width:100%;justify-content:flex-start}}
 .wk-tag{font-size:10px;font-weight:800;letter-spacing:.4px;background:#e6f2ea;color:#1e7a46;border-radius:8px;padding:2px 8px;vertical-align:middle}
 .wk-tag.next{background:#ede9fe;color:#6d28d9}
 /* ── Barras apiladas preparativos ── */
@@ -1326,8 +1363,10 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
         <div class="notif-list" id="notif-list"></div>
       </div></span>
     <button class="user-chip" id="user-chip" onclick="openReg(true)" title="Cambiar usuario" style="display: inline-flex;"><span id="user-name">renata perez</span></button>
-    <span class="save-ind" id="save-ind" style="display: flex;"><span class="save-dot" id="save-dot"></span><span id="save-lbl">Guardado</span></span>
+    <span class="save-ind" id="save-ind" style="display: flex;cursor:pointer" onclick="forceSync()" title="Tocar para sincronizar ahora"><span class="save-dot" id="save-dot"></span><span id="save-lbl">Guardado</span></span>
     <button class="btn bp" id="btn-publish" onclick="publicarSemana()" title="Envía la semana cargada a la nube para que TODOS los usuarios la vean al instante">🌐 Publicar para todos</button>
+    <button class="btn bo" id="btn-archback" onclick="archClose()" style="border:1.5px solid #b45309;color:#b45309">← Volver a la semana actual</button>
+    <button class="btn bo show" id="btn-sem" onclick="openArch()" title="Todas las semanas guardadas en la app">🗂 Semanas</button>
     <button class="btn bp show" id="btn-finweek" onclick="openFinWeek()">✓ Finalizar semana</button>
     <button class="btn bo show" id="btn-reload" onclick="recargar()">↺ Cambiar archivo</button>
     <button class="btn bp show" id="btn-export" onclick="exportarPBIBase()" title="Genera/actualiza PBI_SINFRA_Base.xlsx — la misma base acumulativa que alimenta el Power BI — sin finalizar la semana">⬇ Base de datos PBI</button>
@@ -1343,6 +1382,7 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
     <button class="u-btn" onclick="event.stopPropagation();cargarSemana(0)">📅 Cargar semana en curso</button>
     <button class="u-btn" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6)" onclick="event.stopPropagation();cargarSemana(1)">🔭 Cargar semana siguiente</button>
     <button class="u-btn2" onclick="event.stopPropagation();document.getElementById(&#39;fippt&#39;).click()">📊 + Complementar con PPT</button>
+    <button class="u-btn2" style="background:#b45309" onclick="event.stopPropagation();openArch()">🗂 Ver semanas guardadas <span id="u-arch-n"></span></button>
     <div class="u-fmt"><span class="fmt">.xlsx</span><span class="fmt">.xls</span><span class="fmt">.csv</span><span class="fmt">.pptx</span></div>
     <div class="u-ppt-ok" id="u-ppt-ok"></div>
     <div class="pw-wrap" id="pw" style="display: none;"><div class="pw-bg"><div class="pw-f" id="pwf"></div></div><span class="pw-lbl" id="pwl">Procesando…</span></div>
@@ -1351,6 +1391,8 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
 <input type="file" id="fi" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile(this.files[0])">
 <input type="file" id="fippt" accept=".pptx" style="display:none" onchange="handlePptx(this.files[0])">
 <input type="file" id="fixlsm" accept=".xlsm" style="display:none" onchange="handleMasterXlsm(this.files[0])">
+<input type="file" id="fiarch" accept=".json" style="display:none" onchange="archImport(this.files[0]);this.value=''">
+<input type="file" id="fiall" accept=".json" style="display:none" onchange="restoreAll(this.files[0]);this.value=''">
 
 <div class="wk-note" id="wk-note" style="display:none"></div>
 <div class="tabs" id="tabs" style="display: flex;">
@@ -1362,6 +1404,7 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
   <button class="tab" id="tab-btn-detalle" onclick="showTab(&#39;detalle&#39;)">📄 Detalle Actividades</button>
   <button class="tab" id="tab-btn-traspaso" onclick="showTab(&#39;traspaso&#39;)">⇄ Traspaso de turno</button>
   <button class="tab" id="tab-btn-historial" onclick="showTab(&#39;historial&#39;)">🕘 Historial</button>
+  <button class="tab" id="tab-btn-semanas" onclick="showTab(&#39;semanas&#39;)">🗂 Semanas</button>
 </div>
 
 <main class="dash" id="dash" style="display: block;">
@@ -1452,7 +1495,7 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
     <div class="day-sel" id="day-sel" style="display: none;"><span class="day-sel-lbl">Día</span><button class="day-pill on" onclick="setDia(-1)">Toda la semana</button><button class="day-pill" onclick="setDia(0)">LUN<span class="day-pill-d">22/06</span></button><button class="day-pill" onclick="setDia(1)">MAR<span class="day-pill-d">23/06</span></button><button class="day-pill" onclick="setDia(2)">MIÉ<span class="day-pill-d">24/06</span></button><button class="day-pill" onclick="setDia(3)">JUE<span class="day-pill-d">25/06</span></button><button class="day-pill" onclick="setDia(4)">VIE<span class="day-pill-d">26/06</span></button><button class="day-pill" onclick="setDia(5)">SÁB<span class="day-pill-d">27/06</span></button><button class="day-pill" onclick="setDia(6)">DOM<span class="day-pill-d">28/06</span></button></div>
     <div class="flt">
       <span class="seg vseg"><button class="seg-b" id="vm-cuadros" onclick="setVMode(&#39;cuadros&#39;)">▦ Cuadros</button><button class="seg-b on" id="vm-lista" onclick="setVMode(&#39;lista&#39;)">≡ Lista</button></span>
-      <div class="sw"><span class="si">🔍</span><input class="sb" id="sq" placeholder="Buscar actividad, OT, ejecutor…" oninput="render()"></div>
+      <div class="sw"><span class="si">🔍</span><input class="sb" id="sq" placeholder="Buscar actividad, OT, ejecutor…" oninput="render()"><button class="mic" id="mic-sq" onclick="voiceSearch('sq')" title="Buscar por voz">🎤</button></div>
       <select class="fsel" id="f-disc" onchange="setFilter(&#39;disc&#39;,this.value)"><option value="">Toda disciplina</option><option value="ACTIVIDADES EMPRESAS ALTA PRESION">ACTIVIDADES EMPRESAS ALTA PRESION</option><option value="ACTIVIDADES MECÁNICAS PIPING">ACTIVIDADES MECÁNICAS PIPING</option><option value="ACTIVIDADES MECÁNICAS PIPING PLAN MATRIZ">ACTIVIDADES MECÁNICAS PIPING PLAN MATRIZ</option><option value="ACTIVIDADES TOPOGRAFIA Y PROYECTOS DE INGENIERÍA ESTRUCTURAL">ACTIVIDADES TOPOGRAFIA Y PROYECTOS DE INGENIERÍA ESTRUCTURAL</option><option value="DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO FINO">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO FINO</option><option value="DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO PRIMARIO">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO PRIMARIO</option><option value="DISCIPLINA CONDICIONES SUB-ESTÁNDAR CONCENTRADOR">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CONCENTRADOR</option><option value="DISCIPLINA CONDICIONES SUB-ESTÁNDAR PMFC">DISCIPLINA CONDICIONES SUB-ESTÁNDAR PMFC</option><option value="INSPECCIONES PERSONAL DAND">INSPECCIONES PERSONAL DAND</option><option value="ORDENAMIENTO Y GESTIÓN DE MATERIALES">ORDENAMIENTO Y GESTIÓN DE MATERIALES</option><option value="TRASLADOS DE MATERIALES/CONTINUIDAD OPERACIONAL">TRASLADOS DE MATERIALES/CONTINUIDAD OPERACIONAL</option></select>
       <select class="fsel" id="f-loc" onchange="setFilter(&#39;loc&#39;,this.value)"><option value="">Toda ubicación</option><option value="cal interior">📍 CAL INTERIOR</option><option value="cdm">📍 CDM</option><option value="celdascolumnas">📍 CELDASCOLUMNAS</option><option value="cementacion">📍 CEMENTACIÓN</option><option value="chancado 3">📍 CHANCADO 3°</option><option value="chancado fino">📍 CHANCADO FINO</option><option value="chancado grueso">📍 CHANCADO GRUESO</option><option value="chancado prim">📍 CHANCADO PRIM</option><option value="chancado primario">📍 CHANCADO PRIMARIO</option><option value="chancado terciario">📍 CHANCADO TERCIARIO</option><option value="cloro">📍 CLORO</option><option value="convencional">📍 CONVENCIONAL</option><option value="espesador 2">📍 ESPESADOR 2</option><option value="flotacion">📍 FLOTACIÓN</option><option value="infra">📍 INFRA</option><option value="larox">📍 LAROX</option><option value="lr">📍 LR</option><option value="moly">📍 MOLY</option><option value="mun 1">📍 MUN 1</option><option value="mun 2">📍 MUN 2</option><option value="nodo 3500">📍 NODO 3500</option><option value="plan matriz">📍 PLAN MATRIZ</option><option value="pmfc">📍 PMFC</option><option value="pmfc convencional">📍 PMFC CONVENCIONAL</option><option value="pmfc larox">📍 PMFC LAROX</option><option value="prechancado">📍 PRECHANCADO</option><option value="pta cloro">📍 PTA CLORO</option><option value="pta lr">📍 PTA LR</option><option value="pta moly">📍 PTA MOLY</option><option value="pta nash">📍 PTA NASH</option><option value="sag">📍 SAG</option><option value="sala bombas lado cerro">📍 SALA BOMBAS LADO CERRO</option><option value="secundario">📍 SECUNDARIO</option><option value="terciario">📍 TERCIARIO</option><option value="transversal">📍 TRANSVERSAL</option><option value="tunel hilton">📍 TUNEL HILTON</option></select>
       <select class="fsel" id="f-crit" onchange="setFilter(&#39;crit&#39;,this.value)">
@@ -1468,6 +1511,19 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
     <div id="list"><div class="gantt"><div class="g-grid"><div class="g-row g-head"><div class="g-name g-hname">Actividad</div><div class="g-day g-hday"><span class="g-dl">LUN</span><span class="g-df">22 jun</span></div><div class="g-day g-hday"><span class="g-dl">MAR</span><span class="g-df">23 jun</span></div><div class="g-day g-hday"><span class="g-dl">MIÉ</span><span class="g-df">24 jun</span></div><div class="g-day g-hday"><span class="g-dl">JUE</span><span class="g-df">25 jun</span></div><div class="g-day g-hday"><span class="g-dl">VIE</span><span class="g-df">26 jun</span></div><div class="g-day g-hday"><span class="g-dl">SÁB</span><span class="g-df">27 jun</span></div><div class="g-day g-hday"><span class="g-dl">DOM</span><span class="g-df">28 jun</span></div><div class="g-tot g-htot">Total</div></div><div class="g-grp"><span class="g-grp-n">ACTIVIDADES MECÁNICAS PIPING PLAN MATRIZ</span><span class="g-grp-m">18 act. · 53 pers.</span></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;1.1&quot;)"><div class="g-name"><div class="g-aid">1.1 · OT 109257278</div><div class="g-an">[Piping Flota] 1S Filtros Agua de proces</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">3<span class="g-hh">7 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.2&quot;)"><div class="g-name"><div class="g-aid">1.2 · OT 110606578</div><div class="g-an">MRT 2S Mtto Png Ducha Emer lav ojos FLOT</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;1.3&quot;)"><div class="g-name"><div class="g-aid">1.3 · OT 110606579</div><div class="g-an">[Piping Flota] 4S Red de Manguereo</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.4&quot;)"><div class="g-name"><div class="g-aid">1.4 · OT 110606580</div><div class="g-an">MRT 2S Mtto Png Ducha Emer lav ojos MCON</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.5&quot;)"><div class="g-name"><div class="g-aid">1.5 · OT 110626601</div><div class="g-an">MRT 5S Png Mtto Red Agua Launder Sec.C</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.6&quot;)"><div class="g-name"><div class="g-aid">1.6 · OT 110616983</div><div class="g-an">MRT 1S Png Mtto Filtro Agua Fresca SAG</div><div class="g-meta"><span>📍 SAG</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">4 h</span></div><div class="g-tot">3<span class="g-hh">4 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.7&quot;)"><div class="g-name"><div class="g-aid">1.7 · OT 110616983</div><div class="g-an">MRT 1S Png Mtto Filtros Agua Fresca MUN2</div><div class="g-meta"><span>📍 MUN 2</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">3 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">3 h</span></div><div class="g-tot">6<span class="g-hh">6 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.8&quot;)"><div class="g-name"><div class="g-aid">1.8 · OT 110626982</div><div class="g-an">MRT 2S Png Mtto Duch Emer CAL INT</div><div class="g-meta"><span>📍 CAL INTERIOR</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.9&quot;)"><div class="g-name"><div class="g-aid">1.9 · OT 110626898</div><div class="g-an">MRT 2S Png Mtto Duch Emer Esp 2</div><div class="g-meta"><span>📍 ESPESADOR 2</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.1&quot;)"><div class="g-name"><div class="g-aid">1.1 · OT 109257278</div><div class="g-an">MRT 2S Png Mtto Duch Emer MUN 1</div><div class="g-meta"><span>📍 MUN 1</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.11&quot;)"><div class="g-name"><div class="g-aid">1.11 · OT 110626976</div><div class="g-an">MRT 2S Png Mtto Preparativos Slamjet Cel Col Flota</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">7 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.12&quot;)"><div class="g-name"><div class="g-aid">1.12 · OT 110626977</div><div class="g-an">MRT 2S Png Mtto Cambio Slamjet Cel Col Flota</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">7 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.13&quot;)"><div class="g-name"><div class="g-aid">1.13 · OT 110592846</div><div class="g-an">MRT 2S Png Mtto Parrillas Celda Columna Flota</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">6<span class="g-hh">7 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.14&quot;)"><div class="g-name"><div class="g-aid">1.14 · OT 110598208</div><div class="g-an">MRT 3S Png Mtto Filtros agua alim Ch 3-4</div><div class="g-meta"><span>📍 CHANCADO FINO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.15&quot;)"><div class="g-name"><div class="g-aid">1.15 · OT 110626914</div><div class="g-an">MRT 1S Png Mtto Filtros agua HoldingTank</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-tot">3<span class="g-hh">7 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.16&quot;)"><div class="g-name"><div class="g-aid">1.16</div><div class="g-an">MRT 4S Png Mtto Red Lechada Cal 1 MCONV</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">3<span class="g-hh">7 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.17&quot;)"><div class="g-name"><div class="g-aid">1.17</div><div class="g-an">MRT 4S Png Mtto Red Lechada Cal 2 MCONV</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">3<span class="g-hh">7 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;1.18&quot;)"><div class="g-name"><div class="g-aid">1.18</div><div class="g-an">MRT 16S Png Mtto Mfold Alim Cuba MOBO1</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">6<span class="g-hh">14 h</span></div></div><div class="g-grp"><span class="g-grp-n">ACTIVIDADES MECÁNICAS PIPING</span><span class="g-grp-m">5 act. · 88 pers.</span></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;2.1&quot;)"><div class="g-name"><div class="g-aid">2.1 · OT 110639020</div><div class="g-an">Preparativo y montaje Recuperación de agua de retorno del bolas 1 y SAG línea 2"</div><div class="g-meta"><span>📍 SAG</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-tot">28<span class="g-hh">49 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;2.2&quot;)"><div class="g-name"><div class="g-aid">2.2 · OT 110635686</div><div class="g-an">Mtto Anillo A inferior CONVE - Apertura mnfold [MOBO 1-2-4-8]</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-tot">30<span class="g-hh">42 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;2.3&quot;)"><div class="g-name"><div class="g-aid">2.3 · OT 110635817</div><div class="g-an">Fabricación de insertos 10" a línea 14" desde MOBO 10 hacia Flotación E</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-tot">15<span class="g-hh">35 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;2.4&quot;)"><div class="g-name"><div class="g-aid">2.4 · OT 28015363</div><div class="g-an">Mejora inyección agua trommel MUN2 - FABRICACIÓN DE LANZA 1" EN TROMEL MUN 2</div><div class="g-meta"><span>📍 MUN 2</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-tot">7<span class="g-hh">14 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;2.5&quot;)"><div class="g-name"><div class="g-aid">2.5 · OT 108929080</div><div class="g-an">Apertura inserto línea agua fresca MUN 2 / SAG - inserto frente a pozo de emergencia SAG y limpieza de ese tramo</div><div class="g-meta"><span>📍 SAG</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">3</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">8<span class="g-hh">21 h</span></div></div><div class="g-grp"><span class="g-grp-n">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO PRIMARIO</span><span class="g-grp-m">1 act. · 0 pers.</span></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;3.1&quot;)"><div class="g-name"><div class="g-aid">3.1 · OT 109171290</div><div class="g-an">SIN ACTIVIDAD PLANIFICADA</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-grp"><span class="g-grp-n">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO FINO</span><span class="g-grp-m">3 act. · 91 pers.</span></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;4.1&quot;)"><div class="g-name"><div class="g-aid">4.1 · OT 109441131</div><div class="g-an">Estandarización de pisos patio cocodrilo</div><div class="g-meta"><span>📍 SECUNDARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-tot">35<span class="g-hh">49 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;4.2&quot;)"><div class="g-name"><div class="g-aid">4.2 · OT 110636473</div><div class="g-an">Mejorar condición acopio piso hro 9-10</div><div class="g-meta"><span>📍 CHANCADO TERCIARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-tot">28<span class="g-hh">49 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;4.3&quot;)"><div class="g-name"><div class="g-aid">4.3 · OT CREAR AVISO</div><div class="g-an">Cierre RP - REPARACIÓN BARADAS-GRATING-PLATAFORMAS</div><div class="g-meta"><span>📍 SECUNDARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-tot">28<span class="g-hh">49 h</span></div></div><div class="g-grp"><span class="g-grp-n">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CONCENTRADOR</span><span class="g-grp-m">8 act. · 241 pers.</span></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.1&quot;)"><div class="g-name"><div class="g-aid">5.1 · OT 109251704</div><div class="g-an">Est diagonales y columnas Flotación SCV</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-tot">35<span class="g-hh">49 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.2&quot;)"><div class="g-name"><div class="g-aid">5.2 · OT 109441124</div><div class="g-an">Estandarización pisos taller molienda vertimil (hallazgo SERNAGEOMIN)</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-tot">28<span class="g-hh">49 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.3&quot;)"><div class="g-name"><div class="g-aid">5.3 · OT 29904260</div><div class="g-an">Refuerzo estructura y montaje grating Cuba MUN 1 (1 semana)</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-tot">28<span class="g-hh">49 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.4&quot;)"><div class="g-name"><div class="g-aid">5.4 · OT tiene orden</div><div class="g-an">Refuerzo estructural y montaje grating Holdintank (2 semanas)</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">20<span class="g-hh">35 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.5&quot;)"><div class="g-name"><div class="g-aid">5.5 · OT 110636555</div><div class="g-an">Instalación pto anclajes MOBO 9</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-tot">8<span class="g-hh">14 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.6&quot;)"><div class="g-name"><div class="g-aid">5.6 · OT 28665164</div><div class="g-an">Estandarización estructural celdas columnas 1-4 [CUAD. 7x7]</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">10</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">10</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">10</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">10</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">10</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">10</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">10</span><span class="g-hh">7 h</span></div><div class="g-tot">70<span class="g-hh">49 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.7&quot;)"><div class="g-name"><div class="g-aid">5.7 · OT CREAR OT</div><div class="g-an">Estandarización estructural celdas columnas 1-4 [CUAD. 4X3]</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">9</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">9</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">9</span><span class="g-hh">6 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">9</span><span class="g-hh">5 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">36<span class="g-hh">25 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;5.8&quot;)"><div class="g-name"><div class="g-aid">5.8</div><div class="g-an">Personal de andamios</div><div class="g-meta"><span>📍 CELDASCOLUMNAS</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">6 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">5 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">16<span class="g-hh">25 h</span></div></div><div class="g-grp"><span class="g-grp-n">DISCIPLINA CONDICIONES SUB-ESTÁNDAR PMFC</span><span class="g-grp-m">5 act. · 111 pers.</span></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;6.1&quot;)"><div class="g-name"><div class="g-aid">6.1 · OT 110636674</div><div class="g-an">Estandarización grating y refuerzo estructural 3er piso Filtro Larox</div><div class="g-meta"><span>📍 LAROX</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-tot">34<span class="g-hh">42 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;6.2&quot;)"><div class="g-name"><div class="g-aid">6.2</div><div class="g-an">Instalación de plataforma sector bomba P1-p4</div><div class="g-meta"><span>📍 CLORO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">6</span><span class="g-hh">7 h</span></div><div class="g-tot">40<span class="g-hh">49 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;6.3&quot;)"><div class="g-name"><div class="g-aid">6.3 · OT 110639514</div><div class="g-an">RP 35190 Instalación barandas sala Bbas RCI</div><div class="g-meta"><span>📍 SALA BOMBAS LADO CERRO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-tot">16<span class="g-hh">28 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;6.4&quot;)"><div class="g-name"><div class="g-aid">6.4 · OT 110613661</div><div class="g-an">Reparación base bomba Nash 3 y 4</div><div class="g-meta"><span>📍 PTA NASH</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">16<span class="g-hh">28 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;6.5&quot;)"><div class="g-name"><div class="g-aid">6.5</div><div class="g-an">MRT 4S Png Mtto Duchas emergencia PMFC</div><div class="g-meta"><span>📍 PLAN MATRIZ</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">5<span class="g-hh">7 h</span></div></div><div class="g-grp"><span class="g-grp-n">ORDENAMIENTO Y GESTIÓN DE MATERIALES</span><span class="g-grp-m">1 act. · 28 pers.</span></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;7.1&quot;)"><div class="g-name"><div class="g-aid">7.1</div><div class="g-an">Ordenamiento, inventario y traslado de materiales [KM 15]</div><div class="g-meta"><span>📍 TRANSVERSAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">4</span><span class="g-hh">7 h</span></div><div class="g-tot">28<span class="g-hh">49 h</span></div></div><div class="g-grp"><span class="g-grp-n">TRASLADOS DE MATERIALES/CONTINUIDAD OPERACIONAL</span><span class="g-grp-m">1 act. · 14 pers.</span></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;8.1&quot;)"><div class="g-name"><div class="g-aid">8.1</div><div class="g-an">Chofer y rigger traslado de materiales en camión pluma</div><div class="g-meta"><span>📍 TRANSVERSAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-tot">14<span class="g-hh">49 h</span></div></div><div class="g-grp"><span class="g-grp-n">INSPECCIONES PERSONAL DAND</span><span class="g-grp-m">32 act. · 69 pers.</span></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.1&quot;)"><div class="g-name"><div class="g-aid">9.1</div><div class="g-an">MRT 1S Png Insp Loop CAL INT</div><div class="g-meta"><span>📍 CAL INTERIOR</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">1 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">1 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.2&quot;)"><div class="g-name"><div class="g-aid">9.2</div><div class="g-an">MRT 2S Inf Insp RC22 Pta Moly</div><div class="g-meta"><span>📍 PTA MOLY</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">1 h</span></div><div class="g-tot">1<span class="g-hh">1 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.3&quot;)"><div class="g-name"><div class="g-aid">9.3</div><div class="g-an">MRT 2S Inf Insp RC22 Pta LR</div><div class="g-meta"><span>📍 PTA LR</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">1 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">1 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.4&quot;)"><div class="g-name"><div class="g-aid">9.4</div><div class="g-an">MRT 2S Inf Insp RC22 Ch Primario/CDM</div><div class="g-meta"><span>📍 CHANCADO PRIM</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">3 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">3 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;9.5&quot;)"><div class="g-name"><div class="g-aid">9.5</div><div class="g-an">RC22 4S Inf Insp Plan tránsito CH PRIM</div><div class="g-meta"><span>📍 CHANCADO PRIMARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">5 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">5 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;9.6&quot;)"><div class="g-name"><div class="g-aid">9.6</div><div class="g-an">RC22 4S Inf Insp Plan tránsito CH GRUESO</div><div class="g-meta"><span>📍 CHANCADO GRUESO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">5 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">5 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.7&quot;)"><div class="g-name"><div class="g-aid">9.7</div><div class="g-an">MRT 48S Inf Insp Estructura MOBO10 MC principal y secundaria</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.8&quot;)"><div class="g-name"><div class="g-aid">9.8</div><div class="g-an">MRT 48S Inf Insp Estructura MOBO10 MC transito</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.9&quot;)"><div class="g-name"><div class="g-aid">9.9</div><div class="g-an">MRT 48S Inf Insp Estructura MOBO10 MC soporte de ductos</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.1&quot;)"><div class="g-name"><div class="g-aid">9.1</div><div class="g-an">MRT 1S Inf Insp y Mon Sensores Vibración</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">1 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">1 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.11&quot;)"><div class="g-name"><div class="g-aid">9.11</div><div class="g-an">MRT 48S Inf Insp Estructura Techo MC</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">3 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">3 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;9.14&quot;)"><div class="g-name"><div class="g-aid">9.14</div><div class="g-an">RC22 4S Inf Insp Plan tránsito MSAG MUN2</div><div class="g-meta"><span>📍 MUN 2</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.15&quot;)"><div class="g-name"><div class="g-aid">9.15</div><div class="g-an">MRT 4S Png Insp Linea Aire IR Flota A</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.16&quot;)"><div class="g-name"><div class="g-aid">9.16</div><div class="g-an">MRT 4S Png Insp Linea Aire IR Flota B</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;9.17&quot;)"><div class="g-name"><div class="g-aid">9.17</div><div class="g-an">Inspección Actividades turno A Concentrador</div><div class="g-meta"><span>📍 TRANSVERSAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">8 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">3 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">2</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">4 h</span></div><div class="g-tot">14<span class="g-hh">31 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.18&quot;)"><div class="g-name"><div class="g-aid">9.18</div><div class="g-an">MRT 12S For Insp TNL CT M6 2-3</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.19&quot;)"><div class="g-name"><div class="g-aid">9.19</div><div class="g-an">MRT 12S For Insp TNL CT M7 2-3</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.20&quot;)"><div class="g-name"><div class="g-aid">9.20</div><div class="g-an">MRT 12S For Insp TNL CT M7A 2-3</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.21&quot;)"><div class="g-name"><div class="g-aid">9.21</div><div class="g-an">MRT 12S For Insp CVN Prin 3°</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">3 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">3 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.22&quot;)"><div class="g-name"><div class="g-aid">9.22</div><div class="g-an">MRT 12S For Insp TNL Ptio Cam 3°</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">1 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">1 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.23&quot;)"><div class="g-name"><div class="g-aid">9.23</div><div class="g-an">MRT 12S For Insp TNL Ofi GPLA GMAN 3°</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">1 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">1 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.24&quot;)"><div class="g-name"><div class="g-aid">9.24</div><div class="g-an">MRT 12S For Insp TNL Portal a superfi 4°</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">1 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">1 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.25&quot;)"><div class="g-name"><div class="g-aid">9.25</div><div class="g-an">MRT 12S For Insp TNL Portl Cordillera 4°</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.26&quot;)"><div class="g-name"><div class="g-aid">9.26</div><div class="g-an">MRT 12S For Insp TNL CT 7G 4°</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.17&quot;)"><div class="g-name"><div class="g-aid">9.17</div><div class="g-an">MRT 1S Inf Insp y Mon Sens Vibra. Conv</div><div class="g-meta"><span>📍 PMFC CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">0.5 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">0.5 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.18&quot;)"><div class="g-name"><div class="g-aid">9.18</div><div class="g-an">MRT 1S Inf Insp y Mon Sens Vibra. Larox</div><div class="g-meta"><span>📍 PMFC LAROX</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">0.5 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">0.5 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;9.19&quot;)"><div class="g-name"><div class="g-aid">9.19</div><div class="g-an">Inspección Estructura Espesador Delkor</div><div class="g-meta"><span>📍 MOLY</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;9.2&quot;)"><div class="g-name"><div class="g-aid">9.2</div><div class="g-an">Inspección Estructura Espesador Intermedio</div><div class="g-meta"><span>📍 MOLY</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;9.21&quot;)"><div class="g-name"><div class="g-aid">9.21</div><div class="g-an">Inspección TK de Producción</div><div class="g-meta"><span>📍 MOLY</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-tot">1<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.22&quot;)"><div class="g-name"><div class="g-aid">9.22</div><div class="g-an">MRT 48S Inf Insp Estruc Pte Grúa Moly</div><div class="g-meta"><span>📍 PTA MOLY</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">3 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">3 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;9.23&quot;)"><div class="g-name"><div class="g-aid">9.23</div><div class="g-an">MRT 48S Inf Insp Estruc Pte Grúa Cmentad</div><div class="g-meta"><span>📍 CEMENTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;9.24&quot;)"><div class="g-name"><div class="g-aid">9.24</div><div class="g-an">Inspección actividades Turno A PMFC y Km 15</div><div class="g-meta"><span>📍 PMFC</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">8 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">8 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">8 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">8 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">8 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">8 h</span></div><div class="g-tot">7<span class="g-hh">55 h</span></div></div><div class="g-grp"><span class="g-grp-n">ACTIVIDADES EMPRESAS ALTA PRESION</span><span class="g-grp-m">3 act. · 70 pers.</span></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;10.1&quot;)"><div class="g-name"><div class="g-aid">10.1 · OT N/A</div><div class="g-an">Alta presión: Manifold Mobo 1</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">10<span class="g-hh">14 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;10.2&quot;)"><div class="g-name"><div class="g-aid">10.2 · OT N/A</div><div class="g-an">Alta presión: Limpieza convencional anillo Loop A</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-tot">25<span class="g-hh">35 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;10.3&quot;)"><div class="g-name"><div class="g-aid">10.3 · OT N/A</div><div class="g-an">Alta presión: Limpieza piso inferior CC 1-4 y CC 5-6</div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">5</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">5</span></div><div class="g-tot">35<span class="g-hh">42 h</span></div></div><div class="g-grp"><span class="g-grp-n">ACTIVIDADES TOPOGRAFIA Y PROYECTOS DE INGENIERÍA ESTRUCTURAL</span><span class="g-grp-m">26 act. · 78 pers.</span></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.1&quot;)"><div class="g-name"><div class="g-aid">11.1 · OT N/A</div><div class="g-an">Revisión ingenieria Proyecto Celdas Columnas</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">1 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">1 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">1 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">1 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">4<span class="g-hh">4 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.2&quot;)"><div class="g-name"><div class="g-aid">11.2 · OT N/A</div><div class="g-an">Diseño pedestales y riostras Scavenger C</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">4<span class="g-hh">8 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.3&quot;)"><div class="g-name"><div class="g-aid">11.3 · OT N/A</div><div class="g-an">Reparación pedestal de pistón en Portón 25 CDM</div><div class="g-meta"><span>📍 CDM</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">4<span class="g-hh">8 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.4&quot;)"><div class="g-name"><div class="g-aid">11.4 · OT N/A</div><div class="g-an">Soportes Línea aire IR</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">4<span class="g-hh">8 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.5&quot;)"><div class="g-name"><div class="g-aid">11.5 · OT N/A</div><div class="g-an">Viga portal de ingreso. Sernageomin.</div><div class="g-meta"><span>📍 MOLY</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">4 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">5 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">9 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.6&quot;)"><div class="g-name"><div class="g-aid">11.6 · OT N/A</div><div class="g-an">Envigado lado norte del edificio 3 nivel.</div><div class="g-meta"><span>📍 LAROX</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.7&quot;)"><div class="g-name"><div class="g-aid">11.7 · OT N/A</div><div class="g-an">Refuerzo vigas Lr Portal de ingreso a nuevo espesador. (Flotación selectiva)</div><div class="g-meta"><span>📍 LR</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">3 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">5 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">2<span class="g-hh">8 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.8&quot;)"><div class="g-name"><div class="g-aid">11.8 · OT N/A</div><div class="g-an">Plataforma exterior de acceso Bombas 1-2-3-4</div><div class="g-meta"><span>📍 PTA CLORO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">4 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">4 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.9&quot;)"><div class="g-name"><div class="g-aid">11.9 · OT N/A</div><div class="g-an">Refuerzo columna ejes 2-B2</div><div class="g-meta"><span>📍 LAROX</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">2 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">2 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.1&quot;)"><div class="g-name"><div class="g-aid">11.1 · OT N/A</div><div class="g-an">Bases de bomba nash 3 y 4</div><div class="g-meta"><span>📍 INFRA</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">1</span><span class="g-hh">3 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">1<span class="g-hh">3 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.11&quot;)"><div class="g-name"><div class="g-aid">11.11 · OT N/A</div><div class="g-an">Patio cocodrilos sector sin reparar (atril) - ENTREGABLE</div><div class="g-meta"><span>📍 SECUNDARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">4<span class="g-hh">14 h</span></div></div><div class="g-row g-act g-norm" onclick="openEdit(&quot;11.8&quot;)"><div class="g-name"><div class="g-aid">11.8 · OT N/A</div><div class="g-an">Piso cremalleras placa diamantada abatible - ENTREGABLE</div><div class="g-meta"><span>📍 SECUNDARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">2</span><span class="g-hh">7 h</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">4<span class="g-hh">14 h</span></div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.4&quot;)"><div class="g-name"><div class="g-aid">5.4 · OT tiene orden</div><div class="g-an">Rebaje de fundación MOBA 3</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl br" style="background:#C9CED4;color:#3a3000">4</span></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">4</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;2.4&quot;)"><div class="g-name"><div class="g-aid">2.4 · OT 28015363</div><div class="g-an">Linea de lechada de cal SAG - MUN2</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;3.2&quot;)"><div class="g-name"><div class="g-aid">3.2 · OT BUSCAR AVISO</div><div class="g-an">Torque de pernos estructura (escalera que da acceso a martillo) Andamios voladizos</div><div class="g-meta"><span>📍 NODO 3500</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;3.3&quot;)"><div class="g-name"><div class="g-aid">3.3 · OT BUSCAR AVISO</div><div class="g-an">Grating suelto nodo 3500</div><div class="g-meta"><span>📍 NODO 3500</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;4.3&quot;)"><div class="g-name"><div class="g-aid">4.3 · OT CREAR AVISO</div><div class="g-an">Mejorar condición acopio piso hro 9-10</div><div class="g-meta"><span>📍 CHANCADO TERCIARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;4.4&quot;)"><div class="g-name"><div class="g-aid">4.4 · OT BUSCAR AVISO</div><div class="g-an">Estandarización piso alimentadores 1-8</div><div class="g-meta"><span>📍 CHANCADO TERCIARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;4.5&quot;)"><div class="g-name"><div class="g-aid">4.5 · OT A ESPERA DE LEV</div><div class="g-an">Instalación de mantas termicas líneas crítico</div><div class="g-meta"><span>📍 TERCIARIO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;4.6&quot;)"><div class="g-name"><div class="g-aid">4.6 · OT 29342819</div><div class="g-an">Fuga RCI colector N°10</div><div class="g-meta"><span>📍 CHANCADO 3°</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;4.7&quot;)"><div class="g-name"><div class="g-aid">4.7 · OT BUSCAR AVISO</div><div class="g-an">Reparar escala de gato 5B</div><div class="g-meta"><span>📍 PRECHANCADO</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.6&quot;)"><div class="g-name"><div class="g-aid">5.6 · OT 28665164</div><div class="g-an">Fabricación para Estandarizar grating sector tapones FLOTA A-B</div><div class="g-meta"><span>📍 FLOTACIÓN</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.7&quot;)"><div class="g-name"><div class="g-aid">5.7 · OT CREAR OT</div><div class="g-an">Rebaje fundación MOBA 2 (Manguerote bolas 4)</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.4&quot;)"><div class="g-name"><div class="g-aid">5.4 · OT tiene orden</div><div class="g-an">Montaje soportes ductos Túnel Hilton</div><div class="g-meta"><span>📍 TUNEL HILTON</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-day"></div><div class="g-tot">0</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;5.3&quot;)"><div class="g-name"><div class="g-aid">5.3 · OT 29904260</div><div class="g-an">Reparar pedestales convencional Mobo (realizar levantamiento)</div><div class="g-meta"><span>📍 CONVENCIONAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-bar bl" style="background:#C9CED4;color:#3a3000">6</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span></div><div class="g-day"><span class="g-bar" style="background:#C9CED4;color:#3a3000">6</span></div><div class="g-day"><span class="g-bar br" style="background:#C9CED4;color:#3a3000">6</span></div><div class="g-tot">42</div></div><div class="g-row g-act g-crit" onclick="openEdit(&quot;6.4&quot;)"><div class="g-name"><div class="g-aid">6.4 · OT 110613661</div><div class="g-an">Estandarización EDG PMFC</div><div class="g-meta"><span>📍 TRANSVERSAL</span></div><div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:0%;background:#C9CED4"></div></div><span class="g-av-n" style="color:#C9CED4">0%</span></div></div><div class="g-day"><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-hh">7 h</span></div><div class="g-day"><span class="g-hh">7 h</span></div><div class="g-tot">0<span class="g-hh">49 h</span></div></div><div class="g-row g-foot"><div class="g-name g-fname">Dotación / día</div><div class="g-day g-fday">142</div><div class="g-day g-fday">121</div><div class="g-day g-fday">135</div><div class="g-day g-fday">128</div><div class="g-day g-fday">105</div><div class="g-day g-fday">104</div><div class="g-day g-fday">108</div><div class="g-tot g-ftot">843</div></div><div class="g-row g-foot g-foot2"><div class="g-name g-fname">Horas mtto / día</div><div class="g-day g-fday">219 h</div><div class="g-day g-fday">193 h</div><div class="g-day g-fday">211 h</div><div class="g-day g-fday">207 h</div><div class="g-day g-fday">169 h</div><div class="g-day g-fday">156 h</div><div class="g-day g-fday">159 h</div><div class="g-tot g-ftot">1314 h</div></div></div></div></div>
   </div>
 
+  <div id="tab-semanas" style="display:none">
+    <div class="page-h">Semanas guardadas</div>
+    <div class="page-sub">Archivo de todas las semanas subidas a la app. Cada semana se guarda completa (programa, avances, preparativos, bitácora con fotos, historial de acciones, traspasos, NP y RF22) al presionar «Finalizar semana» o al reemplazar el programa cargado. Ábrela para consultarla en modo solo lectura, o descarga su respaldo.</div>
+    <div class="flt">
+      <button class="fclear" onclick="archSync(true)" title="Trae desde la nube las semanas archivadas por otros usuarios">🌐 Actualizar desde la nube</button>
+      <button class="fclear" onclick="document.getElementById(&#39;fiarch&#39;).click()" title="Vuelve a cargar un respaldo .json descargado desde esta pestaña">⬆ Importar respaldo .json</button>
+      <span style="width:1px;height:22px;background:var(--bd)"></span>
+      <button class="fclear" onclick="backupAll()" title="Descarga TODO lo guardado por la app en este equipo (semanas activas, ediciones, archivo)">💾 Respaldo completo de la app</button>
+      <button class="fclear" onclick="document.getElementById(&#39;fiall&#39;).click()" title="Restaura un respaldo completo (fusiona con lo existente)">♻ Restaurar respaldo completo</button>
+      <span class="cbadge" id="sem-badge"></span>
+    </div>
+    <div id="sem-list"></div>
+  </div>
   <div id="tab-historial" style="display: none;">
     <div class="page-h">Historial de acciones</div>
     <div class="page-sub">Auditoría completa: estados, avances, preparativos, ítems, dotación, quiebres, adelantos, reprogramaciones, NP, bloqueos y traspasos — con usuario, turno y origen (Planificación / Ejecución).</div>
@@ -1653,6 +1709,18 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
   </div>
 </div>
 
+<div class="mo" id="arch-mo" onclick="if(event.target===this)closeArch()">
+  <div class="modal" style="max-width:820px">
+    <div class="mhdr"><div><div class="mey">Archivo</div><div class="mttl">Semanas guardadas</div></div><button class="mcl" onclick="closeArch()">×</button></div>
+    <div style="font-size:12px;color:var(--gm);line-height:1.5;margin-bottom:10px">Todas las semanas subidas quedan guardadas aquí (se archivan al finalizar o al reemplazar el programa). Ábrelas en modo solo lectura o descarga su respaldo.</div>
+    <div class="flt">
+      <button class="fclear" onclick="archSync(true)">🌐 Actualizar desde la nube</button>
+      <button class="fclear" onclick="document.getElementById(&#39;fiarch&#39;).click()">⬆ Importar respaldo .json</button>
+    </div>
+    <div id="sem-list-mo" style="max-height:62vh;overflow:auto"></div>
+  </div>
+</div>
+
 <div class="mo" id="fin-mo" onclick="if(event.target===this)closeFinWeek()">
   <div class="modal" style="max-width:430px">
     <div class="mhdr"><div><div class="mey">Cierre de semana</div><div class="mttl" id="fin-ttl">Finalizar semana</div></div><button class="mcl" onclick="closeFinWeek()">×</button></div>
@@ -1666,15 +1734,36 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
 <div class="toast" id="toast"></div>
 
 <script>
+/* ╔══════════════════════════════════════════════════════════════════════╗
+   ║  ÍNDICE DEL CÓDIGO (buscar por el título de cada bloque)              ║
+   ║  1. Store · capa de almacenamiento (localStorage, modo archivo)       ║
+   ║  2. Fusión de estados (cloudMerge / tombstones)                       ║
+   ║  3. CLOUD · sincronización Supabase (pull / push / poll / apply)      ║
+   ║  4. Semana doble (slots) · selector · recarga                         ║
+   ║  5. Usuario, turno, acciones (historial), traspasos, NP, PPT          ║
+   ║  6. Cierre de semana · base PBI acumulativa · maestro .xlsm           ║
+   ║  7. Carga de programa (Excel/CSV/avances) · parseRows                 ║
+   ║  8. Modelo de edición (ed) · guardado · sellos _mt                    ║
+   ║  9. Tablero: KPIs, gráficos, filtros, lista/tarjetas, gantt           ║
+   ║ 10. Detalle de actividad (modal) · checklists · pasos · bloqueo       ║
+   ║ 11. Bitácora, reprogramación, quiebre, adelanto, interferencias       ║
+   ║ 12. Historial de acciones · traspaso de turno · notificaciones        ║
+   ║ 13. Exportaciones (CSV, Base_de_datos PBI, Detalle Actividades)       ║
+   ║ 14. Seguridad: clave de encargado (SHA-256) · errores globales        ║
+   ║ 15. KPIs 06/10/13 · Detalle Actividades                               ║
+   ║ 16. Archivo de semanas (arch*) · respaldo completo                    ║
+   ║ 17. boot()                                                            ║
+   ╚══════════════════════════════════════════════════════════════════════╝ */
 /* ── Capa de almacenamiento (punto único de E/S) ──
    Hoy persiste en localStorage. Para migrar a Supabase basta reemplazar
    get/set/del por llamadas a la API manteniendo las mismas claves
    (ver SECURITY-SUPABASE.md). Tolera valores antiguos no-JSON. */
+var HIST_VIEW=false, HIST_B=null; /* modo «semana archivada» (solo lectura) */
 var Store={
   ns:'prep_',
-  get:function(k,d){try{var v=localStorage.getItem(this.ns+k);if(v===null)return d;try{return JSON.parse(v);}catch(e){return v;}}catch(e){return d;}},
-  set:function(k,v){try{localStorage.setItem(this.ns+k,typeof v==='string'?v:JSON.stringify(v));if(typeof CLOUD!=='undefined'&&CLOUD.active()&&!CLOUD._applying&&cloudShared(this.ns+k)){CLOUD.setDirty(true);CLOUD.push();}return true;}catch(e){return false;}},
-  del:function(k){try{localStorage.removeItem(this.ns+k);if(typeof CLOUD!=='undefined'&&CLOUD.active()&&!CLOUD._applying&&cloudShared(this.ns+k)){CLOUD.setDirty(true);CLOUD.push();}}catch(e){}}
+  get:function(k,d){try{if(HIST_VIEW&&HIST_B&&archLocalKey(k)){var hv=archVirt(k);return hv===undefined?d:hv;}var v=localStorage.getItem(this.ns+k);if(v===null)return d;try{return JSON.parse(v);}catch(e){return v;}}catch(e){return d;}},
+  set:function(k,v){try{if(HIST_VIEW&&archLocalKey(k))return true;localStorage.setItem(this.ns+k,typeof v==='string'?v:JSON.stringify(v));if(typeof CLOUD!=='undefined'&&CLOUD.active()&&!CLOUD._applying&&cloudShared(this.ns+k)){CLOUD.setDirty(true);CLOUD.push();}return true;}catch(e){return false;}},
+  del:function(k){try{if(HIST_VIEW&&archLocalKey(k))return;localStorage.removeItem(this.ns+k);if(typeof CLOUD!=='undefined'&&CLOUD.active()&&!CLOUD._applying&&cloudShared(this.ns+k)){CLOUD.setDirty(true);CLOUD.push();}}catch(e){}}
 };
 
 /* ===== Sincronización en la nube (Supabase) =====
@@ -1693,10 +1782,69 @@ var SUPA_TABLE='terreno';
 var SUPA_DOC='sinfra-prep'; /* id del tablero compartido (cámbialo para separar tableros) */
 
 /* Claves personales que NO se comparten (quedan en cada navegador) */
-function cloudShared(fullKey){var n=fullKey.slice(Store.ns.length);return !(n==='user'||n==='turno'||n==='vmode'||n==='showot'||n==='dirty');}
+function cloudShared(fullKey){var n=fullKey.slice(Store.ns.length);if(n.indexOf('arch_')===0&&n!=='arch_idx')return false;return !(n==='user'||n==='turno'||n==='vmode'||n==='showot'||n==='dirty');}
+
+
+/* ── Fusión de estados entre usuarios ──
+   Antes, el documento compartido se reemplazaba completo («el último que
+   escribe gana»): dos personas editando a la vez se pisaban. Ahora cada
+   actividad lleva un sello _mt (última modificación) y al recibir la nube:
+   · edits_s*  → por actividad gana la más reciente; la bitácora se une.
+   · acciones/traspasos → unión por ts (borrados respetados vía tombstones).
+   · np/notifs → unión por id.   · arch_idx → unión por ts.
+   · programa, ppt, cierre → manda la nube (los controla el encargado). */
+function _mtOf(e){return (e&&typeof e==='object'&&+e._mt)||0;}
+function _unionBy(remote,local,keyFn,dead){
+  var seen={},out=[],added=0;
+  (remote||[]).forEach(function(x){var k=keyFn(x);if(k!=null&&dead&&dead[k])return;if(k!=null){if(seen[k])return;seen[k]=1;}out.push(x);});
+  (local||[]).forEach(function(x){var k=keyFn(x);if(k!=null&&dead&&dead[k])return;if(k!=null){if(seen[k])return;seen[k]=1;}out.push(x);added++;});
+  return {arr:out,added:added};
+}
+function _sortLike(arr,ref){
+  var asc=(ref&&ref.length>1&&(+ref[0].ts||0)<(+ref[ref.length-1].ts||0));
+  arr.sort(function(a,b){return asc?((+a.ts||0)-(+b.ts||0)):((+b.ts||0)-(+a.ts||0));});return arr;
+}
+function _tombUnion(a,b){var o={a:{},t:{},l:{},n:{}};[a,b].forEach(function(t){if(!t||typeof t!=='object')return;['a','t','l','n'].forEach(function(k){Object.keys(t[k]||{}).forEach(function(x){o[k][x]=1;});});});return o;}
+function _semOf(name){var m=/_s(.+)$/.exec(name);return m?m[1]:'';}
+function cloudMerge(name,localJson,remoteJson,tombs){
+  var res={json:remoteJson,localWon:0,remoteWon:0};
+  var L,R;try{L=JSON.parse(localJson);R=JSON.parse(remoteJson);}catch(e){return res;}
+  var tb=(tombs&&tombs[_semOf(name)])||{a:{},t:{},l:{},n:{}};
+  if(name.indexOf('edits_s')===0&&L&&R&&typeof L==='object'&&typeof R==='object'){
+    var out={},ids={};Object.keys(R).forEach(function(i){ids[i]=1;});Object.keys(L).forEach(function(i){ids[i]=1;});
+    Object.keys(ids).forEach(function(id){var l=L[id],r=R[id];
+      if(tb.n[id]){return;} /* NP eliminada */
+      if(!r){out[id]=l;res.localWon++;return;} if(!l){out[id]=r;return;}
+      var ls=JSON.stringify(l),rs=JSON.stringify(r);if(ls===rs){out[id]=r;return;}
+      var lw=_mtOf(l)>_mtOf(r);var w=JSON.parse(lw?ls:rs);if(lw)res.localWon++;else res.remoteWon++;
+      if(Array.isArray(l.log)||Array.isArray(r.log)){var u=_unionBy(r.log||[],l.log||[],function(m){return m?String(m.ts||0):null;},tb.l);u.arr.sort(function(a,b){return (+a.ts||0)-(+b.ts||0);});w.log=u.arr;}
+      out[id]=w;});
+    res.json=JSON.stringify(out);return res;
+  }
+  if((name.indexOf('acciones_s')===0||name.indexOf('traspasos_s')===0)&&Array.isArray(L)&&Array.isArray(R)){
+    var dead=name.indexOf('acciones_s')===0?tb.a:tb.t;
+    var u2=_unionBy(R,L,function(x){return x?String(x.ts||0):null;},dead);
+    res.localWon=u2.added;res.json=JSON.stringify(_sortLike(u2.arr,R));return res;
+  }
+  if((name.indexOf('np_s')===0||name.indexOf('notifs_s')===0)&&Array.isArray(L)&&Array.isArray(R)){
+    var u3=_unionBy(R,L,function(x){return x?x.id:null;},name.indexOf('np_s')===0?tb.n:null);
+    res.localWon=u3.added;res.json=JSON.stringify(u3.arr);return res;
+  }
+  if((name==='arch_idx')&&L&&R&&typeof L==='object'&&typeof R==='object'){
+    var o2=JSON.parse(remoteJson);var ch=0;Object.keys(L).forEach(function(k){if(!o2[k]||(+L[k].ts||0)>(+o2[k].ts||0)){o2[k]=L[k];ch++;}});
+    res.localWon=ch;if(ch)res.json=JSON.stringify(o2);return res;
+  }
+  if(name.indexOf('tomb_s')===0){var tu=_tombUnion(L,R);var tj=JSON.stringify(tu);res.localWon=(tj!==remoteJson)?1:0;res.json=tj;return res;}
+  return res;
+}
+/* Tombstones: registra un borrado para que no «reviva» al fusionar con otro equipo */
+function tomb(kind,key){
+  if(!DATA||HIST_VIEW)return;var k='tomb_s'+DATA.semana;var t=Store.get(k,null);if(!t||typeof t!=='object')t={a:{},t:{},l:{},n:{}};
+  ['a','t','l','n'].forEach(function(x){if(!t[x])t[x]={};});t[kind][String(key)]=1;Store.set(k,t);
+}
 
 var CLOUD={
-  cid:Math.random().toString(36).slice(2),
+  cid:Math.random().toString(36).slice(2),_lastOk:0,_lastMerge:null,
   _t:null,_rt:null,_applying:false,_seen:null,_pending:false,_offToast:false,
   active:function(){return !!(SUPA_URL&&SUPA_KEY&&window.fetch);},
   hdr:function(){var h={'apikey':SUPA_KEY,'Content-Type':'application/json'};if(SUPA_KEY.indexOf('sb_')!==0)h['Authorization']='Bearer '+SUPA_KEY;return h;},
@@ -1707,18 +1855,40 @@ var CLOUD={
   setDirty:function(v){try{if(v)localStorage.setItem(Store.ns+'dirty','1');else localStorage.removeItem(Store.ns+'dirty');}catch(e){}},
   online:function(){return (typeof navigator==='undefined'||navigator.onLine!==false);},
   collect:function(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(Store.ns)===0&&cloudShared(k))o[k]=localStorage.getItem(k);}return o;},
-  apply:function(data){if(!data)return;this._applying=true;try{
-      var rm=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(Store.ns)===0&&cloudShared(k))rm.push(k);}
-      rm.forEach(function(k){localStorage.removeItem(k);});
-      Object.keys(data).forEach(function(k){if(k.indexOf(Store.ns)===0&&cloudShared(k)&&typeof data[k]==='string')localStorage.setItem(k,data[k]);});
-    }catch(e){}this._applying=false;},
+  apply:function(data,keepLocal){if(!data)return;this._applying=true;var localWon=0,remoteWon=0,self=this;try{
+      var ns=Store.ns;
+      /* 1) tombstones de ambos lados (borrados) */
+      var tombs={};var keys={};
+      for(var i=0;i<localStorage.length;i++){var k0=localStorage.key(i);if(k0&&k0.indexOf(ns)===0&&cloudShared(k0))keys[k0]=1;}
+      Object.keys(data).forEach(function(k){if(k.indexOf(ns)===0&&cloudShared(k)&&typeof data[k]==='string')keys[k]=1;});
+      Object.keys(keys).forEach(function(k){var n=k.slice(ns.length);if(n.indexOf('tomb_s')!==0)return;
+        var l=null,r=null;try{l=JSON.parse(localStorage.getItem(k)||'null');}catch(e){}try{r=JSON.parse(data[k]||'null');}catch(e){}
+        tombs[_semOf(n)]=_tombUnion(l,r);});
+      /* 2) claves que la nube ya no tiene (p. ej. semana finalizada en otro equipo).
+            Con cambios locales pendientes (keepLocal) se conservan: se subirán. */
+      if(!keepLocal)Object.keys(keys).forEach(function(k){if(!(k in data)||typeof data[k]!=='string')localStorage.removeItem(k);});
+      /* 3) fusión clave por clave */
+      Object.keys(data).forEach(function(k){
+        if(!(k.indexOf(ns)===0&&cloudShared(k)&&typeof data[k]==='string'))return;
+        var local=null;try{local=localStorage.getItem(k);}catch(e){}
+        if(local===null||local===data[k]){localStorage.setItem(k,data[k]);return;}
+        var m=cloudMerge(k.slice(ns.length),local,data[k],tombs);
+        localStorage.setItem(k,m.json);localWon+=m.localWon;remoteWon+=m.remoteWon;
+        /* mantiene coherente la memoria de la semana abierta (salvo la actividad en edición) */
+        if(DATA&&!HIST_VIEW&&k===ns+'edits_s'+DATA.semana){try{var mg=JSON.parse(m.json);var open=(document.getElementById('mo')&&document.getElementById('mo').classList.contains('open'))?editId:null;
+          Object.keys(mg).forEach(function(id){if(id!==open){EDITS[id]=mg[id];ed(id);_edSig[DATA.semana+'|'+id]=_sigOf(EDITS[id]);}});Object.keys(EDITS).forEach(function(id){if(!mg[id]&&id!==open)delete EDITS[id];});}catch(e){}}
+      });
+    }catch(e){}this._applying=false;
+    this._lastMerge={localWon:localWon,remoteWon:remoteWon};
+    if(localWon>0){this.setDirty(true);this.push();} /* lo fusionado localmente vuelve a la nube */
+  },
   pull:function(){var self=this;if(!this.active())return Promise.resolve(false);
     /* Hay cambios locales sin subir (p. ej. hechos en terreno sin señal):
        NO se pisan con la nube — primero se suben. */
     if(this.dirty()){
-      return fetch(this.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=updated_at'),{headers:this.hdr()})
+      return fetch(this.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=data,updated_at'),{headers:this.hdr()})
         .then(function(r){return r.json();})
-        .then(function(rows){if(rows&&rows[0])self._seen=rows[0].updated_at;self.push();return true;})
+        .then(function(rows){if(rows&&rows[0]){self._seen=rows[0].updated_at;if(rows[0].data)self.apply(rows[0].data,true);}self.setDirty(true);self.push();return true;})
         .catch(function(){return true;});
     }
     return fetch(this.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=data,cid,updated_at'),{headers:this.hdr()})
@@ -1732,17 +1902,28 @@ var CLOUD={
     var body=JSON.stringify({id:SUPA_DOC,data:this.collect(),cid:this.cid,updated_at:stamp});
     fetch(this.url(''),{method:'POST',headers:Object.assign({'Prefer':'resolution=merge-duplicates,return=minimal'},this.hdr()),body:body})
       .then(function(r){
-        if(r&&r.ok){self._seen=stamp;self._werr=null;self.setDirty(false);setSaved(true);
+        if(r&&r.ok){self._seen=stamp;self._werr=null;self._lastOk=Date.now();self.setDirty(false);setSaved(true);
           if(self._offToast){self._offToast=false;toast('🌐 ✓ Cambios y fotos de terreno sincronizados');}}
         else{if(r&&self._werr!==r.status){self._werr=r.status;toast('⚠ No se pudo guardar en la nube ('+r.status+') — revisa las políticas insert/update de la tabla «'+SUPA_TABLE+'» en Supabase');}self._retry();}
       }).catch(function(){self._retry();});},
   _retry:function(){var self=this;this._offToast=true;clearTimeout(this._rt);this._rt=setTimeout(function(){if(self.dirty())self._send();},15000);},
   poll:function(){var self=this;if(!this.active()||!this.online())return;
     /* Con cambios locales pendientes, primero se suben (no se trae la nube encima) */
-    if(this.dirty()){this._send();return;}
+    if(this.dirty()){
+      /* cambios locales pendientes: si la nube cambió mientras tanto, se fusiona antes de subir */
+      fetch(this.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=cid,updated_at'),{headers:this.hdr()})
+        .then(function(r){return r.json();})
+        .then(function(rows){var row=rows&&rows[0];
+          if(!row||row.cid===self.cid||row.updated_at===self._seen){self._send();return;}
+          return fetch(self.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=data,updated_at'),{headers:self.hdr()})
+            .then(function(r){return r.json();})
+            .then(function(d){if(d&&d[0]){self._seen=d[0].updated_at;if(d[0].data)self.apply(d[0].data,true);}self.setDirty(true);self._send();self.incoming();});
+        }).catch(function(){self._send();});
+      return;
+    }
     fetch(this.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=cid,updated_at'),{headers:this.hdr()})
       .then(function(r){return r.json();})
-      .then(function(rows){if(!rows||!rows[0])return;var row=rows[0];
+      .then(function(rows){if(!rows||!rows[0])return;var row=rows[0];self._lastOk=Date.now();setSaved(SAVED_OK);
         if(row.cid===self.cid||row.updated_at===self._seen)return;
         self._seen=row.updated_at;
         return fetch(self.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=data'),{headers:self.hdr()})
@@ -1750,9 +1931,11 @@ var CLOUD={
           .then(function(d){if(d&&d[0]&&d[0].data){self.apply(d[0].data);self.incoming();}});
       }).catch(function(){});},
   incoming:function(){
+    if(HIST_VIEW){this._pending=true;return;}
     var mo=document.getElementById('mo'),qb=document.getElementById('quiebre-mo');
     if((mo&&mo.classList.contains('open'))||(qb&&qb.classList.contains('open'))){this._pending=true;return;}
     reloadFromStore();
+    var lm=this._lastMerge;if(lm&&(lm.remoteWon||lm.localWon)){toast('🔄 Cambios de otro usuario recibidos'+(lm.remoteWon?' · '+lm.remoteWon+' actividad(es) actualizada(s)':'')+(lm.localWon?' · '+lm.localWon+' cambio(s) tuyos conservados':''));this._lastMerge=null;}
   },
   start:function(){var self=this;if(!this.active())return;
     /* Sonda de diagnóstico: si la tabla o sus políticas están mal, avisa en pantalla */
@@ -1761,11 +1944,13 @@ var CLOUD={
       .catch(function(){toast('📴 Sin conexión con la nube — todo se guarda localmente y se subirá solo al volver la señal');});
     else toast('📴 Sin señal — todo se guarda localmente y se subirá solo al volver la señal');
     if(this.dirty())this._send();
+    setTimeout(archFlush,1500);
     setInterval(function(){self.poll();},5000);}
 };
 /* Al recuperar / perder la señal: sube lo pendiente y actualiza el indicador */
 window.addEventListener('online',function(){
   if(CLOUD.active()&&CLOUD.dirty()){toast('🌐 Señal recuperada — subiendo cambios y fotos de terreno…');CLOUD._send();}
+  setTimeout(archFlush,2000);
   setSaved(true);
 });
 window.addEventListener('offline',function(){
@@ -1775,9 +1960,14 @@ window.addEventListener('offline',function(){
 
 /* Recarga el estado desde Store (tras recibir cambios de otro usuario) y refresca la vista */
 /* ── Selector y carga de doble semana ── */
-function cargarSemana(slot){UP_SLOT=slot;document.getElementById('fi').click();}
+function cargarSemana(slot){if(histGuard())return;UP_SLOT=slot;document.getElementById('fi').click();}
 function renderWeekPills(){
   var hw=document.getElementById('hweek');if(!hw)return;
+  if(HIST_VIEW&&DATA){
+    hw.innerHTML='<button class="wkp hist on" title="Semana archivada — solo lectura">🗂 S'+esc(DATA.semana)+' · '+esc(DATA.anio||'')+' · Archivada</button><button class="wkp add" onclick="archClose()" title="Volver a la semana actual">← Volver</button>';
+    var wn0=document.getElementById('wk-note');if(wn0){wn0.style.display='flex';wn0.innerHTML='🗂 <b>Estás viendo la SEMANA '+esc(DATA.semana)+' · '+esc(DATA.anio||'')+' (archivada)</b> — solo lectura: lo que modifiques aquí no se guarda. Usa «← Volver» para regresar a la semana actual.';}
+    return;
+  }
   var d0=Store.get('data',null),d1=Store.get('data_next',null);
   var h='';
   if(d0&&d0.secs)h+='<button class="wkp'+(WSLOT===0?' on':'')+'" onclick="setWeekSlot(0)" title="Semana en curso — foco ejecución">📅 S'+esc(d0.semana)+' · En curso</button>';
@@ -1789,6 +1979,7 @@ function renderWeekPills(){
   if(wn){wn.style.display=WSLOT===1?'flex':'none';if(WSLOT===1)wn.innerHTML='🔭 <b>Estás viendo la SEMANA '+esc(DATA?DATA.semana:'')+' (próxima)</b> — foco de Planificación: adelantar preparativos. El registro de Ejecución corresponde a la semana en curso.';}
 }
 function setWeekSlot(i){
+  if(histGuard())return;
   if(i===WSLOT)return;
   var d=Store.get(dataKey(i),null);
   if(!d||!d.secs){toast(i===1?'Aún no cargas el programa de la semana siguiente':'Aún no cargas el programa de la semana en curso');return;}
@@ -1812,6 +2003,7 @@ function weekPrepSummary(slot){
   return {slot:slot,semana:d.semana,anio:d.anio,n:n,avg:n?Math.round(sum/n):0,listo:listo,tocados:tocados};
 }
 function reloadFromStore(){
+  if(HIST_VIEW){CLOUD._pending=true;return;}
   if(!DATA){if(restoreData())showDash(true);return;}
   var d=Store.get(dataKey(),null);
   if(!d||!d.secs){
@@ -1901,7 +2093,7 @@ function applyOT(){document.body.classList.toggle('hide-ot',!SHOW_OT);var b=docu
 function toggleOT(){SHOW_OT=!SHOW_OT;Store.set('showot',SHOW_OT);applyOT();}
 function loadPpt(){var x=Store.get('ppt_s'+(DATA?DATA.semana:''),{});PPTINFO=(x&&typeof x==='object')?x:{};}
 function savePpt(){if(!Store.set('ppt_s'+(DATA?DATA.semana:''),PPTINFO))toast('⚠ Almacenamiento lleno (PPT)');}
-function openFinWeek(){if(!DATA)return;if(!requireAdmin())return;document.getElementById('fin-ttl').textContent='Finalizar Semana'+DATA.semana;document.getElementById('fin-mo').classList.add('open');}
+function openFinWeek(){if(!DATA)return;if(histGuard())return;if(!requireAdmin())return;document.getElementById('fin-ttl').textContent='Finalizar Semana'+DATA.semana;document.getElementById('fin-mo').classList.add('open');}
 function closeFinWeek(){document.getElementById('fin-mo').classList.remove('open');}
 /* ── Base de datos PBI acumulativa ──
    Un solo archivo fijo: PBI_SINFRA_Base.xlsx. Al finalizar cada semana se
@@ -2034,6 +2226,7 @@ function _finCore(){
   logAction('Cierre de semana','','Semana '+wk+' finalizada');
   try{save();saveActions();saveHandovers();saveNP();savePpt();}catch(e){}
   Store.set('fin_s'+wk,{ts:Date.now(),by:userName(),sid:SID});
+  try{archSnapshot(DATA,'finalizada');}catch(e){toast('⚠ No se pudo archivar la semana: '+e.message);}
   closeFinWeek();recargar(true);
   toast('✓ Semana '+wk+' finalizada y guardada');
 }
@@ -2089,7 +2282,7 @@ function parseActInfo(s){
 function togglePptDetails(){var d=document.getElementById('ppt-details');var b=document.getElementById('det-btn');if(!d)return;var open=d.style.display!=='none';d.style.display=open?'none':'block';if(b)b.textContent=(open?'👁 Ver detalles (descripción, requerimientos y materiales)':'🙈 Ocultar detalles');}
 function showBusy(msg){var o=document.getElementById('busy');if(o){document.getElementById('busy-msg').textContent=msg||'Procesando…';o.style.display='flex';}}
 function hideBusy(){var o=document.getElementById('busy');if(o)o.style.display='none';}
-function handlePptx(file){
+function handlePptx(file){if(histGuard())return;
   if(!file){return;}
   if(!requireAdmin()){var _fp=document.getElementById('fippt');if(_fp)_fp.value='';return;}
   if(MODE==='ejec'){toast('La carga del PPT se hace en Planificación');return;}
@@ -2173,14 +2366,15 @@ function showTab(t){
   /* v1 simplificada: los dashboards ya no son pestañas accesibles */
   if(t==='dashboard'||t==='execdash'||t==='brechas')t='plani';
   TAB=t;
-  var map={plani:'tab-work',ejec:'tab-work',kpis:'tab-kpis',detalle:'tab-detalle',bitacora:'tab-bitacora',traspaso:'tab-traspaso',historial:'tab-historial'};
-  ['tab-dashboard','tab-execdash','tab-brechas','tab-work','tab-kpis','tab-detalle','tab-bitacora','tab-traspaso','tab-historial'].forEach(function(id){var c=document.getElementById(id);if(c)c.style.display='none';});
+  var map={plani:'tab-work',ejec:'tab-work',kpis:'tab-kpis',detalle:'tab-detalle',bitacora:'tab-bitacora',traspaso:'tab-traspaso',historial:'tab-historial',semanas:'tab-semanas'};
+  ['tab-dashboard','tab-execdash','tab-brechas','tab-work','tab-kpis','tab-detalle','tab-bitacora','tab-traspaso','tab-historial','tab-semanas'].forEach(function(id){var c=document.getElementById(id);if(c)c.style.display='none';});
   var show=map[t];if(document.getElementById(show))document.getElementById(show).style.display='block';
-  ['plani','ejec','kpis','detalle','bitacora','traspaso','historial'].forEach(function(x){var b=document.getElementById('tab-btn-'+x);if(b)b.classList.toggle('active',x===t);});
+  ['plani','ejec','kpis','detalle','bitacora','traspaso','historial','semanas'].forEach(function(x){var b=document.getElementById('tab-btn-'+x);if(b)b.classList.toggle('active',x===t);});
   var bp=document.getElementById('btn-ppt');if(bp)bp.style.display=(t==='plani')?'inline-flex':'none';
   if(t==='plani'||t==='ejec'){MODE=t;if(!DIA_INIT){DIA=todayIndex();DIA_INIT=true;}renderModeBanner();renderPlaniInd();renderEjecTop();renderDaySel();render();}
   if(t==='traspaso'){renderTraspaso();}
   if(t==='historial'){renderHist();}
+  if(t==='semanas'){renderSemanas();archSync(false);}
   if(t==='kpis'){renderKpiTab();}
   if(t==='detalle'){renderDetalleAct();}
 }
@@ -2220,11 +2414,37 @@ function hideProg(){document.getElementById('pw').style.display='none';}
    cambiar el archivo o finalizar la semana. El resto de los usuarios ve el
    programa publicado y registra su trabajo, pero no puede alterar la semana
    de todos. La clave se pide una vez por sesión. */
+
+/* ── SHA-256 compacto (sin dependencias) para no guardar la clave en texto plano ──
+   Para cambiar la clave: abre la consola del navegador (F12) en la app, escribe
+   sha256('nueva clave') y pega el resultado en ADMIN_HASH. */
+function sha256(str){
+  function rr(x,n){return (x>>>n)|(x<<(32-n));}
+  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var b=unescape(encodeURIComponent(str)),l=b.length,words=[],i;
+  for(i=0;i<l;i++)words[i>>2]|=b.charCodeAt(i)<<(24-(i%4)*8);
+  words[l>>2]|=0x80<<(24-(l%4)*8);words[(((l+8)>>6)<<4)+15]=l*8;
+  var w=new Array(64);
+  for(var j=0;j<words.length;j+=16){
+    var a=H[0],bb=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7],t;
+    for(t=0;t<64;t++){
+      if(t<16)w[t]=words[j+t]|0;else{var s0=rr(w[t-15],7)^rr(w[t-15],18)^(w[t-15]>>>3),s1=rr(w[t-2],17)^rr(w[t-2],19)^(w[t-2]>>>10);w[t]=(w[t-16]+s0+w[t-7]+s1)|0;}
+      var S1=rr(e,6)^rr(e,11)^rr(e,25),ch=(e&f)^(~e&g),t1=(h+S1+ch+K[t]+w[t])|0,S0=rr(a,2)^rr(a,13)^rr(a,22),mj=(a&bb)^(a&c)^(bb&c),t2=(S0+mj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=bb;bb=a;a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+bb)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  return H.map(function(x){return ('00000000'+(x>>>0).toString(16)).slice(-8);}).join('');
+}
+var ADMIN_HASH='d4a64806ea479d388ab7532e0655857b4f7277fef86f6454c62bad735f288954';
+function checkAdminKey(k){return typeof k==='string'&&sha256(k)===ADMIN_HASH;}
 var ADMIN_OK=false;
 /* ── Publicar para todos (solo encargado): empuja la semana cargada a la nube
       con confirmación visible. Si el servidor rechaza, muestra el error completo
       para diagnosticar (tabla/columnas/políticas). ── */
 function publicarSemana(){
+  if(histGuard())return;
   if(!DATA){toast('Primero carga el programa de la semana');return;}
   if(typeof CLOUD==='undefined'||!CLOUD.active()){toast('Sincronización no configurada (falta la clave de Supabase)');return;}
   if(!requireAdmin())return;
@@ -2260,14 +2480,17 @@ function requireAdmin(){
   if(ADMIN_OK)return true;
   var k=prompt('Función reservada a la persona encargada del programa semanal.\nClave:');
   if(k===null)return false;
-  if(k==='BeKa'){ADMIN_OK=true;toast('🔓 Modo encargado activo por esta sesión');return true;}
+  if(checkAdminKey(k)){ADMIN_OK=true;toast('🔓 Modo encargado activo por esta sesión');return true;}
   toast('Clave incorrecta — solo la persona encargada puede subir o finalizar la semana');
   return false;
 }
 function handleFile(file){
   if(!file)return;
+  if(histGuard()){var _fi0=document.getElementById('fi');if(_fi0)_fi0.value='';return;}
   if(!requireAdmin()){var _fi=document.getElementById('fi');if(_fi)_fi.value='';return;}
-  if(UP_SLOT!==null){WSLOT=UP_SLOT;UP_SLOT=null;}var ext=file.name.split('.').pop().toLowerCase();
+  if(UP_SLOT!==null){WSLOT=UP_SLOT;UP_SLOT=null;}
+  /* La semana que ocupaba este espacio se archiva antes de reemplazarla (no se pierde nada) */
+  try{archReplace();}catch(e){}var ext=file.name.split('.').pop().toLowerCase();
   if(['csv','xlsx','xls'].indexOf(ext)<0){toast('Formato no permitido: usa .xlsx, .xls o .csv');return;}
   if(file.size>30*1048576){toast('Archivo demasiado grande (máx. 30 MB)');return;}
   prog('Leyendo archivo…',15);var r=new FileReader();
@@ -2392,12 +2615,41 @@ function ed(id){
   if(e.prepDisc===undefined)e.prepDisc={};
   return e;
 }
-function save(){if(Store.set('edits_s'+(DATA?DATA.semana:''),EDITS)){setSaved(true);}else{setSaved(true);toast('⚠ Almacenamiento lleno — la última foto/nota podría no guardarse ni sincronizarse. Borra fotos antiguas de la bitácora');}}
+var _edSig={};
+/* firma canónica (claves ordenadas, sin _mt) para detectar cambios reales */
+function _canon(v){if(Array.isArray(v))return '['+v.map(_canon).join(',')+']';if(v&&typeof v==='object'){return '{'+Object.keys(v).filter(function(k){return k!=='_mt'&&v[k]!==undefined;}).sort().map(function(k){return JSON.stringify(k)+':'+_canon(v[k]);}).join(',')+'}';}return JSON.stringify(v===undefined?null:v);}
+function _sigOf(e){return _canon(e);}
+/* normaliza una copia guardada con las mismas reglas que ed() (campos por defecto) */
+function _normStored(id,se){var keep=EDITS;EDITS={};EDITS[id]=JSON.parse(JSON.stringify(se));try{ed(id);}catch(e){}var n=EDITS[id];EDITS=keep;return n;}
+function stampEdits(){
+  if(!DATA||HIST_VIEW)return;var now=Date.now(),pre=DATA.semana+'|',stored=null;
+  Object.keys(EDITS).forEach(function(id){var e=EDITS[id];if(!e||typeof e!=='object')return;
+    var sig=_sigOf(e),k=pre+id;
+    if(_edSig[k]===undefined){ /* primera vez tras cargar: compara con lo ya guardado */
+      if(stored===null){var st=Store.get('edits_s'+DATA.semana,{});stored=(st&&typeof st==='object')?st:{};}
+      var se=stored[id];_edSig[k]=sig;if(_sigOf(_normStored(id,se||{}))!==sig)e._mt=now;return;}
+    if(_edSig[k]!==sig){_edSig[k]=sig;e._mt=now;}
+  });
+}
+function save(){stampEdits();if(Store.set('edits_s'+(DATA?DATA.semana:''),EDITS)){setSaved(true);}else{setSaved(true);toast('⚠ Almacenamiento lleno — la última foto/nota podría no guardarse ni sincronizarse. Borra fotos antiguas de la bitácora');}}
 var _sv;function markUnsaved(){setSaved(false);clearTimeout(_sv);_sv=setTimeout(save,600);}
-function setSaved(ok){var d=document.getElementById('save-dot'),l=document.getElementById('save-lbl');if(!d)return;d.classList.toggle('unsaved',!ok);var cl=(typeof CLOUD!=='undefined'&&CLOUD.active());
+var SAVED_OK=true;
+function _ago(ts){if(!ts)return '';var s=Math.round((Date.now()-ts)/1000);if(s<8)return 'ahora';if(s<60)return 'hace '+s+' s';var m=Math.round(s/60);if(m<60)return 'hace '+m+' min';var h=Math.round(m/60);return 'hace '+h+' h';}
+function setSaved(ok){SAVED_OK=!!ok;var d=document.getElementById('save-dot'),l=document.getElementById('save-lbl');if(!d)return;d.classList.toggle('unsaved',!ok);var cl=(typeof CLOUD!=='undefined'&&CLOUD.active());
   if(cl&&!CLOUD.online()){l.textContent=ok?'📴 Guardado local — se subirá con señal':'Guardando…';return;}
   if(cl&&ok&&CLOUD.dirty()){l.textContent='Sincronizando…';return;}
-  l.textContent=ok?(cl?'Sincronizado ☁':'Guardado'):(cl?'Sincronizando…':'Guardando…');}
+  var ago=(cl&&ok&&CLOUD._lastOk)?' · '+_ago(CLOUD._lastOk):'';
+  l.textContent=ok?(cl?'Sincronizado ☁'+ago:'Guardado'):(cl?'Sincronizando…':'Guardando…');}
+setInterval(function(){if(typeof CLOUD!=='undefined'&&CLOUD.active())setSaved(SAVED_OK);},20000);
+/* Toque en el indicador: fuerza una sincronización inmediata */
+function forceSync(){
+  if(HIST_VIEW){histGuard();return;}
+  if(typeof CLOUD==='undefined'||!CLOUD.active()){toast('Esta copia no tiene sincronización en la nube configurada');return;}
+  if(!CLOUD.online()){toast('📴 Sin señal — se sincronizará al volver la conexión');return;}
+  try{clearTimeout(_sv);if(DATA)save();}catch(e){}
+  toast('🔄 Sincronizando con la nube…');
+  CLOUD._seen=null;CLOUD.poll();if(CLOUD.dirty())CLOUD._send();archFlush();
+}
 
 /* merged real dotación */
 function realDot(a){var e=ed(a.id);return (e.dr&&e.dr.length===7)?e.dr:a.dr0;}
@@ -2481,6 +2733,10 @@ function showDash(silent){
   DIA_INIT=false;
   showTab('plani');
   buildCharts();buildChips();refreshAll();
+  archApplyUI();
+  /* Persiste las entradas creadas/normalizadas al cargar (OT, criticidad Excel, PPT): así la
+     firma guardada coincide con la memoria en todos los equipos y solo los cambios reales llevan sello */
+  if(!HIST_VIEW){try{var _st=Store.get('edits_s'+DATA.semana,{})||{};var _miss=false;Object.keys(EDITS).forEach(function(id){if(!_st[id])_miss=true;});if(_miss){_edSig={};Store.set('edits_s'+DATA.semana,EDITS);}}catch(e){}}
   hideProg();if(!silent)toast('✓ '+DATA.filename+' cargado'+(Object.keys(PPTINFO).length?' · PPT vinculado':'')+(CLOUD.active()?' · 🌐 publicado para todos los usuarios':''));
   ensureUser();
 }
@@ -2488,6 +2744,7 @@ function recargar(force){
   /* «Cambiar archivo» borra la semana para todos → solo encargado. Los flujos
      internos (cierre propio ya validado, o cierre recibido desde la nube)
      llaman recargar(true) para no pedir clave. */
+  if(force!==true&&histGuard())return;
   if(force!==true&&!requireAdmin())return;
   var _cleared=WSLOT;
   DATA=null;FLT='';FILT={disc:'',loc:'',crit:'',estado:''};CHFLT={type:null,val:null};PPTINFO={};Store.del(dataKey());
@@ -2514,7 +2771,7 @@ function recargar(force){
 }
 function refreshAll(){refreshNuevos();renderKPIs();renderPeriod();renderAlerts();renderRepro();renderPlaniAnalytics();updateCharts();renderDayStrip();renderBar();renderExec();render();updTabCount();if(document.getElementById('plani-top')&&document.getElementById('plani-top').style.display!=='none')renderPlaniInd();if(document.getElementById('ejec-top')&&document.getElementById('ejec-top').style.display!=='none')renderEjecTop();}
 function renderPeriod(){
-  var pw=document.getElementById('period-week');if(pw)pw.innerHTML='Semana '+(DATA.semana||'—')+(WSLOT===1?' <span class="wk-tag next">🔭 PRÓXIMA · PREPARATIVOS</span>':' <span class="wk-tag">📅 EN CURSO</span>');
+  var pw=document.getElementById('period-week');if(pw)pw.innerHTML='Semana '+(DATA.semana||'—')+(HIST_VIEW?' <span class="wk-tag" style="background:#fff7e6;color:#b45309">🗂 ARCHIVADA · SOLO LECTURA</span>':WSLOT===1?' <span class="wk-tag next">🔭 PRÓXIMA · PREPARATIVOS</span>':' <span class="wk-tag">📅 EN CURSO</span>');
   var d0=DATA.dates[0]||'',d6=DATA.dates[6]||'';var pr=document.getElementById('period-range');
   if(pr)pr.textContent=(d0&&d6)?('Del '+d0+' al '+d6+(DATA.anio?' · '+DATA.anio:'')):(DATA.anio||'');
 }
@@ -2942,7 +3199,7 @@ function renderGantt(){
       var chip=qb?'<span class="g-chip">'+(MODE==='plani'?'↺ Replanificar':'⚠ Quiebre')+'</span>':'';
       var meta=(a.area?'<span>📍 '+esc(dispArea(a))+'</span>':'');
       var row='<div class="g-row g-act '+rowCls+'" onclick="openEdit('+jsArg(a.id)+')">';
-      row+='<div class="g-name"><div class="g-aid">'+esc(a.id)+(a.np?' · NP':'')+(ot?' · OT '+esc(ot):'')+chip+'</div><div class="g-an">'+esc(a.nombre)+'</div>'+(meta?'<div class="g-meta">'+meta+'</div>':'')+'<div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:'+mida+'%;background:'+avc+'"></div></div><span class="g-av-n" style="color:'+avc+'">'+mida+'%</span></div></div>';
+      row+='<div class="g-name"><div class="g-aid">'+esc(a.id)+(a.np?' · NP':'')+(ot?' · OT '+esc(ot):'')+chip+'</div><div class="g-an">'+esc(a.nombre)+'</div>'+(meta?'<div class="g-meta">'+meta+'</div>':'')+'<div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:'+mida+'%;background:'+avc+'"></div></div><span class="g-av-n" style="color:'+avc+'">'+mida+'%</span>'+quickSel(a)+'</div></div>';
       var tp=0,th=0;
       for(var d=0;d<7;d++){
         var v=a.dp[d]||0;tp+=v;dayTot[d]+=v;
@@ -3007,6 +3264,7 @@ function acard(a){
   h+='<div class="ac-foot"><span class="ac-st b-na">Plan <b>'+tp+'</b></span><span class="ac-st b-ve">Real <b>'+tr+'</b></span>'
     +(e.log&&e.log.length?'<span class="ac-st">💬 '+e.log.length+'</span>':'');
   if(MODE==='ejec'){
+    h+=quickSel(a);
     if(!qb&&estadoOf(a)==='Sin iniciar')h+='<button class="ac-qb" onclick="event.stopPropagation();openQuiebre('+jsArg(a.id)+')">⚠ Quiebre</button>';
     h+='<button class="ac-edit" onclick="event.stopPropagation();openEdit('+jsArg(a.id)+')">▶ Ejecución</button>';
   }else{
@@ -3016,7 +3274,35 @@ function acard(a){
 }
 
 /* ── EDIT MODAL ── */
+/* Búsqueda por voz (Chrome / Android): dicta el nombre, la OT o el ejecutor */
+var _SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+function voiceSearch(inputId){
+  if(!_SR){toast('Este navegador no soporta dictado por voz');return;}
+  var inp=document.getElementById(inputId);if(!inp)return;
+  var rec=new _SR();rec.lang='es-CL';rec.interimResults=false;rec.maxAlternatives=1;
+  var btn=document.getElementById('mic-'+inputId);if(btn)btn.classList.add('rec');
+  toast('🎤 Escuchando… di el nombre de la actividad, la OT o el ejecutor');
+  rec.onresult=function(ev){var t=(ev.results[0][0].transcript||'').trim();inp.value=t;inp.dispatchEvent(new Event('input'));toast('🔍 «'+t+'»');};
+  rec.onerror=function(ev){toast('No se pudo reconocer la voz'+(ev.error?' ('+ev.error+')':''));};
+  rec.onend=function(){if(btn)btn.classList.remove('rec');};
+  try{rec.start();}catch(e){toast('No se pudo iniciar el micrófono');if(btn)btn.classList.remove('rec');}
+}
 function findAct(id){var r=null;DATA.secs.forEach(function(s){s.actividades.forEach(function(a){if(a.id===id)r=a;});});return r;}
+/* Estado de ejecución directo desde la lista/tarjeta, sin abrir el detalle */
+function quickSel(a){
+  if(MODE!=='ejec'||isQuiebre(a))return '';
+  var cur=ed(a.id).estEj||'Sin iniciar';
+  return '<select class="qsel" title="Cambiar estado de ejecución" onclick="event.stopPropagation()" onchange="event.stopPropagation();quickEstado('+jsArg(a.id)+',this.value)">'
+    +EJ_OPTS.map(function(o){return '<option value="'+escAttr(o)+'"'+(o===cur?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';
+}
+function quickEstado(id,v){
+  if(HIST_VIEW){histGuard();render();return;}
+  if(!ensureUser()){render();return;}
+  var e=ed(id);var old=e.estEj||'Sin iniciar';if(old===v)return;
+  e.estEj=v;if(v==='Completada')e.mida=100;else if(v==='Sin iniciar')e.mida=0;
+  MODE='ejec';logAction('Estado',id,old+' → '+v);markUnsaved();refreshAll();
+  toast('✓ '+id+' · '+v);
+}
 function openEdit(id){
   if(editId!==id)PLAN_UNLOCKED=false;
   editId=id;var a=findAct(id);if(!a)return;var e=ed(id);var rd=realDot(a);
@@ -3437,7 +3723,7 @@ function unlockPlan(){
   if(PLAN_UNLOCKED)return;
   var k=prompt('Clave para editar el plan (solo Planificación):');
   if(k===null)return;
-  if(k==='BeKa'){PLAN_UNLOCKED=true;toast('🔓 Plan desbloqueado · edita y luego Guardar cambios');openEdit(editId);}
+  if(checkAdminKey(k)){PLAN_UNLOCKED=true;toast('🔓 Plan desbloqueado · edita y luego Guardar cambios');openEdit(editId);}
   else toast('Clave incorrecta');
 }
 function savePlan(){PLAN_UNLOCKED=false;Store.set(dataKey(),DATA);if(typeof save==='function')save();toast('💾 Plan guardado y bloqueado');openEdit(editId);}
@@ -3520,7 +3806,7 @@ function addObs(){
   pendingPhoto=null;showPending('log');renderObsLog();updTabCount();markUnsaved();
   if(TAB==='bitacora')renderBitacora();
 }
-function delObs(i){var m=ed(editId).log[i];logAction('Nota eliminada',editId,(m&&m.text?m.text:'(foto)').slice(0,120));ed(editId).log.splice(i,1);renderObsLog();updTabCount();markUnsaved();if(TAB==='bitacora')renderBitacora();}
+function delObs(i){var m=ed(editId).log[i];logAction('Nota eliminada',editId,(m&&m.text?m.text:'(foto)').slice(0,120));if(m&&m.ts)tomb('l',m.ts);ed(editId).log.splice(i,1);renderObsLog();updTabCount();markUnsaved();if(TAB==='bitacora')renderBitacora();}
 
 /* ── BITÁCORA GENERAL ── */
 function buildBitFilters(){
@@ -3575,7 +3861,7 @@ function bitAdd(){
   if(inp){inp.value='';inp.style.height='auto';}
   pendingPhoto=null;showPending('bit');renderBitacora();updTabCount();markUnsaved();
 }
-function delBitNote(actId,idx){var m=ed(actId).log[idx];logAction('Nota eliminada',actId,(m&&m.text?m.text:'(foto)').slice(0,120));ed(actId).log.splice(idx,1);renderBitacora();updTabCount();markUnsaved();}
+function delBitNote(actId,idx){var m=ed(actId).log[idx];logAction('Nota eliminada',actId,(m&&m.text?m.text:'(foto)').slice(0,120));if(m&&m.ts)tomb('l',m.ts);ed(actId).log.splice(idx,1);renderBitacora();updTabCount();markUnsaved();}
 function goBitacora(actId){closeModal();showTab('bitacora');var sel=document.getElementById('bit-act');if(sel)sel.value=actId;var fil=document.getElementById('bit-filter');if(fil)fil.value=actId;renderBitacora();var inp=document.getElementById('bit-input');if(inp)inp.focus();}
 
 /* ── REPROGRAMACIÓN ── */
@@ -3751,7 +4037,7 @@ function delAction(ts){
   if(!confirm(msg))return;
   if(rev.can)applyRevert(act);
   var done=false;ACTIONS=ACTIONS.filter(function(x){if(!done&&x.ts===ts){done=true;return false;}return true;});
-  saveActions();
+  tomb('a',ts);saveActions();
   if(rev.can){markUnsaved();refreshAll();if(editId&&document.getElementById('mo').classList.contains('open'))openEdit(editId);}
   renderHist();
   toast(rev.can?'✓ Movimiento eliminado y acción revertida':'Movimiento eliminado del historial');
@@ -4025,6 +4311,7 @@ function trAdd(){
 }
 function delTrComment(ts){
   var c=null;for(var i=0;i<HANDOVERS.length;i++){if(HANDOVERS[i].ts===ts){c=HANDOVERS[i];HANDOVERS.splice(i,1);break;}}
+  tomb('t',ts);
   if(c)logAction('Traspaso eliminado','',(c.text||'(foto)').slice(0,120));
   saveHandovers();renderTraspaso();
 }
@@ -4107,7 +4394,7 @@ function guardarNP(){
   showTab(MODE==='ejec'?'ejec':'plani');openEdit(np.id);
 }
 function eliminarNP(id){
-  NPACTS=NPACTS.filter(function(n){return n.id!==id;});saveNP();
+  tomb('n',id);NPACTS=NPACTS.filter(function(n){return n.id!==id;});saveNP();
   DATA.secs.forEach(function(s){s.actividades=s.actividades.filter(function(a){return a.id!==id;});});
   DATA.secs=DATA.secs.filter(function(s){return s.actividades.length>0;});
   delete EDITS[id];
@@ -5019,6 +5306,38 @@ function exportar(){
 /* ── Utils ── */
 function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escAttr(s){return esc(s).replace(/"/g,'&quot;');}
+/* Un error interno ya no deja la app «muda»: se avisa en pantalla (y queda en consola) */
+var _errT=0;
+window.addEventListener('error',function(ev){var now=Date.now();if(now-_errT<4000)return;_errT=now;try{toast('⚠ Error interno: '+String(ev.message||'').slice(0,120)+' — si se repite, recarga la página');}catch(e){}});
+window.addEventListener('unhandledrejection',function(ev){var now=Date.now();if(now-_errT<4000)return;_errT=now;try{var m=(ev.reason&&ev.reason.message)||String(ev.reason||'');toast('⚠ Error interno: '+m.slice(0,120));}catch(e){}});
+/* Respaldo completo de la app (todo lo guardado: semanas activas, ediciones, archivo, índice) */
+function backupAll(){
+  var o={app:'sinfra-prep',v:2,ts:Date.now(),by:userName(),keys:{}};
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(Store.ns)===0&&k!==Store.ns+'user')o.keys[k]=localStorage.getItem(k);}}catch(e){}
+  var bl=new Blob([JSON.stringify(o)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(bl);
+  var d=new Date();a.download='Respaldo_completo_SINFRA_'+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+'.json';a.click();
+  toast('⬇ Respaldo completo descargado ('+Object.keys(o.keys).length+' registros)');
+}
+function restoreAll(file){
+  if(!file)return;if(!requireAdmin())return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{var o=JSON.parse(ev.target.result);if(!o||o.app!=='sinfra-prep'||!o.keys)throw new Error('no es un respaldo completo de esta app');
+      if(!confirm('Restaurar '+Object.keys(o.keys).length+' registros del respaldo del '+new Date(o.ts).toLocaleString('es-CL')+'?\nLo que no exista localmente se agrega; lo existente se fusiona (gana lo más reciente). Luego la página se recarga.'))return;
+      var merged={};Object.keys(o.keys).forEach(function(k){merged[k]=o.keys[k];});
+      /* usa la misma fusión que la nube: lo local más reciente se conserva */
+      CLOUD._applying=true;try{
+        Object.keys(merged).forEach(function(k){var local=localStorage.getItem(k);if(local===null){localStorage.setItem(k,merged[k]);return;}
+          var m=cloudMerge(k.slice(Store.ns.length),local,merged[k],null);
+          /* al restaurar, si la clave no es fusionable, manda el respaldo solo cuando lo local no existe */
+          if(m.json!==merged[k]||m.localWon||m.remoteWon)localStorage.setItem(k,m.json);});
+      }finally{CLOUD._applying=false;}
+      if(CLOUD.active()){CLOUD.setDirty(true);}
+      toast('✓ Respaldo restaurado — recargando…');setTimeout(function(){location.reload();},900);
+    }catch(e){toast('⚠ No se pudo restaurar: '+e.message);}
+  };
+  r.readAsText(file,'UTF-8');
+}
 var _tt;function toast(msg){var e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){e.classList.remove('show');},2600);}
 
 /* ── Init ── */
@@ -5035,6 +5354,7 @@ function uiReset(){
   var ts=document.getElementById('turno-seg');if(ts)ts.style.display='none';
   var ot=document.getElementById('ot-toggle');if(ot)ot.style.display='none';
   var si=document.getElementById('save-ind');if(si)si.style.display='none';
+  archApplyUI();
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -5381,6 +5701,252 @@ function refreshNuevos(){
   if(d&&d.style.display!=='none')renderDetalleAct();
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   ARCHIVO DE SEMANAS
+   Cada semana subida se conserva completa: programa + avances/preparativos
+   (edits) + historial de acciones + traspasos + NP + PPT + notificaciones
+   + RF22 + cierre. Se archiva automáticamente al «Finalizar semana» y al
+   reemplazar un programa cargado. Se guarda:
+   · localmente (prep_arch_<año>_<sem>; si no cabe, sin fotos), y
+   · en la nube como fila propia de la tabla «terreno»
+     (id = SUPA_DOC + ':' + año + '-' + semana), fuera del documento compartido,
+     para que éste no crezca. Solo el índice (prep_arch_idx) viaja en el
+     documento compartido, así todos los usuarios ven la misma lista.
+   Al abrir una semana archivada la app entra en modo solo lectura: Store
+   lee virtualmente desde el paquete y descarta las escrituras.
+   ═════════════════════════════════════════════════════════════════════ */
+var HIST_PREV=null, ARCH_MEM={}, ARCH_SENDING={}, ARCH_SYNC_T=0;
+function archLocalKey(k){return /^(data|data_next|edits_s|acciones_s|traspasos_s|np_s|ppt_s|notifs_s|rf22_s|fin_s|tomb_s)/.test(k);}
+function archVirt(k){
+  var b=HIST_B;if(!b)return undefined;
+  if(k==='data'||k==='data_next')return b.data;
+  var m={edits_s:'edits',acciones_s:'acciones',traspasos_s:'traspasos',np_s:'np',ppt_s:'ppt',notifs_s:'notifs',rf22_s:'rf22',fin_s:'fin',tomb_s:'tomb'};
+  for(var p in m){if(k.indexOf(p)===0){if(k.slice(p.length)!==String(b.semana))return undefined;var v=b[m[p]];return (v==null)?undefined:v;}}
+  return undefined;
+}
+function archKey(anio,sem){return 'arch_'+(anio||'0000')+'_'+pad2(parseInt(sem,10)||sem);}
+function archRowId(anio,sem){return SUPA_DOC+':'+(anio||'0000')+'-'+pad2(parseInt(sem,10)||sem);}
+function histGuard(){if(HIST_VIEW){toast('🗂 Estás viendo una semana archivada (solo lectura) — presiona «← Volver» para seguir con la semana actual');return true;}return false;}
+function archIdx(){var x=Store.get('arch_idx',{});return (x&&typeof x==='object'&&!Array.isArray(x))?x:{};}
+function archResumen(b,motivo){
+  var d=b.data||{},ed2=b.edits||{};var n=0,comp=0,proc=0,plan=0,real=0,psum=0,pap=0,fotos=0,quiebres=0,np=0;
+  (d.secs||[]).forEach(function(s){(s.actividades||[]).forEach(function(a){
+    n++;var e=ed2[a.id]||{};if(a.np)np++;
+    if(e.estEj==='Completada')comp++;else if(e.estEj==='En proceso')proc++;
+    var dp=a.dp||[],dr=(e.dr&&e.dr.length===7)?e.dr:(a.dr0||dp);
+    for(var i=0;i<7;i++){plan+=(+dp[i]||0);real+=(+dr[i]||0);}
+    var r=prepPctRaw(e);if(r.ap>0){psum+=r.pct;pap++;}
+    if(e.quiebre)quiebres++;
+    (e.log||[]).forEach(function(m){if(m&&m.photo)fotos++;});
+  });});
+  return {k:archKey(d.anio,d.semana),semana:d.semana,anio:d.anio,dates:[(d.dates&&d.dates[0])||'',(d.dates&&d.dates[6])||''],filename:d.filename||'',ts:b.ts,by:b.by,motivo:motivo,
+    n:n,comp:comp,proc:proc,np:np,quiebres:quiebres,plan:plan,real:real,cumpl:plan?Math.round(real/plan*100):0,prep:pap?Math.round(psum/pap):0,
+    fotos:fotos,acciones:(b.acciones||[]).length,traspasos:(b.traspasos||[]).length,rf22:!!(b.rf22&&b.rf22.ts),sinFotos:!!b.sinFotos};
+}
+function archBuild(d,motivo){
+  var sm=d.semana;
+  var b={v:1,semana:sm,anio:d.anio,ts:Date.now(),by:userName(),motivo:motivo,data:d,
+    edits:Store.get('edits_s'+sm,{}),acciones:Store.get('acciones_s'+sm,[]),traspasos:Store.get('traspasos_s'+sm,[]),
+    np:Store.get('np_s'+sm,[]),ppt:Store.get('ppt_s'+sm,{}),notifs:Store.get('notifs_s'+sm,[]),rf22:Store.get('rf22_s'+sm,null),fin:Store.get('fin_s'+sm,null),tomb:Store.get('tomb_s'+sm,null)};
+  b.resumen=archResumen(b,motivo);return b;
+}
+/* Semana que ocupa el espacio (slot) actual → archivo antes de cargar otro programa encima */
+function archReplace(){
+  var prev=Store.get(dataKey(),null);
+  if(!prev||!prev.secs||prev.semana==null)return;
+  try{clearTimeout(_sv);if(DATA)save();}catch(e){}
+  if(archSnapshot(prev,'reemplazada'))toast('🗂 Semana '+prev.semana+' archivada antes de reemplazarla');
+}
+function archSnapshot(d,motivo){
+  var b=archBuild(d,motivo);var old=archIdx()[b.resumen.k];
+  /* Una semana ya finalizada no se pisa con una copia «reemplazada» */
+  if(old&&old.motivo==='finalizada'&&motivo!=='finalizada')return false;
+  archSave(b);return true;
+}
+/* Copia sin adjuntos (fotos/documentos en data:URL) para cuando no hay espacio */
+function archStrip(b){
+  var c=JSON.parse(JSON.stringify(b));
+  (function walk(o){if(!o||typeof o!=='object')return;Object.keys(o).forEach(function(k){var v=o[k];
+    if(typeof v==='string'){if(v.length>2000&&v.indexOf('data:')===0)o[k]=null;}else if(v&&typeof v==='object')walk(v);});})(c);
+  c.sinFotos=true;c.resumen=archResumen(c,c.motivo);return c;
+}
+function archLocalSet(k,b){try{localStorage.setItem(Store.ns+k,JSON.stringify(b));return true;}catch(e){return false;}}
+function archLocalGet(k){var v=Store.get(k,null);return (v&&v.data&&v.data.secs)?v:null;}
+function archPend(){var p=Store.get('arch_pend',[]);return Array.isArray(p)?p:[];}
+function archPendAdd(k){var p=archPend();if(p.indexOf(k)<0)p.push(k);Store.set('arch_pend',p);}
+function archPendDel(k){Store.set('arch_pend',archPend().filter(function(x){return x!==k;}));}
+function archSave(b){
+  var k=b.resumen.k;var idx=archIdx();idx[k]=b.resumen;Store.set('arch_idx',idx);
+  var ok=archLocalSet(k,b);
+  if(!ok){var s=archStrip(b);ok=archLocalSet(k,s);
+    if(ok)toast('⚠ Poco espacio en este equipo: la semana '+b.semana+' quedó guardada localmente sin fotos'+(CLOUD.active()?' (completa en la nube)':''));
+    else toast('⚠ Sin espacio en este equipo para archivar la semana '+b.semana+(CLOUD.active()?' — se guardará solo en la nube':''));}
+  if(CLOUD.active()){ARCH_MEM[k]=b;archPendAdd(k);archFlush();}
+  else if(ok)setTimeout(function(){archCleanup(b);},2500); /* tras recargar(): la semana ya salió del tablero */
+  renderSemanas();
+}
+/* Sube a la nube las semanas pendientes (cola persistente: sobrevive sin señal y al cerrar la app) */
+function archFlush(){
+  if(typeof CLOUD==='undefined'||!CLOUD.active()||!CLOUD.online())return;
+  archPend().forEach(function(k){
+    if(ARCH_SENDING[k])return;
+    var b=ARCH_MEM[k]||archLocalGet(k);if(!b){archPendDel(k);return;}
+    ARCH_SENDING[k]=true;
+    archPost(b).then(function(r){
+      ARCH_SENDING[k]=false;
+      if(r.ok){archPendDel(k);delete ARCH_MEM[k];archCleanup(b);toast('🌐 ✓ Semana '+b.semana+' archivada en la nube');renderSemanas();}
+      else if((r.status===413||r.status===400||r.status===0)&&!b.sinFotos&&b.resumen.fotos>0){
+        /* demasiado grande o cuerpo rechazado: reintenta sin adjuntos */
+        var s=archStrip(b);ARCH_MEM[k]=s;var idx=archIdx();idx[k]=s.resumen;Store.set('arch_idx',idx);setTimeout(archFlush,500);
+      }else{if(r.status)toast('⚠ La nube rechazó el archivo de la semana '+b.semana+' ('+r.status+') — se reintentará');setTimeout(archFlush,20000);}
+    });
+  });
+}
+function archPost(b){
+  var stamp=new Date().toISOString();
+  var body=JSON.stringify({id:archRowId(b.anio,b.semana),data:b,cid:CLOUD.cid,updated_at:stamp});
+  return fetch(CLOUD.url(''),{method:'POST',headers:Object.assign({'Prefer':'resolution=merge-duplicates,return=minimal'},CLOUD.hdr()),body:body})
+    .then(function(r){return {ok:r.ok,status:r.status};}).catch(function(){return {ok:false,status:0};});
+}
+/* Tras archivar una semana FINALIZADA con éxito, sus claves de trabajo salen del
+   documento compartido (que si no crece semana a semana con las fotos). Se
+   conservan rf22_s (saldo para la semana siguiente) y fin_s. */
+function archCleanup(b){
+  if(b.motivo!=='finalizada')return;
+  var sm=String(b.semana);
+  var d0=Store.get('data',null),d1=Store.get('data_next',null);
+  if((d0&&String(d0.semana)===sm)||(d1&&String(d1.semana)===sm))return;
+  if(DATA&&String(DATA.semana)===sm&&!HIST_VIEW)return;
+  ['edits_s','acciones_s','traspasos_s','np_s','ppt_s','notifs_s','tomb_s'].forEach(function(p){Store.del(p+sm);});
+}
+function archLoad(k,cb){
+  var mem=ARCH_MEM[k];if(mem){cb(mem);return;}
+  var meta=archIdx()[k],loc=archLocalGet(k);
+  if(loc&&!loc.sinFotos){cb(loc);return;}
+  if(CLOUD.active()&&CLOUD.online()&&meta){
+    showBusy('Descargando la semana '+meta.semana+' desde la nube…');
+    fetch(CLOUD.url('?id=eq.'+encodeURIComponent(archRowId(meta.anio,meta.semana))+'&select=data'),{headers:CLOUD.hdr()})
+      .then(function(r){return r.json();})
+      .then(function(rows){hideBusy();var b=rows&&rows[0]&&rows[0].data;if(b&&b.data&&b.data.secs)cb(b);else if(loc)cb(loc);else toast('⚠ La semana no está en la nube ni en este equipo');})
+      .catch(function(){hideBusy();if(loc)cb(loc);else toast('⚠ Sin conexión y la semana no está guardada en este equipo');});
+    return;
+  }
+  if(loc)cb(loc);else toast('⚠ La semana no está disponible en este equipo'+(CLOUD.active()?' (sin conexión con la nube)':''));
+}
+/* Sincroniza el índice con las filas de archivo que existen en la nube (semanas archivadas desde otros equipos) */
+function archSync(manual){
+  if(typeof CLOUD==='undefined'||!CLOUD.active()||!CLOUD.online()){if(manual)toast('Sin conexión con la nube');return;}
+  var now=Date.now();if(!manual&&now-ARCH_SYNC_T<30000)return;ARCH_SYNC_T=now;
+  fetch(CLOUD.url('?id=like.'+encodeURIComponent(SUPA_DOC+':*')+'&select=id,updated_at,res:data->resumen'),{headers:CLOUD.hdr()})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      if(!Array.isArray(rows))return;var idx=archIdx(),ch=0;
+      rows.forEach(function(row){var r=row.res;if(!r||!r.k)return;var cur=idx[r.k];if(!cur||(r.ts||0)>(cur.ts||0)){idx[r.k]=r;ch++;}});
+      if(ch){Store.set('arch_idx',idx);renderSemanas();}
+      if(manual)toast(ch?'🌐 '+ch+' semana(s) actualizada(s) desde la nube':'🌐 El archivo ya estaba al día ('+rows.length+' semanas en la nube)');
+    }).catch(function(){if(manual)toast('⚠ No se pudo consultar la nube');});
+}
+function archList(){var idx=archIdx();return Object.keys(idx).map(function(k){var r=idx[k];r.k=r.k||k;return r;})
+  .sort(function(a,b){var ya=parseInt(a.anio,10)||0,yb=parseInt(b.anio,10)||0;if(ya!==yb)return yb-ya;return (parseInt(b.semana,10)||0)-(parseInt(a.semana,10)||0);});}
+function archFmtTs(ts){if(!ts)return '—';var d=new Date(ts);return d.toLocaleDateString('es-CL')+' '+d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});}
+function archListHtml(){
+  var list=archList(),pend=archPend();
+  if(!list.length)return '<div class="empty">Aún no hay semanas guardadas. Cada semana queda archivada automáticamente al presionar «Finalizar semana» (o al reemplazar el programa cargado).</div>';
+  var cur=(HIST_VIEW&&HIST_B)?HIST_B.resumen.k:null;
+  return list.map(function(r){
+    var loc=!!archLocalGet(r.k),isPend=pend.indexOf(r.k)>=0;
+    var st=r.motivo==='finalizada'?'<span class="sem-tag fin">✓ Finalizada</span>':r.motivo==='importada'?'<span class="sem-tag imp">⬆ Importada</span>':'<span class="sem-tag rep">↺ Reemplazada sin finalizar</span>';
+    var where=(isPend?'<span class="sem-tag pend">⏳ Pendiente de subir</span>':(CLOUD.active()?'<span class="sem-tag cloud">🌐 Nube</span>':''))+(loc?'<span class="sem-tag loc">💾 Este equipo</span>':'');
+    return '<div class="sem-row'+(cur===r.k?' cur':'')+'">'
+      +'<div class="sem-wk"><div class="sem-n">S'+esc(r.semana)+'</div><div class="sem-y">'+esc(r.anio||'')+'</div></div>'
+      +'<div class="sem-main"><div class="sem-t">Semana '+esc(r.semana)+' · '+esc(r.anio||'')+(r.dates&&r.dates[0]?' · '+esc(r.dates[0])+' → '+esc(r.dates[1]):'')+' '+st+where+'</div>'
+      +'<div class="sem-stats"><span><b>'+(r.n||0)+'</b> actividades</span><span><b>'+(r.comp||0)+'</b> completadas</span><span><b>'+(r.proc||0)+'</b> en proceso</span><span>Cumpl. dotación <b>'+(r.cumpl||0)+'%</b></span><span>Preparativos <b>'+(r.prep||0)+'%</b></span>'
+      +(r.quiebres?'<span><b>'+r.quiebres+'</b> quiebres</span>':'')+(r.np?'<span><b>'+r.np+'</b> NP</span>':'')+'<span><b>'+(r.fotos||0)+'</b> fotos</span><span><b>'+(r.acciones||0)+'</b> acciones</span>'+(r.traspasos?'<span><b>'+r.traspasos+'</b> traspasos</span>':'')+(r.rf22?'<span>RF22 ✓</span>':'')+'</div>'
+      +'<div class="sem-meta">Guardada '+archFmtTs(r.ts)+' · '+esc(r.by||'—')+(r.filename?' · '+esc(r.filename):'')+(r.sinFotos?' · <b>sin fotos</b>':'')+'</div></div>'
+      +'<div class="sem-acts"><button class="cl-ab" style="padding:8px 14px" onclick="archOpen('+jsArg(r.k)+')">👁 Ver</button><button class="fclear" onclick="archExport('+jsArg(r.k)+')" title="Descarga el respaldo completo (.json) de la semana">⬇ Respaldo</button><button class="fclear" style="color:var(--ro)" onclick="archDelete('+jsArg(r.k)+')" title="Eliminar del archivo (solo encargado)">🗑</button></div></div>';
+  }).join('');
+}
+function renderSemanas(){
+  var h=null;
+  ['sem-list','sem-list-mo'].forEach(function(id){var box=document.getElementById(id);if(!box)return;if(h===null)h=archListHtml();box.innerHTML=h;});
+  var n=archList().length;
+  var badge=document.getElementById('sem-badge');if(badge)badge.textContent=n+' semana'+(n===1?'':'s');
+  var un=document.getElementById('u-arch-n');if(un)un.textContent=n?'('+n+')':'';
+}
+function openArch(){renderSemanas();document.getElementById('arch-mo').classList.add('open');archSync(false);}
+function closeArch(){document.getElementById('arch-mo').classList.remove('open');}
+function archApplyUI(){
+  var h=HIST_VIEW;
+  var bb=document.getElementById('btn-archback');if(bb)bb.classList.toggle('show',h);
+  var bs=document.getElementById('btn-sem');if(bs)bs.classList.add('show');
+  document.body.classList.toggle('wk-hist',h);
+  renderSemanas();
+}
+/* Abre una semana archivada en modo solo lectura */
+function archOpen(k){
+  if(HIST_VIEW&&HIST_B&&HIST_B.resumen.k===k){closeArch();toast('Ya estás viendo esta semana');return;}
+  archLoad(k,function(b){
+    if(!HIST_VIEW){try{clearTimeout(_sv);if(DATA)save();}catch(e){}HIST_PREV={slot:WSLOT,tab:TAB,had:!!DATA};}
+    closeArch();
+    HIST_VIEW=true;HIST_B=b;WSLOT=0;
+    DATA=b.data;EDITS=(b.edits&&typeof b.edits==='object')?b.edits:{};b.edits=EDITS;
+    PPTINFO={};FLT='';CHFLT={type:null,val:null};FILT={disc:'',loc:'',crit:'',estado:''};DIA_INIT=false;
+    document.body.classList.remove('wk-next');
+    showDash(true);
+    showTab('plani');
+    toast('🗂 Semana '+b.semana+' · '+(b.anio||'')+' — archivada, solo lectura'+(b.sinFotos?' (copia sin fotos)':''));
+  });
+}
+/* Vuelve a la semana actual */
+function archClose(){
+  if(!HIST_VIEW)return;
+  HIST_VIEW=false;HIST_B=null;DATA=null;EDITS={};PPTINFO={};FLT='';CHFLT={type:null,val:null};FILT={disc:'',loc:'',crit:'',estado:''};DIA_INIT=false;
+  var pv=HIST_PREV||{};HIST_PREV=null;
+  document.body.classList.remove('wk-hist');
+  var sl=(pv.slot===1)?1:0;var d=Store.get(dataKey(sl),null);
+  if(d&&d.secs){WSLOT=sl;DATA=d;var sv=Store.get('edits_s'+DATA.semana,{});EDITS=(sv&&typeof sv==='object')?sv:{};showDash(true);showTab(pv.tab||'plani');}
+  else if(restoreData()){showDash(true);showTab(pv.tab||'plani');}
+  else{uiReset();}
+  if(CLOUD._pending){CLOUD._pending=false;if(DATA)reloadFromStore();}
+  toast('↩ De vuelta a la semana actual');
+}
+function archExport(k){
+  archLoad(k,function(b){
+    var txt=JSON.stringify(b);var bl=new Blob([txt],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='Semana_'+pad2(parseInt(b.semana,10)||b.semana)+'_'+(b.anio||'')+'_respaldo.json';a.click();
+    toast('⬇ Respaldo de la semana '+b.semana+' descargado');
+  });
+}
+function archImport(file){
+  if(!file)return;
+  if(!requireAdmin())return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var b=JSON.parse(ev.target.result);
+      if(!b||!b.data||!b.data.secs||b.semana==null)throw new Error('el archivo no es un respaldo de semana de esta app');
+      b.motivo=b.motivo||'importada';b.ts=b.ts||Date.now();b.by=b.by||userName();
+      b.resumen=archResumen(b,b.motivo);
+      archSave(b);toast('✓ Semana '+b.semana+' · '+(b.anio||'')+' importada al archivo');
+    }catch(e){toast('⚠ No se pudo importar: '+e.message);}
+  };
+  r.readAsText(file,'UTF-8');
+}
+function archDelete(k){
+  if(!requireAdmin())return;
+  var r=archIdx()[k];if(!r)return;
+  if(!confirm('¿Eliminar del archivo la semana '+r.semana+' · '+(r.anio||'')+'? Se borra en este equipo y en la nube. Esta acción no se puede deshacer.'))return;
+  var idx=archIdx();delete idx[k];Store.set('arch_idx',idx);
+  Store.del(k);archPendDel(k);delete ARCH_MEM[k];
+  if(CLOUD.active()&&CLOUD.online()){
+    fetch(CLOUD.url('?id=eq.'+encodeURIComponent(archRowId(r.anio,r.semana))),{method:'DELETE',headers:CLOUD.hdr()})
+      .then(function(x){if(!x.ok)toast('⚠ La nube no permitió borrar la fila ('+x.status+') — revisa la política delete de la tabla');})
+      .catch(function(){});
+  }
+  if(HIST_VIEW&&HIST_B&&HIST_B.resumen.k===k)archClose();
+  renderSemanas();toast('🗑 Semana '+r.semana+' eliminada del archivo');
+}
+
 function boot(){
   loadUser();
   if(USER&&USER.nombre&&!USER.grupo){setTimeout(function(){openReg(true);toast('Indica tu grupo de turno');},400);}
@@ -5388,6 +5954,7 @@ function boot(){
   var _restored=restoreData();
   if(_restored){showDash(true);}
   else{uiReset();}
+  renderSemanas();
   if(!_restored&&(!USER||!USER.nombre)){setTimeout(function(){openReg(false);},200);}
   if(CLOUD.active()){
     setSaved(true);CLOUD.start();
