@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- CSP: limita scripts a este documento + cdnjs, imágenes a data:/blob: (fotos de bitácora)
      y deja connect-src preparado para Supabase (https/wss *.supabase.co). -->
-<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-inline&#39; https://cdnjs.cloudflare.com; style-src &#39;self&#39; &#39;unsafe-inline&#39; https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src &#39;self&#39; data: blob:; connect-src &#39;self&#39; https://*.supabase.co wss://*.supabase.co; object-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-inline&#39; https://cdnjs.cloudflare.com; style-src &#39;self&#39; &#39;unsafe-inline&#39; https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src &#39;self&#39; data: blob: https://*.supabase.co; connect-src &#39;self&#39; https://*.supabase.co wss://*.supabase.co; object-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#E55302">
@@ -1345,6 +1345,22 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
   .user-chip{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 </style>
+<style>
+/* ── Menú de opciones (mismo estilo que la versión MGA) ── */
+.opt-wrap{position:relative}
+.opt-btn{font-family:var(--fn);font-size:12px;font-weight:700;color:var(--go);background:var(--wh);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.opt-btn:hover{border-color:var(--na);color:var(--na)}
+.opt-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);width:272px;background:var(--wh);border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh2);padding:6px;z-index:260}
+.opt-menu.open{display:block}
+.opt-sec{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gl);padding:9px 10px 3px}
+.opt-sep{height:1px;background:var(--bd);margin:5px 6px}
+.opt-menu .btn{display:none;width:100%;justify-content:flex-start;text-align:left;background:none;border:none;box-shadow:none;color:var(--bk);font-size:12.5px;font-weight:600;padding:8px 10px;border-radius:9px;gap:9px}
+.opt-menu .btn.show{display:flex}
+.opt-menu .btn:hover{background:var(--gb);color:var(--na);transform:none;filter:none;box-shadow:none}
+.opt-menu .btn small{margin-left:auto;font-size:9.5px;color:var(--gl);font-weight:700}
+.opt-menu .btn.dz{color:var(--ro)}
+@media(max-width:640px){.htitle{display:none}}
+</style>
 </head>
 <body>
 
@@ -1356,21 +1372,30 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
     <span class="hweek" id="hweek" style="display: inline-flex;"><button class="wkp on" onclick="setWeekSlot(0)" title="Semana en curso — foco ejecución">📅 S26 · En curso</button><button class="wkp add" onclick="cargarSemana(1)" title="Cargar el programa de la semana siguiente para adelantar preparativos">＋ Semana siguiente</button></span>
   </div>
   <div class="hr2">
-    <button class="btn bo show" id="btn-ppt" onclick="document.getElementById(&#39;fippt&#39;).click()" style="display: none;">📊 + PPT</button>
-    <span class="notif-wrap"><button class="notif-bell" id="notif-bell" onclick="toggleNotifs()" title="Notificaciones">🔔<span class="notif-badge" id="notif-badge" style="display: inline-flex;">1</span></button>
+    <span class="notif-wrap"><button class="notif-bell" id="notif-bell" onclick="toggleNotifs()" title="Notificaciones">🔔<span class="notif-badge" id="notif-badge" style="display:none"></span></button>
       <div class="notif-panel" id="notif-panel">
         <div class="notif-head"><span>Notificaciones</span><button class="notif-mark" onclick="markAllNotifsRead()">Marcar leídas</button></div>
         <div class="notif-list" id="notif-list"></div>
       </div></span>
-    <button class="user-chip" id="user-chip" onclick="openReg(true)" title="Cambiar usuario" style="display: inline-flex;"><span id="user-name">renata perez</span></button>
-    <span class="save-ind" id="save-ind" style="display: flex;cursor:pointer" onclick="forceSync()" title="Tocar para sincronizar ahora"><span class="save-dot" id="save-dot"></span><span id="save-lbl">Guardado</span></span>
-    <button class="btn bp" id="btn-publish" onclick="publicarSemana()" title="Envía la semana cargada a la nube para que TODOS los usuarios la vean al instante">🌐 Publicar para todos</button>
+    <button class="user-chip" id="user-chip" onclick="openReg(true)" title="Cambiar usuario"><span id="user-name"></span></button>
+    <span class="save-ind" id="save-ind" style="cursor:pointer" onclick="forceSync()" title="Tocar para sincronizar ahora"><span class="save-dot" id="save-dot"></span><span id="save-lbl">Guardado</span></span>
     <button class="btn bo" id="btn-archback" onclick="archClose()" style="border:1.5px solid #b45309;color:#b45309">← Volver a la semana actual</button>
-    <button class="btn bo show" id="btn-sem" onclick="openArch()" title="Todas las semanas guardadas en la app">🗂 Semanas</button>
-    <button class="btn bp show" id="btn-finweek" onclick="openFinWeek()">✓ Finalizar semana</button>
-    <button class="btn bo show" id="btn-reload" onclick="recargar()">↺ Cambiar archivo</button>
-    <button class="btn bp show" id="btn-export" onclick="exportarPBIBase()" title="Genera/actualiza PBI_SINFRA_Base.xlsx — la misma base acumulativa que alimenta el Power BI — sin finalizar la semana">⬇ Base de datos PBI</button>
-    <button class="btn bo" id="btn-resetall" style="display:inline-flex" onclick="resetTotal()" title="Borra TODA la información guardada (local y nube) y reinicia la app desde cero — solo encargado">♻ Reiniciar app</button>
+    <span class="opt-wrap">
+      <button class="opt-btn" id="opt-btn" onclick="toggleOptMenu(event)" title="Opciones: cargar programa, PPT, exportar, cierre">☰ Opciones</button>
+      <div class="opt-menu" id="opt-menu">
+        <div class="opt-sec">Programa</div>
+        <button class="btn show" id="btn-ppt" onclick="optGo();document.getElementById(&#39;fippt&#39;).click()" style="display: none;">📊 Complementar con PPT<small>encargado</small></button>
+        <button class="btn" id="btn-publish" onclick="optGo();publicarSemana()" title="Envía la semana cargada a la nube para que TODOS los usuarios la vean al instante">🌐 Publicar para todos<small>encargado</small></button>
+        <button class="btn show" id="btn-reload" onclick="optGo();recargar()">↺ Cambiar archivo<small>encargado</small></button>
+        <div class="opt-sep"></div>
+        <div class="opt-sec">Datos</div>
+        <button class="btn show" id="btn-export" onclick="optGo();exportarPBIBase()" title="Genera/actualiza PBI_SINFRA_Base.xlsx sin finalizar la semana">⬇ Base de datos PBI</button>
+        <button class="btn show" id="btn-sem" onclick="optGo();openArch()" title="Todas las semanas guardadas en la app">🗂 Semanas guardadas</button>
+        <div class="opt-sep"></div>
+        <button class="btn show" id="btn-finweek" onclick="optGo();openFinWeek()">✓ Finalizar semana<small>encargado</small></button>
+        <button class="btn dz" id="btn-resetall" style="display:inline-flex" onclick="optGo();resetTotal()" title="Borra TODA la información guardada (local y nube) — solo encargado">⟲ Reiniciar app<small>encargado</small></button>
+      </div>
+    </span>
   </div>
 </header>
 
@@ -5965,7 +5990,63 @@ function boot(){
 }
 if(CLOUD.active()){CLOUD.pull().then(function(had){window._CLOUD_EMPTY=(had===false);boot();},function(){boot();});}else{boot();}
 
+/* ══════════════════════════════════════════════════════════════════
+   FOTOS EN SUPABASE STORAGE (bucket «fotos»)
+   Al adjuntar, la foto queda embebida (base64) como siempre — funciona
+   sin señal. Un barrendero en segundo plano la sube al bucket y deja en
+   su lugar la URL pública: el documento compartido queda liviano y la
+   sincronización vuelve a ser instantánea. Si el bucket no existe o no
+   hay clave, todo sigue funcionando embebido como antes.
+   ══════════════════════════════════════════════════════════════════ */
+var FOTO_BUCKET='fotos', FOTO_OFF=false, _fotoBusy=false, _fotoFail=0;
+function fotoHdr(extra){var h={'apikey':SUPA_KEY,'x-upsert':'true'};if(SUPA_KEY.indexOf('sb_')!==0)h['Authorization']='Bearer '+SUPA_KEY;if(extra)for(var k in extra)h[k]=extra[k];return h;}
+function fotoPub(p){return SUPA_URL+'/storage/v1/object/public/'+FOTO_BUCKET+'/'+p;}
+function isDataMedia(sv){return typeof sv==='string'&&sv.indexOf('data:')===0&&sv.length>500;}
+function _b64Blob(du){var m=/^data:([^;]+);base64,(.+)$/.exec(du);if(!m)return null;try{var bin=atob(m[2]),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:m[1]});}catch(e){return null;}}
+function fotoExt(du){if(du.indexOf('application/pdf')>0&&du.indexOf('application/pdf')<20)return 'pdf';var m=/^data:image\/(png|jpeg|jpg|webp)/.exec(du);return m?(m[1]==='jpeg'?'jpg':m[1]):'jpg';}
+function fotoUpload(du,path){var bl=_b64Blob(du);if(!bl)return Promise.reject('formato');
+  return fetch(SUPA_URL+'/storage/v1/object/'+FOTO_BUCKET+'/'+encodeURI(path),{method:'POST',headers:fotoHdr({'Content-Type':bl.type}),body:bl})
+    .then(function(r){if(!r.ok)throw r.status;return fotoPub(encodeURI(path));});}
+/* Recorre lo guardado buscando fotos embebidas y las sube de a una */
+function fotoJobs(){
+  var jobs=[];
+  if(!DATA)return jobs;
+  Object.keys(EDITS).forEach(function(id){var e=EDITS[id];if(!e||typeof e!=='object')return;
+    (e.log||[]).forEach(function(m2,i){if(m2&&isDataMedia(m2.photo))jobs.push({du:m2.photo,set:function(v){m2.photo=v;},kind:'edit',tag:'log_'+id+'_'+(m2.ts||i)});});
+    if(e.quiebre&&isDataMedia(e.quiebre.photo))jobs.push({du:e.quiebre.photo,set:function(v){EDITS[id].quiebre.photo=v;},kind:'edit',tag:'qb_'+id+'_'+(e.quiebre.ts||0)});
+    if(e.quiebre&&e.quiebre.doc&&isDataMedia(e.quiebre.doc.data))jobs.push({du:e.quiebre.doc.data,set:function(v){EDITS[id].quiebre.doc.data=v;},kind:'edit',tag:'qbdoc_'+id+'_'+(e.quiebre.ts||0)});
+  });
+  (typeof HANDOVERS!=='undefined'?HANDOVERS:[]).forEach(function(c,i){if(c&&isDataMedia(c.photo))jobs.push({du:c.photo,set:function(v){c.photo=v;},kind:'tr',tag:'tr_'+(c.ts||i)});});
+  return jobs;
+}
+function fotoSweep(){
+  if(FOTO_OFF||_fotoBusy||HIST_VIEW||!DATA)return;
+  if(typeof CLOUD==='undefined'||!CLOUD.active()||!CLOUD.online())return;
+  var jobs=fotoJobs();if(!jobs.length)return;
+  var j=jobs[0];_fotoBusy=true;
+  var path='sem'+String(DATA.anio||'')+'-'+String(DATA.semana)+'/'+j.tag.replace(/[^A-Za-z0-9_.-]/g,'-')+'.'+fotoExt(j.du);
+  fotoUpload(j.du,path).then(function(url){
+    _fotoBusy=false;_fotoFail=0;j.set(url);
+    try{if(j.kind==='tr')saveHandovers();else{clearTimeout(_sv);save();}}catch(e){}
+    var rest=fotoJobs().length;
+    if(rest)setTimeout(fotoSweep,400);
+    else toast('📷 ☁ Fotos respaldadas en la nube — documento liviano');
+    if(TAB==='bitacora'&&typeof renderBitacora==='function')renderBitacora();
+    if(TAB==='traspaso'&&typeof renderTraspaso==='function')renderTraspaso();
+  }).catch(function(st){
+    _fotoBusy=false;_fotoFail++;
+    if((st===400||st===404||st===403)&&_fotoFail>=2&&!FOTO_OFF){FOTO_OFF=true;
+      toast('📷 Fotos: crea el bucket «'+FOTO_BUCKET+'» en Supabase Storage para aligerar la sincronización — mientras tanto se guardan embebidas como siempre');}
+  });
+}
+setInterval(fotoSweep,20000);
+window.addEventListener('online',function(){setTimeout(fotoSweep,3000);});
+setTimeout(fotoSweep,6000);
 </script>
-
-
+<script>
+/* Menú de opciones */
+function toggleOptMenu(ev){if(ev)ev.stopPropagation();var m=document.getElementById('opt-menu');if(m)m.classList.toggle('open');}
+function optGo(){var m=document.getElementById('opt-menu');if(m)m.classList.remove('open');}
+document.addEventListener('click',function(ev){var m=document.getElementById('opt-menu');if(m&&m.classList.contains('open')&&!ev.target.closest('.opt-wrap'))m.classList.remove('open');});
+</script>
 </body></html>
