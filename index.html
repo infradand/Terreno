@@ -3023,7 +3023,26 @@ function recargar(force){
   var ok=document.getElementById('u-ppt-ok');if(ok)ok.textContent='';
   document.getElementById('fi').value='';
 }
-function refreshAll(){refreshNuevos();renderKPIs();renderPeriod();renderAlerts();renderRepro();renderPlaniAnalytics();updateCharts();renderDayStrip();renderBar();renderExec();render();updTabCount();if(document.getElementById('plani-top')&&document.getElementById('plani-top').style.display!=='none')renderPlaniInd();if(document.getElementById('ejec-top')&&document.getElementById('ejec-top').style.display!=='none')renderEjecTop();}
+/* Al re-renderizar (p. ej. al cerrar un cuadro emergente) la página volvía al inicio y había
+   que bajar de nuevo hasta la actividad. Se guarda y repone la posición de scroll de la
+   ventana y de los contenedores con scroll propio (gantt, tablas, bitácoras). */
+function _scrollSnap(){
+  var s={y:window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop||0,boxes:[]};
+  document.querySelectorAll('.gantt,.da-wrap,.bit-feed,.ekd-body').forEach(function(b){
+    if(!b.scrollTop&&!b.scrollLeft)return;var cls=b.className.split(' ')[0];
+    s.boxes.push({cls:cls,idx:Array.prototype.indexOf.call(document.querySelectorAll('.'+cls),b),top:b.scrollTop,left:b.scrollLeft});});
+  return s;
+}
+function _scrollRestore(s){
+  if(!s)return;
+  function go(){
+    if(Math.abs((window.pageYOffset||0)-s.y)>1){try{window.scrollTo({top:s.y,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,s.y);}}
+    s.boxes.forEach(function(x){var all=document.querySelectorAll('.'+x.cls),b=all[x.idx];if(b){b.scrollTop=x.top;b.scrollLeft=x.left;}});
+  }
+  go();requestAnimationFrame(go);setTimeout(go,60);
+}
+function refreshAll(){var _ss=_scrollSnap();try{_refreshAllRaw();}finally{_scrollRestore(_ss);}}
+function _refreshAllRaw(){refreshNuevos();renderKPIs();renderPeriod();renderAlerts();renderRepro();renderPlaniAnalytics();updateCharts();renderDayStrip();renderBar();renderExec();render();updTabCount();if(document.getElementById('plani-top')&&document.getElementById('plani-top').style.display!=='none')renderPlaniInd();if(document.getElementById('ejec-top')&&document.getElementById('ejec-top').style.display!=='none')renderEjecTop();}
 function renderPeriod(){
   var pw=document.getElementById('period-week');if(pw)pw.innerHTML='Semana '+(DATA.semana||'—')+(HIST_VIEW?' <span class="wk-tag" style="background:#fff7e6;color:#b45309">🗂 ARCHIVADA · SOLO LECTURA</span>':WSLOT===1?' <span class="wk-tag next">🔭 PRÓXIMA · PREPARATIVOS</span>':' <span class="wk-tag">📅 EN CURSO</span>');
   var d0=DATA.dates[0]||'',d6=DATA.dates[6]||'';var pr=document.getElementById('period-range');
@@ -3403,7 +3422,8 @@ function match(a,q,ignoreDia){
 }
 
 /* ── Render cards ── */
-function render(){
+function render(){var _ss=_scrollSnap();try{_renderRaw();}finally{_scrollRestore(_ss);}}
+function _renderRaw(){
   if(!DATA)return;
   if(VMODE==='lista'){renderGantt();return;}
   var q=(document.getElementById('sq').value||'').toLowerCase();var shown=0,html='';
