@@ -2596,11 +2596,23 @@ function parseSemTurnos(wb,sh,filename){
   var weekRaw='';for(var r0=0;r0<6;r0++){var t0=ct2((raw[r0]||[])[0]);if(/SEMANA\s*\d+/i.test(t0)){weekRaw=t0;break;}}
   var sm=(weekRaw.match(/SEMANA\s*(\d+)/i)||[])[1]||'';
   var yr=(weekRaw.match(/(20\d{2})/)||[])[1]||String(new Date().getFullYear());
-  /* 1) fila ID con los turnos */
-  var hr=-1,r,c;
-  for(r=0;r<Math.min(raw.length,12);r++){var rw=raw[r]||[];if(ct2(rw[0]).toUpperCase()==='ID'){var n=0;for(c=0;c<rw.length;c++)if(/^T[AC]\d?$/i.test(ct2(rw[c])))n++;if(n>=12){hr=r;break;}}}
-  if(hr<0)throw new Error('la hoja «'+sh+'» no tiene la fila ID con los turnos TA/TC');
-  var H=raw[hr];
+  /* 1) encabezado: fila «ID» + fila(s) con los turnos TA/TC. En algunos programas el
+     encabezado viene repartido en 2-3 filas (ID / TA2-TC2 de dotación / TA-TC de horas
+     + Orden), así que se fusionan todas las filas entre «ID» y la última fila con turnos. */
+  var hr=-1,rID=-1,rTA=-1,r,c;
+  function nTAC(rw){var n=0;for(var j=0;j<rw.length;j++)if(/^T[AC]\d?$/i.test(ct2(rw[j])))n++;return n;}
+  for(r=0;r<Math.min(raw.length,12);r++){var rw=raw[r]||[];
+    if(rID<0&&ct2(rw[0]).toUpperCase()==='ID')rID=r;
+    if(nTAC(rw)>=12&&(rID<0||r-rID<=4))rTA=r;}
+  if(rTA<0)throw new Error('la hoja «'+sh+'» no tiene fila(s) de encabezado con los turnos TA/TC');
+  if(rID<0||rID>rTA)rID=rTA;
+  hr=Math.max(rID,rTA);
+  var H=[],_KEY=/^(ORDEN|NOMBRE LISTADO|UBICACI|[ÁA]REA|EJECUTOR|SUPERVISOR|PL\s*\/\s*NP|ORIGEN|CONCLUIDO|CRITICIDAD)/i,W=0;
+  for(r=rID;r<=hr;r++)W=Math.max(W,(raw[r]||[]).length);
+  for(c=0;c<W;c++){var vT='',vK='',vF='';
+    for(r=rID;r<=hr;r++){var hv=(raw[r]||[])[c];if(hv instanceof Date)continue;hv=ct2(hv);if(!hv)continue;
+      if(!vT&&/^T[AC]\d?$/i.test(hv))vT=hv;else if(!vK&&_KEY.test(hv.toUpperCase()))vK=hv;if(!vF)vF=hv;}
+    H[c]=vT||vK||vF;}
   function colOf(re){for(var j=0;j<H.length;j++){if(re.test(ct2(H[j]).toUpperCase()))return j;}return -1;}
   var cOT=colOf(/^ORDEN/),cList=colOf(/^NOMBRE LISTADO/),cUbi=colOf(/^UBICACI/),cArea=colOf(/^[ÁA]REA/),cEjec=colOf(/^EJECUTOR/),cSup=colOf(/^SUPERVISOR/),cOrig=colOf(/^PL\s*\/\s*NP|^ORIGEN/),cConc=colOf(/^CONCLUIDO/);
   var cCrit=-1;for(r=0;r<hr;r++){var rwc=raw[r]||[];for(c=0;c<rwc.length;c++)if(/^CRITICIDAD/i.test(ct2(rwc[c]))){cCrit=c;break;}if(cCrit>=0)break;}
