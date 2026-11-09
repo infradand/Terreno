@@ -590,6 +590,21 @@ button:focus-visible,.tab:focus-visible,.fchip:focus-visible{outline:2px solid v
 .cbadge{font-size:11px;font-weight:600;color:var(--gm);margin-left:auto;white-space:nowrap}
 .fsel{font-family:var(--fn);font-size:12px;font-weight:600;color:var(--go);background:var(--wh);border:1px solid var(--bd);border-radius:11px;padding:9px 12px;outline:none;cursor:pointer;box-shadow:var(--sh);max-width:200px}
 .fsel:focus{border-color:var(--na)}
+.fms{position:relative;display:inline-block}
+.fms-b{display:inline-flex;align-items:center;gap:6px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fms-b.act{color:var(--na);border-color:var(--na);background:var(--na1)}
+.fms-car{font-size:10px;opacity:.7}
+.fms-p{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:240px;max-width:min(340px,calc(100vw - 32px));max-height:300px;overflow:auto;background:var(--wh);border:1px solid var(--bd);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.16);z-index:120;padding:6px}
+.fms.open .fms-p{display:block}
+.fms-o{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;font-size:12px;font-weight:600;color:var(--go);cursor:pointer;user-select:none}
+.fms-o:hover{background:var(--gb)}
+.fms-o input{accent-color:var(--na);width:15px;height:15px;margin:0;flex-shrink:0}
+.fms-o.on{color:var(--na)}
+.fms-top{display:flex;gap:6px;padding:4px 6px 8px;border-bottom:1px solid var(--bd);margin-bottom:4px}
+.fms-top button{font-family:var(--fn);font-size:11px;font-weight:600;color:var(--gm);background:var(--gb);border:1px solid var(--bd);border-radius:8px;padding:5px 9px;cursor:pointer}
+.fms-top button:hover{color:var(--na);border-color:var(--na)}
+.fms-n{margin-left:auto;font-size:11px;color:var(--gm);align-self:center}
+@media(max-width:640px){.fms-b{min-height:44px}.fms-o{min-height:40px}}
 .fclear{font-family:var(--fn);font-size:11px;font-weight:600;color:var(--gm);background:var(--wh);border:1px solid var(--bd);border-radius:11px;padding:9px 13px;cursor:pointer}
 .fclear:hover{border-color:var(--gm)}
 .fclear.act{color:var(--na);border-color:var(--na);background:var(--na1)}
@@ -1523,7 +1538,7 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
       <span class="seg vseg"><button class="seg-b" id="vm-cuadros" onclick="setVMode(&#39;cuadros&#39;)">▦ Cuadros</button><button class="seg-b on" id="vm-lista" onclick="setVMode(&#39;lista&#39;)">≡ Lista</button></span>
       <div class="sw"><span class="si">🔍</span><input class="sb" id="sq" placeholder="Buscar actividad, OT, ejecutor…" oninput="render()"><button class="mic" id="mic-sq" onclick="voiceSearch('sq')" title="Buscar por voz">🎤</button></div>
       <select class="fsel" id="f-disc" onchange="setFilter(&#39;disc&#39;,this.value)"><option value="">Toda disciplina</option><option value="ACTIVIDADES EMPRESAS ALTA PRESION">ACTIVIDADES EMPRESAS ALTA PRESION</option><option value="ACTIVIDADES MECÁNICAS PIPING">ACTIVIDADES MECÁNICAS PIPING</option><option value="ACTIVIDADES MECÁNICAS PIPING PLAN MATRIZ">ACTIVIDADES MECÁNICAS PIPING PLAN MATRIZ</option><option value="ACTIVIDADES TOPOGRAFIA Y PROYECTOS DE INGENIERÍA ESTRUCTURAL">ACTIVIDADES TOPOGRAFIA Y PROYECTOS DE INGENIERÍA ESTRUCTURAL</option><option value="DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO FINO">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO FINO</option><option value="DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO PRIMARIO">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CHANCADO PRIMARIO</option><option value="DISCIPLINA CONDICIONES SUB-ESTÁNDAR CONCENTRADOR">DISCIPLINA CONDICIONES SUB-ESTÁNDAR CONCENTRADOR</option><option value="DISCIPLINA CONDICIONES SUB-ESTÁNDAR PMFC">DISCIPLINA CONDICIONES SUB-ESTÁNDAR PMFC</option><option value="INSPECCIONES PERSONAL DAND">INSPECCIONES PERSONAL DAND</option><option value="ORDENAMIENTO Y GESTIÓN DE MATERIALES">ORDENAMIENTO Y GESTIÓN DE MATERIALES</option><option value="TRASLADOS DE MATERIALES/CONTINUIDAD OPERACIONAL">TRASLADOS DE MATERIALES/CONTINUIDAD OPERACIONAL</option></select>
-      <select class="fsel" id="f-loc" onchange="setFilter(&#39;loc&#39;,this.value)"><option value="">Toda ubicación</option><option value="cal interior">📍 CAL INTERIOR</option><option value="cdm">📍 CDM</option><option value="celdascolumnas">📍 CELDASCOLUMNAS</option><option value="cementacion">📍 CEMENTACIÓN</option><option value="chancado 3">📍 CHANCADO 3°</option><option value="chancado fino">📍 CHANCADO FINO</option><option value="chancado grueso">📍 CHANCADO GRUESO</option><option value="chancado prim">📍 CHANCADO PRIM</option><option value="chancado primario">📍 CHANCADO PRIMARIO</option><option value="chancado terciario">📍 CHANCADO TERCIARIO</option><option value="cloro">📍 CLORO</option><option value="convencional">📍 CONVENCIONAL</option><option value="espesador 2">📍 ESPESADOR 2</option><option value="flotacion">📍 FLOTACIÓN</option><option value="infra">📍 INFRA</option><option value="larox">📍 LAROX</option><option value="lr">📍 LR</option><option value="moly">📍 MOLY</option><option value="mun 1">📍 MUN 1</option><option value="mun 2">📍 MUN 2</option><option value="nodo 3500">📍 NODO 3500</option><option value="plan matriz">📍 PLAN MATRIZ</option><option value="pmfc">📍 PMFC</option><option value="pmfc convencional">📍 PMFC CONVENCIONAL</option><option value="pmfc larox">📍 PMFC LAROX</option><option value="prechancado">📍 PRECHANCADO</option><option value="pta cloro">📍 PTA CLORO</option><option value="pta lr">📍 PTA LR</option><option value="pta moly">📍 PTA MOLY</option><option value="pta nash">📍 PTA NASH</option><option value="sag">📍 SAG</option><option value="sala bombas lado cerro">📍 SALA BOMBAS LADO CERRO</option><option value="secundario">📍 SECUNDARIO</option><option value="terciario">📍 TERCIARIO</option><option value="transversal">📍 TRANSVERSAL</option><option value="tunel hilton">📍 TUNEL HILTON</option></select>
+      <div class="fms" id="f-loc"><button type="button" class="fsel fms-b" id="f-loc-b" onclick="locToggle(event)" title="Filtrar por una o varias ubicaciones">Toda ubicación <span class="fms-car">▾</span></button><div class="fms-p" id="f-loc-p"></div></div>
       <select class="fsel" id="f-crit" onchange="setFilter(&#39;crit&#39;,this.value)">
         <option value="">Toda criticidad</option><option value="CRITICO">🔴 Críticas</option><option value="IMPORTANTE">Importantes</option><option value="NORMAL">Normales</option>
       </select>
@@ -3342,16 +3357,37 @@ function buildChips(){
   allActs().forEach(function(a){if(a.disc)disc[a.disc]=true;var g=normLoc(a.area);if(g)loc[g]=true;});
   var ds=document.getElementById('f-disc');
   if(ds){ds.innerHTML='<option value="">Toda disciplina</option>'+Object.keys(disc).sort().map(function(d){return '<option value="'+esc(d)+'">'+esc(d)+'</option>';}).join('');ds.value=FILT.disc;}
-  var ls=document.getElementById('f-loc');
-  if(ls){var gl=Object.keys(loc).sort(function(a,b){return (LOC_LABELS[a]||a).localeCompare(LOC_LABELS[b]||b);});
-    ls.innerHTML='<option value="">Toda ubicación</option>'+gl.map(function(g){return '<option value="'+esc(g)+'">📍 '+esc(LOC_LABELS[g]||g)+'</option>';}).join('');ls.value=FILT.loc;}
+  LOC_OPTS=Object.keys(loc).sort(function(a,b){return (LOC_LABELS[a]||a).localeCompare(LOC_LABELS[b]||b);});
+  FILT.loc=locSel().filter(function(g){return loc[g];}); /* descarta ubicaciones que ya no existen en el programa */
+  renderLocFilter();
   var cs=document.getElementById('f-crit');if(cs)cs.value=FILT.crit;
   var es=document.getElementById('f-estado');if(es)es.value=FILT.estado;
   updFclear();
 }
 function setFilter(k,v){FILT[k]=v;updFclear();render();}
-function clearFilters(){FILT={disc:'',loc:'',crit:'',estado:''};CHFLT={type:null,val:null};['f-disc','f-loc','f-crit','f-estado'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});updFclear();updateCharts();render();}
-function updFclear(){var n=(FILT.disc?1:0)+(FILT.loc?1:0)+(FILT.crit?1:0)+(FILT.estado?1:0)+(CHFLT.type?1:0);var b=document.getElementById('fclear');if(b)b.classList.toggle('act',n>0);}
+/* ── Filtro de ubicación con selección múltiple ──
+   FILT.loc es una lista de ubicaciones normalizadas (vacía = todas). */
+var LOC_OPTS=[];
+function locSel(){var v=FILT.loc;if(!v)return [];return Array.isArray(v)?v:[v];}
+function locToggle(ev){if(ev)ev.stopPropagation();var w=document.getElementById('f-loc');if(!w)return;w.classList.toggle('open');}
+function locClose(){var w=document.getElementById('f-loc');if(w)w.classList.remove('open');}
+document.addEventListener('click',function(e){var w=document.getElementById('f-loc');if(w&&w.classList.contains('open')&&!w.contains(e.target))w.classList.remove('open');});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')locClose();});
+function locSet(g,on){var sel=locSel().slice();var i=sel.indexOf(g);if(on&&i<0)sel.push(g);if(!on&&i>=0)sel.splice(i,1);FILT.loc=sel;renderLocFilter();updFclear();render();}
+function locAll(on){FILT.loc=on?LOC_OPTS.slice():[];renderLocFilter();updFclear();render();}
+function locLabel(){var sel=locSel();if(!sel.length)return 'Toda ubicación';if(sel.length===1)return '📍 '+(LOC_LABELS[sel[0]]||sel[0]);return '📍 '+sel.length+' ubicaciones';}
+function renderLocFilter(){
+  var b=document.getElementById('f-loc-b'),p=document.getElementById('f-loc-p');if(!b||!p)return;
+  var sel=locSel();
+  b.innerHTML=esc(locLabel())+' <span class="fms-car">▾</span>';b.classList.toggle('act',sel.length>0);
+  var h='<div class="fms-top"><button type="button" onclick="locAll(true)">Todas</button><button type="button" onclick="locAll(false)">Ninguna</button><span class="fms-n">'+(sel.length?sel.length+' de '+LOC_OPTS.length:LOC_OPTS.length+' ubicaciones')+'</span></div>';
+  LOC_OPTS.forEach(function(g){var on=sel.indexOf(g)>=0;
+    h+='<label class="fms-o'+(on?' on':'')+'"><input type="checkbox"'+(on?' checked':'')+' onchange="locSet('+jsArg(g)+',this.checked)"> '+esc(LOC_LABELS[g]||g)+'</label>';});
+  if(!LOC_OPTS.length)h+='<div class="fms-o" style="color:var(--gm);cursor:default">Sin ubicaciones en el programa</div>';
+  p.innerHTML=h;
+}
+function clearFilters(){FILT={disc:'',loc:[],crit:'',estado:''};CHFLT={type:null,val:null};['f-disc','f-crit','f-estado'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});renderLocFilter();updFclear();updateCharts();render();}
+function updFclear(){var n=(FILT.disc?1:0)+(locSel().length?1:0)+(FILT.crit?1:0)+(FILT.estado?1:0)+(CHFLT.type?1:0);var b=document.getElementById('fclear');if(b)b.classList.toggle('act',n>0);}
 function toggleChFilter(type,val){if(CHFLT.type===type){CHFLT={type:null,val:null};}else{CHFLT={type:type,val:val};}updFclear();updateCharts();render();}
 function clickPie(id){toggleChFilter(id,id);}
 var PIE_SEGS={};
@@ -3412,7 +3448,7 @@ function estadoOf(a){return ed(a.id).estEj||'Sin iniciar';}
 function match(a,q,ignoreDia){
   if(!ignoreDia&&!inDia(a))return false;
   if(FILT.disc&&a.disc!==FILT.disc)return false;
-  if(FILT.loc&&normLoc(a.area)!==FILT.loc)return false;
+  var _ls=locSel();if(_ls.length&&_ls.indexOf(normLoc(a.area))<0)return false;
   if(FILT.crit&&critOf(a)!==FILT.crit)return false;
   if(FILT.estado==='__quiebre'){if(!isQuiebre(a))return false;}
   else if(FILT.estado&&estadoOf(a)!==FILT.estado)return false;
