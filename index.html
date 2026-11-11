@@ -1409,6 +1409,12 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
 .opt-menu .btn.dz{color:var(--ro)}
 @media(max-width:640px){.htitle{display:none}}
 
+
+/* ── v13: vulnerabilidades como listado simple ── */
+.vu-n{flex:0 0 auto;min-width:18px;height:18px;border-radius:9px;background:var(--am);color:#fff;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-top:1px}
+.vu-tx{white-space:pre-wrap}
+.vu-ta{width:100%;box-sizing:border-box;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font-family:var(--fn);font-size:14px;line-height:1.45;outline:none;resize:vertical;min-height:56px;background:var(--wh);color:var(--bk)}
+.vu-add .cl-ab{align-self:flex-end}
 /* ── Mejoras v12: observaciones a pantalla completa ── */
 .obs-xp{margin-left:auto;border:1px solid var(--bd);background:var(--wh);color:var(--go);font-family:var(--fn);font-size:11px;font-weight:700;border-radius:8px;padding:5px 10px;cursor:pointer;text-transform:none;letter-spacing:0;white-space:nowrap}
 .obs-sec.full{position:fixed;left:0;right:0;top:0;bottom:0;z-index:250;background:var(--wh);display:flex;flex-direction:column;padding:12px;box-sizing:border-box}
@@ -3850,7 +3856,7 @@ function acard(a){
   h+='</div>';
   h+='<div class="ac-foot"><span class="ac-st b-na">Plan <b>'+tp+'</b></span><span class="ac-st b-ve">Real <b>'+tr+'</b></span>'
     +'<button class="ac-chat" title="Ver / escribir observaciones" onclick="event.stopPropagation();openEdit('+jsArg(a.id)+',\'log\')">💬 '+((e.log||[]).length)+'</button>'
-    +(vulnOpenN(a)?'<span class="ac-st" style="color:var(--am)" title="Vulnerabilidades abiertas">🛡 '+vulnOpenN(a)+'</span>':'')
+    +(vulnOpenN(a)?'<span class="ac-st" style="color:var(--am)" title="Vulnerabilidades registradas">🛡 '+vulnOpenN(a)+'</span>':'')
     +(e.interfs&&e.interfs.length?'<span class="ac-st" title="Interferencias registradas">⇄ '+e.interfs.length+'</span>':'');
   if(MODE==='ejec'){
     h+=quickSel(a);
@@ -4862,73 +4868,49 @@ function splitVuln(txt){
   return String(txt).split(/[\n;•▪●]+/).map(function(s){return s.replace(/^[\s.:|\-–*·]+|[\s|]+$/g,'');})
     .filter(function(s){return s.length>2&&!/^(no aplica|n\/?a|ningun[ao]s?|sin vulnerabilidad(es)?|no hay|no se identifican?)\.?$/i.test(s);});
 }
+/* v13: listado simple — situaciones puntuales que afectan o pueden afectar el
+   avance de la tarea. Se escriben en un cuadro de texto y se van acumulando.
+   (Ya no se precarga nada desde el PPT.) */
 function vulnList(a){
-  if(!a)return [];var e=ed(a.id);var L=[],have={};
-  (e.vulns||[]).forEach(function(x,i){have[(x.text||'').toLowerCase()]=1;L.push({x:x,i:i});});
-  (e.vulnHide||[]).forEach(function(t){have[t]=1;});
-  var pp=pptOf(a);
-  if(pp&&pp.vuln)splitVuln(pp.vuln).forEach(function(t){var k=t.toLowerCase();if(have[k])return;have[k]=1;L.push({x:{text:t,ctrl:'',st:'abierta',src:'ppt'},i:-1});});
-  return L;
+  if(!a)return [];var e=ed(a.id);
+  return (e.vulns||[]).map(function(x,i){return {x:x,i:i};}).filter(function(v){return v.x&&v.x.src!=='ppt';});
 }
-function vulnOpenN(a){var n=0;vulnList(a).forEach(function(v){if(v.x.st!=='controlada')n++;});return n;}
-function vulnMat(k){ /* devuelve el registro guardado del ítem k (lo crea si era del PPT) */
-  var a=findAct(editId);var e=ed(editId);var it=vulnList(a)[k];if(!it)return null;
-  if(it.i>=0)return e.vulns[it.i];
-  var n={id:'v'+Date.now().toString(36)+k,text:it.x.text,ctrl:'',st:'abierta',src:'ppt',ts:Date.now(),by:'PPT'};
-  e.vulns.push(n);return n;
-}
+function vulnOpenN(a){return vulnList(a).length;}
 function vulnRender(){
   var box=document.getElementById('vu-box');if(!box||!editId)return;
-  var a=findAct(editId);var L=vulnList(a);var op=0;
+  var a=findAct(editId);var L=vulnList(a);
   var h=L.length?'':'<div class="cl-empty">Sin vulnerabilidades registradas.</div>';
-  L.forEach(function(v,k){var x=v.x,ok=(x.st==='controlada');if(!ok)op++;
-    h+='<div class="vu-it'+(ok?' ok':'')+'"><div class="vu-top">'
-      +'<button class="vu-st" onclick="vulnTog('+k+')" title="Cambiar estado">'+(ok?'✓ Controlada':'⚠ Abierta')+'</button>'
-      +'<span class="vu-tx">'+esc(x.text)+'</span>'
-      +'<button class="cl-del" onclick="vulnDel('+k+')" title="Quitar">×</button></div>'
-      +'<input class="vu-ctrl" placeholder="Medida de control…" value="'+escAttr(x.ctrl||'')+'" onchange="vulnCtrl('+k+',this.value)">'
-      +'<div class="vu-by">'+(x.src==='ppt'?'Del PPT de planificación':esc(x.by||'—')+(x.ts?' · '+new Date(x.ts).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''))
-      +(ok&&x.okBy?' · controlada por '+esc(x.okBy):'')+'</div></div>';
+  L.forEach(function(v,k){var x=v.x;
+    h+='<div class="vu-it"><div class="vu-top"><span class="vu-n">'+(k+1)+'</span><span class="vu-tx">'+esc(x.text)+'</span>'
+      +'<button class="cl-del" onclick="vulnDel('+v.i+')" title="Quitar">×</button></div>'
+      +'<div class="vu-by">'+esc(x.by||'—')+(x.ts?' · '+new Date(x.ts).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'')+'</div></div>';
   });
   box.innerHTML=h;
-  var tg=document.getElementById('tag-vuln');if(tg)tg.textContent=L.length?(op+' abierta'+(op===1?'':'s')+' / '+L.length):'';
+  var tg=document.getElementById('tag-vuln');if(tg)tg.textContent=L.length?(L.length+' registrada'+(L.length===1?'':'s')):'';
 }
 function vulnAdd(){
   if(!ensureUser())return;
-  var i1=document.getElementById('add-vuln'),i2=document.getElementById('add-vuln-ctrl');
-  var t=ct2(i1.value),c=ct2(i2?i2.value:'');if(!t){i1.focus();return;}
+  var i1=document.getElementById('add-vuln');var t=String(i1.value||'').replace(/\s+$/,'').replace(/^\s+/,'');
+  if(!t){i1.focus();return;}
   var e=ed(editId);var a=findAct(editId);
-  e.vulns.push({id:'v'+Date.now().toString(36),text:t,ctrl:c,st:'abierta',src:(MODE==='ejec'?'ejec':'plani'),ts:Date.now(),by:userName()});
-  i1.value='';if(i2)i2.value='';
-  logAction('Vulnerabilidad',editId,(a?a.nombre:'')+' — registrada: '+t+(c?' · Control: '+c:''));
+  e.vulns.push({id:'v'+Date.now().toString(36),text:t,src:(MODE==='ejec'?'ejec':'plani'),ts:Date.now(),by:userName()});
+  i1.value='';
+  logAction('Vulnerabilidad',editId,(a?a.nombre:'')+' — '+t);
   if(MODE==='ejec')notify('discrep','🛡 Vulnerabilidad en "'+(a?a.nombre:'')+'": '+t,editId,'plani');
   vulnRender();markUnsaved();
 }
-function vulnTog(k){
-  if(!ensureUser())return;
-  var x=vulnMat(k);if(!x)return;var a=findAct(editId);
-  x.st=(x.st==='controlada')?'abierta':'controlada';
-  if(x.st==='controlada'){x.okBy=userName();x.okTs=Date.now();}else{delete x.okBy;delete x.okTs;}
-  logAction('Vulnerabilidad',editId,(a?a.nombre:'')+' — '+(x.st==='controlada'?'✓ controlada: ':'⚠ reabierta: ')+x.text);
-  vulnRender();markUnsaved();
-}
-function vulnCtrl(k,val){
-  var x=vulnMat(k);if(!x)return;var a=findAct(editId);var c=ct2(val);
-  if((x.ctrl||'')===c){vulnRender();return;}
-  x.ctrl=c;logAction('Vulnerabilidad',editId,(a?a.nombre:'')+' — medida de control: '+(c||'(sin medida)')+' · '+x.text);
-  vulnRender();markUnsaved();
-}
-function vulnDel(k){
-  var a=findAct(editId);var e=ed(editId);var it=vulnList(a)[k];if(!it)return;
-  if(it.x.src==='ppt'){if(!e.vulnHide)e.vulnHide=[];e.vulnHide.push((it.x.text||'').toLowerCase());}
-  if(it.i>=0)e.vulns.splice(it.i,1);
-  logAction('Vulnerabilidad',editId,(a?a.nombre:'')+' — quitada: '+it.x.text);
+function vulnDel(i){
+  var a=findAct(editId);var e=ed(editId);var x=e.vulns[i];if(!x)return;
+  e.vulns.splice(i,1);
+  logAction('Vulnerabilidad',editId,(a?a.nombre:'')+' — quitada: '+x.text);
   vulnRender();markUnsaved();
 }
 function vulnSectionHTML(){
-  return '<div class="shdg">Vulnerabilidades <span class="pcttag" id="tag-vuln"></span></div><div id="vu-box"></div>'
-    +'<div class="vu-add"><input class="cl-ai" id="add-vuln" placeholder="Describe la vulnerabilidad (qué puede impedir o afectar la actividad)…" onkeydown="if(event.key===\'Enter\')vulnAdd()">'
-    +'<div class="cl-ar" style="margin-top:0"><input class="cl-ai" id="add-vuln-ctrl" placeholder="Medida de control (opcional)…" onkeydown="if(event.key===\'Enter\')vulnAdd()"><button class="cl-ab" onclick="vulnAdd()">+ Add</button></div></div>';
+  return '<div class="shdg">Vulnerabilidades <span class="pcttag" id="tag-vuln"></span></div>'
+    +'<div style="font-size:10.5px;color:var(--gm);margin:-2px 0 8px">Situaciones puntuales que pasaron o pueden afectar el avance de la tarea.</div>'
+    +'<div id="vu-box"></div>'
+    +'<div class="vu-add"><textarea class="vu-ta" id="add-vuln" rows="2" placeholder="Escribe la vulnerabilidad y presiona Agregar…"></textarea>'
+    +'<button class="cl-ab" onclick="vulnAdd()">+ Agregar al listado</button></div>';
 }
 
 /* ── 5 · Desvío de avance por día (Gantt) ──
@@ -6373,7 +6355,7 @@ function daConsolidado(a){
   if(e.quiebre&&(e.quiebre.causa||e.quiebre.comment))
     out.push('⚠ Quiebre — '+(e.quiebre.causa||'')+(e.quiebre.comment?': '+e.quiebre.comment:''));
   if(e.interf&&e.interf.obs)out.push('⇄ Interferencia — '+e.interf.obs);
-  (e.vulns||[]).forEach(function(x){out.push('🛡 Vulnerabilidad'+(x.st==='controlada'?' (controlada)':' (abierta)')+' — '+x.text+(x.ctrl?' · Control: '+x.ctrl:''));});
+  (e.vulns||[]).forEach(function(x){if(x&&x.src!=='ppt')out.push('🛡 Vulnerabilidad — '+x.text);});
   return out.join('\n');
 }
 function daRows(){
