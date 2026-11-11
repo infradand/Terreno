@@ -1408,6 +1408,18 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
 .opt-menu .btn small{margin-left:auto;font-size:9.5px;color:var(--gl);font-weight:700}
 .opt-menu .btn.dz{color:var(--ro)}
 @media(max-width:640px){.htitle{display:none}}
+
+/* ── Mejoras v12: observaciones a pantalla completa ── */
+.obs-xp{margin-left:auto;border:1px solid var(--bd);background:var(--wh);color:var(--go);font-family:var(--fn);font-size:11px;font-weight:700;border-radius:8px;padding:5px 10px;cursor:pointer;text-transform:none;letter-spacing:0;white-space:nowrap}
+.obs-sec.full{position:fixed;left:0;right:0;top:0;bottom:0;z-index:250;background:var(--wh);display:flex;flex-direction:column;padding:12px;box-sizing:border-box}
+.obs-sec.full .shdg{margin:0 0 8px;flex:0 0 auto}
+.obs-sec.full .log-wrap{flex:1 1 auto;max-height:none;min-height:0}
+.obs-sec.full .log-msg{max-width:100%;align-self:stretch}
+.obs-sec.full .log-text{font-size:15px;line-height:1.5}
+.obs-sec.full .log-photo-thumb{max-width:100%;max-height:340px}
+.obs-sec.full .log-bar{flex:0 0 auto}
+.obs-sec.full .obs-xp{padding:9px 14px;font-size:13px}
+@media(max-width:700px){.obs-xp{padding:8px 12px;font-size:12px}}
 /* ── Mejoras v11: celular, bitácora del día, visor de fotos ── */
 .only-mob{display:none}
 .lb-dl{position:fixed;left:14px;top:14px;top:max(14px,env(safe-area-inset-top));height:46px;border:none;border-radius:24px;background:rgba(255,255,255,.96);color:#111;font-family:var(--fn);font-size:14px;font-weight:700;padding:0 20px;cursor:pointer;z-index:301;box-shadow:0 2px 10px rgba(0,0,0,.45)}
@@ -4042,7 +4054,7 @@ function openEdit(id,_focus){
 
   h+='<!--S:obs-->';
   // Observaciones → alimentan la Bitácora general
-  h+='<div class="shdg">Observaciones · alimentan la bitácora <span class="pcttag" id="tag-log"></span></div>';
+  h+='<div class="obs-sec" id="obs-sec"><div class="shdg">Observaciones · alimentan la bitácora <span class="pcttag" id="tag-log"></span><button class="obs-xp" id="obs-xp" onclick="obsToggle()">⤢ Agrandar</button></div>';
   h+='<div class="log-wrap" id="log-wrap"></div>';
   h+='<div class="log-bar"><div class="log-pending" id="log-pending"></div>'
     +'<div class="log-bar-row">'
@@ -4051,6 +4063,7 @@ function openEdit(id,_focus){
     +'<button class="log-photo-btn" onclick="document.getElementById(\'log-photo\').click()" title="Adjuntar foto">📷</button>'
     +'<button class="log-send" onclick="addObs()">Registrar</button>'
     +'</div></div>';
+  h+='</div>';
   h+='<!--S:end-->';
   h+='<button class="msave-full" onclick="guardarModal()">💾 Guardar y cerrar</button>';
 
@@ -4058,9 +4071,10 @@ function openEdit(id,_focus){
   document.getElementById('modal').innerHTML=h;
   clRender('mat');clRender('req');stepRender();vulnRender();updTags();pendingPhoto=null;renderObsLog();renderBloqueo();
   document.getElementById('mo').classList.add('open');
+  obsApply();
   modalFocus(_focus);
 }
-function closeModal(){document.getElementById('mo').classList.remove('open');editId=null;PLAN_UNLOCKED=false;refreshAll();if(typeof CLOUD!=='undefined'&&CLOUD._pending){CLOUD._pending=false;reloadFromStore();}}
+function closeModal(){OBS_FULL=false;obsApply();document.getElementById('mo').classList.remove('open');editId=null;PLAN_UNLOCKED=false;refreshAll();if(typeof CLOUD!=='undefined'&&CLOUD._pending){CLOUD._pending=false;reloadFromStore();}}
 function guardarModal(){clearTimeout(_sv);save();toast('✓ Cambios guardados');closeModal();}
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();var np=document.getElementById('notif-panel');if(np)np.classList.remove('open');}});
 
@@ -6894,6 +6908,28 @@ function lbDownload(){
   else p=fetch(src).then(function(r){if(!r.ok)throw 0;return r.blob();});
   p.then(withBlob).catch(function(){viaLink(src);toast('Se abrió la foto — mantén presionada la imagen para guardarla');});
 }
+
+
+/* ── Observaciones a pantalla completa (botón «Agrandar») ── */
+var OBS_FULL=false;
+function obsFit(){
+  var s=document.getElementById('obs-sec');if(!s)return;
+  if(OBS_FULL&&window.visualViewport){s.style.height=window.visualViewport.height+'px';s.style.top=window.visualViewport.offsetTop+'px';s.style.bottom='auto';}
+  else{s.style.height='';s.style.top='';s.style.bottom='';}
+  var w=document.getElementById('log-wrap');if(w&&OBS_FULL)w.scrollTop=w.scrollHeight;
+}
+function obsApply(){
+  var s=document.getElementById('obs-sec'),b=document.getElementById('obs-xp'),mo=document.getElementById('mo');
+  if(s)s.classList.toggle('full',OBS_FULL);
+  if(b)b.textContent=OBS_FULL?'✕ Achicar':'⤢ Agrandar';
+  if(mo)mo.style.overflow=OBS_FULL?'hidden':'';
+  obsFit();
+}
+function obsToggle(){
+  OBS_FULL=!OBS_FULL;obsApply();
+  if(!OBS_FULL){var s=document.getElementById('obs-sec');if(s&&s.scrollIntoView)s.scrollIntoView({block:'start'});}
+}
+if(window.visualViewport){window.visualViewport.addEventListener('resize',function(){if(OBS_FULL)obsFit();});window.visualViewport.addEventListener('scroll',function(){if(OBS_FULL)obsFit();});}
 
 function boot(){
   loadUser();
