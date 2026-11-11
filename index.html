@@ -1421,6 +1421,7 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
 .cv-dv-c{background:var(--wh);border:1px solid var(--bd);border-radius:8px;padding:6px 4px;text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}
 .cv-dv-c.today{border-color:var(--na);box-shadow:0 0 0 1px var(--na) inset}
 .cv-dv-c.off{opacity:.55}
+.cv-dv-dt{font-style:normal}
 .cv-dv-d{font-size:9.5px;font-weight:700;color:var(--gm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cv-dv-c b{font-size:16px;font-weight:800;line-height:1.15;white-space:nowrap}
 .cv-dv-pr{font-size:9px;color:var(--gm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1480,7 +1481,16 @@ button,.acard,.mrow,.tab,.day-pill,.log-photo-thumb,.bit-photo,.sec-h{touch-acti
 .only-mob{display:flex}
 #tab-btn-kpis,#tab-btn-detalle,#tab-btn-traspaso,#tab-btn-historial,#tab-btn-semanas{display:none!important}
 .tabs .tab{flex:1;justify-content:center}
-#mode-banner,#curva-s,#ejec-top,#plani-top{display:none!important}
+#mode-banner,#ejec-top,#plani-top{display:none!important}
+#curva-s .cv-head,#curva-s .cv-svg,#curva-s .cv-leg,#curva-s .cv-foot{display:none!important}
+#curva-s .cv-box{padding:8px}
+#curva-s .cv-dv{margin-top:0;padding:8px}
+#curva-s .cv-dv-s,#curva-s .cv-dv-pr,#curva-s .cv-dv-dt{display:none}
+#curva-s .cv-dv-g{gap:3px}
+#curva-s .cv-dv-c{padding:5px 1px}
+#curva-s .cv-dv-c b{font-size:12.5px}
+#curva-s .cv-dv-d{font-size:8.5px}
+#curva-s .cv-dv-b{font-size:10.5px;padding:3px 8px}
 #day-sel{display:flex!important;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
 #day-sel .day-pill{flex:0 0 auto}
 #day-sel .day-sel-lbl{display:none}
@@ -3701,12 +3711,13 @@ function cvDevDaily(acts){
   return {days:days,lab:lab,bg:bg};
 }
 function cvDevStrip(acts){
-  var x=cvDevDaily(acts);if(!x.days.some(function(d){return !!d;}))return '';
+  var x=cvDevDaily(acts);
+  if(!x.lab&&!x.days.some(function(d){return !!d;})){x.lab='La semana aún no comienza';x.bg='#8A9299';}
   var ti=todayIndex();
-  var h='<div class="cv-dv"><div class="cv-dv-h"><span class="cv-dv-t">Desvío avance / día</span><span class="cv-dv-s">avance real − planificado al cierre de cada día · pp</span>'
+  var h='<div class="cv-dv"><div class="cv-dv-h"><span class="cv-dv-t">Desviación acumulada por día</span><span class="cv-dv-s">avance real acumulado − planificado acumulado al cierre de cada día · pp</span>'
     +(x.lab?'<span class="cv-dv-b" style="background:'+x.bg+'">'+x.lab+'</span>':'')+'</div><div class="cv-dv-g">';
   for(var d=0;d<7;d++){var o=x.days[d];var dt=(DATA.dates&&DATA.dates[d])?fmtFechaCorta(DATA.dates[d]):'';
-    h+='<div class="cv-dv-c'+(d===ti?' today':'')+(o?'':' off')+'"><span class="cv-dv-d">'+(d===ti?'HOY':DSHORT[d])+(dt?' '+esc(dt):'')+'</span>'
+    h+='<div class="cv-dv-c'+(d===ti?' today':'')+(o?'':' off')+'"><span class="cv-dv-d">'+(d===ti?'HOY':DSHORT[d])+(dt?'<i class="cv-dv-dt"> '+esc(dt)+'</i>':'')+'</span>'
       +(o?'<b style="color:'+cvDevClr(o.dev)+'">'+cvSgn(o.dev)+cvTrend(o.dev,o.prev)+'</b><span class="cv-dv-pr">Plan '+Math.round(o.p)+'% · Real '+Math.round(o.r)+'%</span>':'<b style="color:var(--gl)">—</b><span class="cv-dv-pr">&nbsp;</span>')
       +'</div>';}
   return h+'</div></div>';
@@ -3735,9 +3746,10 @@ function renderCurvaS(){
   CV_STATES.forEach(function(st){var n=g.cnt[st.k]||0;if(!n)return;var on=CHFLT.type==='curva'&&CHFLT.val===st.k;
     h+='<span class="cv-st'+(on?' on':'')+'" onclick="toggleChFilter(\'curva\','+jsArg(st.k)+')" title="Filtrar actividades '+esc(st.lab.toLowerCase())+'"><span class="dot" style="background:'+st.c+'"></span>'+n+' '+esc(st.lab)+'</span>';});
   h+='</div></div>';
+  g.dv=cvDevDaily(acts);
   h+=cvSVG(g,Math.max(300,box.clientWidth-34));
   h+=cvDevStrip(acts);
-  h+='<div class="cv-leg"><span><span class="ln plan"></span><b>Planificado</b> (HH acumuladas del programa)</span><span><span class="ln" style="border-color:var(--te)"></span><b>Real</b> (MiDA ponderado por HH)</span><span><span class="ln" style="border-color:var(--na);border-top-style:dotted"></span>Hoy</span></div>';
+  h+='<div class="cv-leg"><span><span class="ln plan"></span><b>Planificado</b> (HH acumuladas del programa)</span><span><span class="ln" style="border-color:var(--te)"></span><b>Real</b> (MiDA ponderado por HH)</span><span><span class="ln" style="border-color:var(--na);border-top-style:dotted"></span>Hoy</span><span><b style="background:#D98E00;color:#fff;border-radius:7px;padding:1px 6px;font-size:9.5px">−pp</b> Desviación acumulada del día</span></div>';
   h+='<div class="cv-foot">Avance ponderado por HH planificadas de '+g.n+' actividades ('+Math.round(g.W).toLocaleString('es-CL')+' HH). Estado por actividad: desvío real − plan a hoy; tolerancia ±'+CURVA_TOL+' pp, muy atrasada bajo −'+CURVA_BAD+' pp.'+(CHFLT.type==='curva'?' <b style="color:var(--na);cursor:pointer" onclick="toggleChFilter(\'curva\','+jsArg(CHFLT.val)+')">✕ Quitar filtro</b>':'')+'</div>';
   h+='</div>';
   box.innerHTML=h;
@@ -3769,6 +3781,16 @@ function cvSVG(g,W){
     if(Math.abs(yp-yr)<12){yp-=6;yr+=6;}
     s+='<text x="'+tx+'" y="'+(yp+3.5)+'" font-size="10" fill="#3A4750" font-weight="800" text-anchor="'+anchor+'">Plan '+Math.round(g.planNow)+'%</text>';
     s+='<text x="'+tx+'" y="'+(yr+3.5)+'" font-size="10" fill="#0098AA" font-weight="800" text-anchor="'+anchor+'">Real '+Math.round(g.realNow)+'%</text>';}
+  /* v16 · desviación acumulada al cierre de cada día (real − plan), marcada sobre la curva */
+  if(g.dv&&g.dv.days){g.dv.days.forEach(function(o,d){
+    if(!o)return;var closed=(g.t>=d+1);var xx=X(closed?d+1:g.t);var y1=Y(o.p),y2=Y(o.r);var c=cvDevClr(o.dev);var txt=cvSgn(o.dev)+' pp';
+    var w=txt.length*6.2+12;var ym=(y1+y2)/2;if(Math.abs(y1-y2)<18)ym=Math.min(y1,y2)-13;
+    var px=closed?xx:(g.t>5?xx+w/2+8:xx-w/2-8);
+    px=Math.max(L+w/2,Math.min(W-R-w/2,px));ym=Math.max(T+8,Math.min(H-B-8,ym));
+    if(closed)s+='<line x1="'+xx+'" y1="'+y1+'" x2="'+xx+'" y2="'+y2+'" stroke="'+c+'" stroke-width="2"/>';
+    s+='<rect x="'+(px-w/2)+'" y="'+(ym-8)+'" width="'+w+'" height="16" rx="8" fill="'+c+'" stroke="#fff" stroke-width="1.5"/>'
+      +'<text x="'+px+'" y="'+(ym+3.5)+'" font-size="10" fill="#fff" font-weight="800" text-anchor="middle">'+txt+'</text>';
+  });}
   s+='</svg>';return s;
 }
 /* ── Render cards ── */
@@ -3834,7 +3856,7 @@ function renderGantt(){
       for(var d=0;d<7;d++){
         var dvh='',dd=cvDayDev(a,d,tpos);
         if(dd){devAg[d].w+=aw;devAg[d].p+=dd.p*aw;devAg[d].r+=dd.r*aw;
-          if(!closed&&(dd.p>0.5||dd.r>0)){dvh=cvDevTag(dd,prevDev);if(dd.p>=99.5&&dd.r>=100)closed=true;}
+          /* v16: el desvío se muestra solo en la Curva S */
           prevDev=dd.dev;}
         var v=a.dp[d]||0;tp+=v;dayTot[d]+=v;
         var hv=(a.hp&&a.hp[d])?a.hp[d]:0;th+=hv;hourTot[d]+=hv;
@@ -3858,9 +3880,8 @@ function renderGantt(){
     foot+='<div class="g-row g-foot g-foot2"><div class="g-name g-fname">Horas mtto / día</div>';
     for(var d3=0;d3<7;d3++){foot+='<div class="g-day g-fday'+(d3===ti?' g-today':'')+'">'+(hourTot[d3]?(+hourTot[d3])+' h':'')+'</div>';}
     foot+='<div class="g-tot g-ftot">'+(grandH?(+grandH)+' h':'')+'</div></div>';
-    foot+=ganttDevFoot(devAg,ti);
   }
-  document.getElementById('list').innerHTML=shown?('<div class="gantt"><div class="g-grid">'+head+body+foot+'</div></div>'+GANTT_DEV_LEG):'<div class="empty">Sin resultados para el filtro actual</div>';
+  document.getElementById('list').innerHTML=shown?('<div class="gantt"><div class="g-grid">'+head+body+foot+'</div></div>'):'<div class="empty">Sin resultados para el filtro actual</div>';
   var ftxt=shown+' actividades';if(CHFLT.type)ftxt+=' · filtro activo';
   document.getElementById('cbadge').textContent=ftxt;
 }
