@@ -1410,6 +1410,20 @@ td.da-causa{min-width:150px;max-width:240px;line-height:1.4;font-size:10px}
 @media(max-width:640px){.htitle{display:none}}
 
 
+
+/* ── v15: desvío por día en la Curva S ── */
+.cv-dv{margin-top:10px;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;background:var(--gb)}
+.cv-dv-h{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;margin-bottom:8px}
+.cv-dv-t{font-size:12px;font-weight:800;color:var(--go);text-transform:uppercase;letter-spacing:.04em}
+.cv-dv-s{font-size:10.5px;color:var(--gm)}
+.cv-dv-b{margin-left:auto;color:#fff;font-size:11.5px;font-weight:800;border-radius:8px;padding:4px 10px;white-space:nowrap}
+.cv-dv-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cv-dv-c{background:var(--wh);border:1px solid var(--bd);border-radius:8px;padding:6px 4px;text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}
+.cv-dv-c.today{border-color:var(--na);box-shadow:0 0 0 1px var(--na) inset}
+.cv-dv-c.off{opacity:.55}
+.cv-dv-d{font-size:9.5px;font-weight:700;color:var(--gm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cv-dv-c b{font-size:16px;font-weight:800;line-height:1.15;white-space:nowrap}
+.cv-dv-pr{font-size:9px;color:var(--gm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* ── v13: vulnerabilidades como listado simple ── */
 .vu-n{flex:0 0 auto;min-width:18px;height:18px;border-radius:9px;background:var(--am);color:#fff;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-top:1px}
 .vu-tx{white-space:pre-wrap}
@@ -3670,6 +3684,34 @@ function cvGlobal(acts){
 function cvToggle(){Store.set('cv_col',!Store.get('cv_col',false));renderCurvaS();}
 var _cvResizeT=null;
 window.addEventListener('resize',function(){clearTimeout(_cvResizeT);_cvResizeT=setTimeout(function(){renderCurvaS();},180);});
+
+/* ── v15 · Desvío de avance por día, a la vista en la Curva S ── */
+function cvDevDaily(acts){
+  var t=cvWeekPos(),days=[],last=null,prev=null;
+  for(var d=0;d<7;d++){var w=0,p=0,r=0;
+    acts.forEach(function(a){var dd=cvDayDev(a,d,t);if(!dd)return;var aw=cvW(a);w+=aw;p+=dd.p*aw;r+=dd.r*aw;});
+    if(w>0){var o={p:p/w,r:r/w,dev:(r-p)/w,prev:last};days.push(o);prev=last;last=o.dev;}else days.push(null);}
+  var lab='',bg='';
+  if(last!=null){var g1=Math.max(0,-Math.round(last)),g0=(prev==null)?null:Math.max(0,-Math.round(prev));
+    if(g1===0){lab='Sin brecha';bg='#2E9E5B';}
+    else if(g0==null){lab='Brecha de '+g1+' pp';bg='#D98E00';}
+    else if(g1<g0){lab='↗ Brecha baja ('+g0+' → '+g1+' pp)';bg='#2E9E5B';}
+    else if(g1>g0){lab='↘ Brecha sube ('+g0+' → '+g1+' pp)';bg='#C13832';}
+    else{lab='→ Brecha igual ('+g1+' pp)';bg='#D98E00';}}
+  return {days:days,lab:lab,bg:bg};
+}
+function cvDevStrip(acts){
+  var x=cvDevDaily(acts);if(!x.days.some(function(d){return !!d;}))return '';
+  var ti=todayIndex();
+  var h='<div class="cv-dv"><div class="cv-dv-h"><span class="cv-dv-t">Desvío avance / día</span><span class="cv-dv-s">avance real − planificado al cierre de cada día · pp</span>'
+    +(x.lab?'<span class="cv-dv-b" style="background:'+x.bg+'">'+x.lab+'</span>':'')+'</div><div class="cv-dv-g">';
+  for(var d=0;d<7;d++){var o=x.days[d];var dt=(DATA.dates&&DATA.dates[d])?fmtFechaCorta(DATA.dates[d]):'';
+    h+='<div class="cv-dv-c'+(d===ti?' today':'')+(o?'':' off')+'"><span class="cv-dv-d">'+(d===ti?'HOY':DSHORT[d])+(dt?' '+esc(dt):'')+'</span>'
+      +(o?'<b style="color:'+cvDevClr(o.dev)+'">'+cvSgn(o.dev)+cvTrend(o.dev,o.prev)+'</b><span class="cv-dv-pr">Plan '+Math.round(o.p)+'% · Real '+Math.round(o.r)+'%</span>':'<b style="color:var(--gl)">—</b><span class="cv-dv-pr">&nbsp;</span>')
+      +'</div>';}
+  return h+'</div></div>';
+}
+
 function renderCurvaS(){
   var box=document.getElementById('curva-s');if(!box)return;
   if(!DATA){box.innerHTML='';return;}
@@ -3694,6 +3736,7 @@ function renderCurvaS(){
     h+='<span class="cv-st'+(on?' on':'')+'" onclick="toggleChFilter(\'curva\','+jsArg(st.k)+')" title="Filtrar actividades '+esc(st.lab.toLowerCase())+'"><span class="dot" style="background:'+st.c+'"></span>'+n+' '+esc(st.lab)+'</span>';});
   h+='</div></div>';
   h+=cvSVG(g,Math.max(300,box.clientWidth-34));
+  h+=cvDevStrip(acts);
   h+='<div class="cv-leg"><span><span class="ln plan"></span><b>Planificado</b> (HH acumuladas del programa)</span><span><span class="ln" style="border-color:var(--te)"></span><b>Real</b> (MiDA ponderado por HH)</span><span><span class="ln" style="border-color:var(--na);border-top-style:dotted"></span>Hoy</span></div>';
   h+='<div class="cv-foot">Avance ponderado por HH planificadas de '+g.n+' actividades ('+Math.round(g.W).toLocaleString('es-CL')+' HH). Estado por actividad: desvío real − plan a hoy; tolerancia ±'+CURVA_TOL+' pp, muy atrasada bajo −'+CURVA_BAD+' pp.'+(CHFLT.type==='curva'?' <b style="color:var(--na);cursor:pointer" onclick="toggleChFilter(\'curva\','+jsArg(CHFLT.val)+')">✕ Quitar filtro</b>':'')+'</div>';
   h+='</div>';
