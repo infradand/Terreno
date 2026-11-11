@@ -4836,7 +4836,7 @@ function prepGridHTML(e){
     var ejc=(MODE==='ejec')?'<label class="cl-v2" title="Doble-check de ejecución"><input type="checkbox"'+((e.prepV2&&e.prepV2[d[0]])?' checked':'')+' onchange="prepCheck(\''+d[0]+'\',this.checked)">2ºch</label><button class="cl-disc'+((e.prepDisc&&e.prepDisc[d[0]])?' on':'')+'" title="Levantar discrepancia (notifica a Planificación)" onclick="prepDiscrep(\''+d[0]+'\')">⚠</button>':((e.prepDisc&&e.prepDisc[d[0]])?'<span class="cl-disc on" title="Discrepancia de Ejecución">⚠</span>':'');
     var opts=av?[[av,av+' · auto'],['No aplica','No aplica']]:['','Sí','No','Parcial','No aplica'].map(function(o){return [o,o||'— Sel —'];});
     var tip=d[0]==='prepMat'?'Se calcula solo desde el checklist de materiales':'Se calcula solo desde los requerimientos que mencionan andamios';
-    h+='<div class="prep-row"><span class="prep-lbl-s">'+d[1]+(av?' <span class="prep-auto" title="'+tip+'">auto</span>':'')+'</span><select class="prep-sel '+prepClr(v)+'" id="prep-'+d[0]+'"'+(MODE==='ejec'?' disabled title="El estado lo gestiona Planificación"':' onchange="'+(av?'setPrepAuto':'setPrep')+'(\''+d[0]+'\',this)"')+'>'
+    h+='<div class="prep-row"><span class="prep-lbl-s">'+d[1]+(av?' <span class="prep-auto" title="'+tip+'">auto</span>':'')+'</span><select class="prep-sel '+prepClr(v)+'" id="prep-'+d[0]+'"'+' onchange="'+(av?'setPrepAuto':'setPrep')+'(\''+d[0]+'\',this)"'+'>'
       +opts.map(function(o){return '<option value="'+o[0]+'"'+(v===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>'+ejc+'</div>';
   });
   return h;
