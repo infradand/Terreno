@@ -1822,6 +1822,26 @@ body.wk-hist .tabs .tab.active{box-shadow:none!important;border-bottom-color:#B4
 .g-act.carry .g-name{background:#FFFBEF!important;box-shadow:inset 3px 0 0 #E0B000}
 .g-act.carry .g-day,.g-act.carry .g-tot{background:#FFFDF6}
 .g-act.carry .carry-chip{margin-left:6px}
+
+/* ══ v30 · paso marcado como interferencia + reordenar arrastrando ══ */
+.st-int-tag{display:inline-block;font-size:10.5px;font-weight:700;color:#8A5A00;background:#FFF4D6;border:1px solid #F0CF7A;border-radius:5px;padding:1px 6px;margin-right:4px;white-space:nowrap}
+.cl-item.st-isint{background:#FFFBEF}
+.st-nopct{font-size:11px;font-weight:600;color:var(--gm);white-space:nowrap}
+.cl-ab.st-int{background:transparent;color:#8A5A00;border:1px solid #E6C766}
+.cl-ab.st-int:active{background:#FFF4D6}
+.st-grip{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:28px;height:32px;font-size:18px;line-height:1;color:var(--gl);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:6px}
+.st-grip:hover{color:var(--bk);background:var(--gb)}
+.cl-item.st-drag{position:relative;z-index:5;background:var(--wh);box-shadow:0 6px 20px rgba(20,30,40,.18);border-radius:8px;opacity:.96}
+.cl-item.st-drag .st-grip{cursor:grabbing;color:var(--na)}
+.cl-item.st-over-t{box-shadow:inset 0 3px 0 var(--na)}
+.cl-item.st-over-b{box-shadow:inset 0 -3px 0 var(--na)}
+@media(max-width:700px){.st-grip{width:36px;height:40px;font-size:22px}.cl-ab.st-int{flex:1 1 100%;margin-top:6px}}
+@media(max-width:700px){
+  .cl-ar{flex-wrap:wrap}
+  #add-step{flex:1 1 100%}
+  .st-addw{flex:1 1 0!important}
+  .cl-ab.st-int{flex:1 1 100%;margin-top:0;min-height:44px}
+}
 </style>
 </head>
 <body>
@@ -4416,7 +4436,7 @@ function openEdit(id,_focus){
   // Paso a paso → maneja el % de avance
   h+='<div class="shdg">Paso a paso <span class="pcttag" id="tag-step"></span><span style="font-weight:600;color:var(--gm);font-size:10px"> · el % de avance se calcula con los pasos cumplidos y lo que vale cada uno</span></div>';
   h+='<div class="cl-ed" id="cl-step"></div>';
-  h+='<div class="cl-ar"><input class="cl-ai" id="add-step" placeholder="Agregar paso…" onkeydown="if(event.key===\'Enter\')stepAdd()"><input class="cl-ai st-addw" id="add-step-w" type="number" inputmode="decimal" min="0" max="100" step="any" placeholder="% (opcional)" title="Cuánto vale el paso. Vacío = todos valen lo mismo" onkeydown="if(event.key===\'Enter\')stepAdd()"><button class="cl-ab" onclick="stepAdd()">+ Paso</button></div>';
+  h+='<div class="cl-ar"><input class="cl-ai" id="add-step" placeholder="Agregar paso…" onkeydown="if(event.key===\'Enter\')stepAdd()"><input class="cl-ai st-addw" id="add-step-w" type="number" inputmode="decimal" min="0" max="100" step="any" placeholder="% (opcional)" title="Cuánto vale el paso. Vacío = todos valen lo mismo" onkeydown="if(event.key===\'Enter\')stepAdd()"><button class="cl-ab" onclick="stepAdd()">+ Paso</button>'+(MODE==='ejec'?'<button class="cl-ab st-int" onclick="stepAddInterf()" title="Agrega el paso como interferencia: abre el registro de interferencia y no suma al % de avance">⚠ Es interferencia</button>':'')+'</div>';
 
   h+='<!--S:rest-->';
   // N° Orden de Trabajo (OT)
@@ -4567,13 +4587,55 @@ function clSetUnit(i,v){var it=ed(editId).matItems[i];if(!it)return;it.unit=ct2(
    Con algunos pesos → los que quedan en blanco se reparten lo que falta para 100.
    Si los pesos suman distinto de 100 (o más) se ajustan proporcionalmente. */
 function stepWeights(st){
-  var n=st.length;if(!n)return [];
-  var spec=0,ns=0;st.forEach(function(s){var w=+s.w;if(w>0){spec+=w;ns++;}});
-  if(ns===0)return st.map(function(){return 100/n;});
-  if(ns===n||spec>=100)return st.map(function(s){var w=+s.w;return w>0?w/spec*100:0;});
-  var rest=(100-spec)/(n-ns);return st.map(function(s){var w=+s.w;return w>0?w:rest;});
+  /* v30 · los pasos marcados como interferencia (s.interf) no suman avance: peso 0 */
+  var n=0,spec=0,ns=0;st.forEach(function(s){if(s.interf)return;n++;var w=+s.w;if(w>0){spec+=w;ns++;}});
+  if(!n)return st.map(function(){return 0;});
+  if(ns===0)return st.map(function(s){return s.interf?0:100/n;});
+  if(ns===n||spec>=100)return st.map(function(s){var w=+s.w;return (!s.interf&&w>0)?w/spec*100:0;});
+  var rest=(100-spec)/(n-ns);return st.map(function(s){if(s.interf)return 0;var w=+s.w;return w>0?w:rest;});
 }
-function stepsPct(a){var st=ed(a.id).stepItems||[];if(!st.length)return null;var w=stepWeights(st),p=0;st.forEach(function(s,i){if(s.done)p+=w[i];});return Math.max(0,Math.min(100,Math.round(p)));}
+function stepsPct(a){var st=ed(a.id).stepItems||[];if(!st.some(function(s){return !s.interf;}))return null;var w=stepWeights(st),p=0;st.forEach(function(s,i){if(s.done&&!s.interf)p+=w[i];});return Math.max(0,Math.min(100,Math.round(p)));}
+/* v30 · Ejecución agrega un paso «como interferencia»: abre la misma ventana de
+   interferencia; al guardarla queda el paso (sin % de avance) ligado a ella. */
+var _pendStep=null;
+function stepAddInterf(){
+  if(MODE!=='ejec'){toast('La interferencia la registra Ejecución');return;}
+  var inp=document.getElementById('add-step');var v=ct2(inp.value);
+  if(!v){toast('Escribe primero el paso y luego toca «Es interferencia»');inp.focus();return;}
+  openInterf();
+  if(!document.getElementById('interf-mo').classList.contains('open'))return;
+  _pendStep=v;
+  document.getElementById('interf-obs').value=v;
+  var tt=document.getElementById('interf-ttl');if(tt)tt.textContent='Interferencia en el paso a paso';
+}
+/* v30 · reordenar pasos arrastrando el tirador ⠿ (mouse o dedo) */
+function stepMove(f,t){
+  var st=ed(editId).stepItems;if(!st||f===t||f<0||f>=st.length)return;
+  var it=st.splice(f,1)[0];t=Math.max(0,Math.min(st.length,t));st.splice(t,0,it);
+  logAction('Paso',editId,'Reordenado: «'+it.text+'» a la posición '+(t+1));
+  stepRender();markUnsaved();
+}
+var _sd=null;
+function stepDragStart(ev,i){
+  if(ev.button!==undefined&&ev.button>0)return;
+  var box=document.getElementById('cl-step');if(!box)return;var items=[].slice.call(box.querySelectorAll('.cl-item'));var el=items[i];if(!el)return;
+  ev.preventDefault();
+  _sd={from:i,to:i,el:el,items:items,y0:ev.clientY};el.classList.add('st-drag');
+  try{ev.currentTarget.setPointerCapture(ev.pointerId);}catch(e){}
+}
+function stepDragMove(ev){
+  if(!_sd)return;ev.preventDefault();
+  _sd.el.style.transform='translateY('+(ev.clientY-_sd.y0)+'px)';
+  var y=ev.clientY,n=0,others=[];
+  _sd.items.forEach(function(it,k){it.classList.remove('st-over-t','st-over-b');if(k===_sd.from)return;others.push(it);var r=it.getBoundingClientRect();if(y>r.top+r.height/2)n++;});
+  _sd.to=n;
+  if(n<others.length)others[n].classList.add('st-over-t');else if(others.length)others[others.length-1].classList.add('st-over-b');
+}
+function stepDragEnd(ev){
+  if(!_sd)return;var f=_sd.from,t=_sd.to;_sd.el.style.transform='';_sd.el.classList.remove('st-drag');
+  _sd.items.forEach(function(it){it.classList.remove('st-over-t','st-over-b');});_sd=null;
+  if(t!==f)stepMove(f,t);
+}
 function stepFmt(v){var r=Math.round(v*10)/10;return (r%1===0?String(r):r.toFixed(1).replace('.',','));}
 function stepW(i,val){
   var it=ed(editId).stepItems[i];if(!it)return;var v=parseFloat(String(val).replace(',','.'));
@@ -4584,13 +4646,13 @@ function stepW(i,val){
 function stepRender(){
   var box=document.getElementById('cl-step');if(!box)return;var st=ed(editId).stepItems||[];
   if(!st.length){box.innerHTML='<div class="cl-empty">Sin pasos. Agrega el paso a paso para que el avance se calcule solo.</div>';return;}
-  var W=stepWeights(st),spec=0,ns=0;st.forEach(function(s){if(+s.w>0){spec+=+s.w;ns++;}});
+  var W=stepWeights(st),spec=0,ns=0,nc=0;st.forEach(function(s){if(s.interf)return;nc++;if(+s.w>0){spec+=+s.w;ns++;}});
   box.innerHTML=st.map(function(it,i){
-    return '<div class="cl-item"><input type="checkbox" class="cl-cb"'+(it.done?' checked':'')+(MODE==='ejec'?' onchange="stepTog('+i+',this.checked)"':' disabled title="El avance lo registra Ejecución"')+'><span class="cl-tx'+(it.done?' done':'')+'">'+esc(it.text)+'</span>'
-      +'<span class="st-w" title="Cuánto vale este paso en el avance. Déjalo vacío para repartirlo parejo."><input type="number" inputmode="decimal" min="0" max="100" step="any" class="st-wi" value="'+(+it.w>0?it.w:'')+'" placeholder="'+stepFmt(W[i])+'" onchange="stepW('+i+',this.value)">%</span>'
+    return '<div class="cl-item'+(it.interf?' st-isint':'')+'"><span class="st-grip" title="Arrastra para cambiar el orden" onpointerdown="stepDragStart(event,'+i+')" onpointermove="stepDragMove(event)" onpointerup="stepDragEnd(event)" onpointercancel="stepDragEnd(event)">⠿</span><input type="checkbox" class="cl-cb"'+(it.done?' checked':'')+(MODE==='ejec'?' onchange="stepTog('+i+',this.checked)"':' disabled title="El avance lo registra Ejecución"')+'><span class="cl-tx'+(it.done?' done':'')+'">'+(it.interf?'<span class="st-int-tag">⚠ Interferencia</span> ':'')+esc(it.text)+'</span>'
+      +(it.interf?'<span class="st-w st-nopct" title="Este paso es una interferencia: no suma al % de avance">no suma %</span>':'<span class="st-w" title="Cuánto vale este paso en el avance. Déjalo vacío para repartirlo parejo."><input type="number" inputmode="decimal" min="0" max="100" step="any" class="st-wi" value="'+(+it.w>0?it.w:'')+'" placeholder="'+stepFmt(W[i])+'" onchange="stepW('+i+',this.value)">%</span>')
       +'<button class="cl-del" onclick="stepDel('+i+')">×</button></div>';
   }).join('')
-  +((ns>0&&Math.abs((ns===st.length?spec:Math.max(spec,100))-100)>0.05)?'<div class="st-note">Los pesos escritos suman '+stepFmt(spec)+'% — se ajustan proporcionalmente para llegar a 100%.</div>':(ns>0&&ns<st.length?'<div class="st-note">Los pasos sin peso se reparten el '+stepFmt(100-spec)+'% restante en partes iguales.</div>':''));
+  +((ns>0&&Math.abs((ns===nc?spec:Math.max(spec,100))-100)>0.05)?'<div class="st-note">Los pesos escritos suman '+stepFmt(spec)+'% — se ajustan proporcionalmente para llegar a 100%.</div>':(ns>0&&ns<nc?'<div class="st-note">Los pasos sin peso se reparten el '+stepFmt(100-spec)+'% restante en partes iguales.</div>':''));
 }
 function stepAdd(){
   var inp=document.getElementById('add-step');var v=ct2(inp.value);if(!v)return;
@@ -5256,12 +5318,14 @@ function openInterf(idx){
   var tt=document.getElementById('interf-ttl');if(tt)tt.textContent=_interfIdx>=0?'Editar interferencia':(e.interfs.length?'Agregar otra interferencia':'Registrar interferencia');
   document.getElementById('interf-mo').classList.add('open');
 }
-function closeInterf(){document.getElementById('interf-mo').classList.remove('open');}
+function closeInterf(){_pendStep=null;document.getElementById('interf-mo').classList.remove('open');}
 function saveInterf(){
   var tipo=document.getElementById('interf-tipo').value;var obs=document.getElementById('interf-obs').value.trim();
   var hrs=parseFloat(document.getElementById('interf-hrs').value);if(isNaN(hrs)||hrs<0)hrs=0;
   var e=ed(editId);var a=findAct(editId);var isNew=!(_interfIdx>=0&&e.interfs[_interfIdx]);
-  if(isNew)e.interfs.push({id:'i'+Date.now().toString(36),tipo:tipo,obs:obs,horas:hrs,ts:Date.now(),by:userName()});
+  var _iid='i'+Date.now().toString(36);
+  if(isNew)e.interfs.push({id:_iid,tipo:tipo,obs:obs,horas:hrs,ts:Date.now(),by:userName()});
+  if(isNew&&_pendStep){e.stepItems.push({text:_pendStep,done:false,interf:true,interfId:_iid,by:userName(),ts:Date.now()});logAction('Paso',editId,'Agregado como interferencia: '+_pendStep);_pendStep=null;}
   else{var x=e.interfs[_interfIdx];x.tipo=tipo;x.obs=obs;x.horas=hrs;x.editTs=Date.now();x.editBy=userName();}
   interfSync(e);
   var txt=tipo+(hrs?' · '+hrs+' h perdidas':'')+(obs?' — '+obs:'');
