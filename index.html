@@ -1514,6 +1514,277 @@ button,.acard,.mrow,.tab,.day-pill,.log-photo-thumb,.bit-photo,.sec-h{touch-acti
 .vu-by{font-size:9.5px;color:var(--gm);margin-top:4px}
 .vu-add{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 </style>
+<style id="tema-minimal">
+/* ══════════════════════════════════════════════════════════════════════
+   TEMA MINIMALISTA · solo apariencia (no cambia ninguna función)
+   Superficies blancas planas, líneas finas, un solo color de acento
+   (naranjo Codelco) para la acción principal y el estado activo; el
+   turquesa queda reservado para el dato «real / avance».
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --gb:#F5F6F7;--bd:#E2E5E8;--cream:#FFFFFF;
+  --bk:#1E272D;--go:#2B363D;--gm:#6E787F;--gl:#B4BBC1;
+  --na1:rgba(229,83,2,.06);--te1:rgba(0,152,170,.06);--ve1:rgba(46,158,91,.07);--ro1:rgba(193,56,50,.05);--am1:rgba(244,170,0,.08);
+  --sh:none;--sh2:0 18px 50px rgba(20,30,40,.16);
+  --r:10px;--r2:8px;
+}
+body{background:var(--gb);font-size:13.5px}
+/* sin animaciones decorativas (el ícono de la portada ya no se mueve) */
+.u-ic{animation:none!important}
+.sec,.acard,.kc,.chc,.ek-card{animation:none!important}
+.stripe{display:none!important}
+
+/* ── Rótulos en minúscula normal (antes TODO EN MAYÚSCULAS) ── */
+.hn,.bit-act-tag,.bit-day,.u-ttl,.u-btn,.fmt,.pw-lbl,.period-lbl,.kl,.dn-h,.exec-grp-h,.exec-chip,.day-n,.fchip-lbl,.cv-stat-l,.sec-n,.chip,.ac-area,.prog-lbl,.mini-d,.ac-st,.ac-edit,.mey,.shdg,.cl-ab,.prep-lbl-s,.prep-sel,.fl,.m-tbl th,.m-tbl .rl,.m-si,.ek-sectitle,.log-day,.tr-rec-msg-h,.exec-lbl,.toast,.day-sel-lbl,.ppt-lbl,.tr-stat-l,.g-meta,.g-hname,.g-htot,.g-grp-n,.g-fname,.kpi3-n,.kpi3-ct,.da-sc span,.da-title,table.da th,.opt-sec,.cv-dv-t,.prep-auto{text-transform:none!important;letter-spacing:0!important}
+
+/* ── Cabecera y pestañas ── */
+.hdr{box-shadow:none;border-bottom:1px solid var(--bd);min-height:56px}
+.logo{background:var(--na);box-shadow:none;border-radius:8px;width:32px;height:32px;font-size:15px}
+.hn{color:var(--bk);font-size:13px;font-weight:700}
+.tabs{top:56px;gap:4px;padding:0 18px}
+.tab{font-size:13.5px;font-weight:500;padding:12px 12px;border-bottom-width:2px;color:var(--gm)}
+.tab.active{color:var(--bk);font-weight:700;border-bottom-color:var(--na)}
+.user-chip,.wkp,.btn{box-shadow:none!important}
+
+/* ── Títulos de sección: texto, sin barra de color ── */
+.sttl{border-left:none;padding-left:0;font-size:14px;font-weight:700;color:var(--bk);margin:22px 0 10px}
+.shdg{border-left:none;padding-left:0;font-size:12.5px;font-weight:700;color:var(--bk);margin:20px 0 8px;padding-top:14px;border-top:1px solid var(--bd)}
+.obs-sec.full .shdg{border-top:none;padding-top:0}
+.pcttag{font-weight:600;color:var(--gm)}
+
+/* ── Franja de modo: una línea discreta ── */
+.mode-banner{background:transparent!important;border:none!important;padding:0 0 2px!important;margin-bottom:6px;font-size:12.5px;color:var(--gm)!important}
+.mode-banner b,.mode-banner strong{color:var(--bk)}
+
+/* ── Tarjetas y contenedores: planos, con línea fina ── */
+.chc,.bar-wrap,.day-strip,.cv-box,.sec,.gantt,.kc,.ek-card,.exec-gr,.alert,.hist-row,.tr-head,.tr-stat,.tr-sec,.tr-rec,.tr-sum,.sem-row,.kpi3-row,.kpi3-c,.da-sc,.da-tools,.da-wrap,.bit-card,.bit-compose,.repro-row,.busy-card,.mv-card,.opt-menu{box-shadow:none!important}
+.kc:hover,.ek-card:hover,.acard:hover,.kpi3-c[data-drill]:hover{box-shadow:none!important;transform:none!important}
+.sb,.fsel,.psearch input,.da-tools input,.da-tools select,.log-input{box-shadow:none!important;border-radius:8px}
+.sb:focus,.fsel:focus,.log-input:focus,.vu-ta:focus,.cl-ai:focus,input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--na);outline-offset:1px}
+
+/* encabezado de disciplina: claro en vez de barra oscura */
+.sec-h{background:var(--wh)!important;border-bottom:1px solid var(--bd);padding:12px 16px}
+.sec-n{color:var(--bk)!important;font-size:13.5px;font-weight:700}
+.sec-h *{color:var(--gm)}
+.sec-h .sec-n{color:var(--bk)}
+.sec-h span[class*="pill"],.sec-h .sec-c,.sec-h .sec-p,.sec-h .sec-b{background:var(--gb)!important;color:var(--gm)!important;border:none!important}
+.g-grp{background:var(--gb)!important}
+.g-grp-n{font-size:12px;color:var(--bk)}
+
+/* tarjeta de actividad */
+.acard{border-left-width:1px;border-left-color:var(--bd);border-radius:10px;padding:14px;animation:none}
+.acard.crit,.acard.obs{border-left:3px solid var(--ro)}
+.acard:hover{border-color:var(--gl)}
+.ac-foot{background:transparent}
+.chip{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:6px}
+.ac-area{font-size:10.5px;font-weight:600}
+.ac-edit{font-size:11.5px;font-weight:600;border-radius:6px;padding:5px 10px;color:var(--bk);border-color:var(--bd)}
+.ac-st{font-size:11px}
+.ac-chat{border-radius:6px}
+.mrow{border-left-width:1px;border-left-color:var(--bd)}
+.mrow.crit,.mrow.obs{border-left:3px solid var(--ro)}
+.mrow.obs{background:var(--wh)}
+
+/* ── Controles ── */
+.day-pill{border-radius:8px;font-weight:600}
+.day-pill.on{background:var(--bk);border-color:var(--bk)}
+.day-pill.today{box-shadow:none!important;border-color:var(--na)}
+.day-pill.today.on{background:var(--na);border-color:var(--na)}
+.day-sel-lbl{font-size:12px;color:var(--gm)}
+.seg-b.on,.vseg .on,.vseg-b.on{background:var(--bk)!important;color:#fff!important}
+.bp{background:var(--na);box-shadow:none}
+.bp:hover{background:var(--na2);box-shadow:none}
+.cl-ab{background:var(--bk);font-size:12px;font-weight:600;border-radius:6px;padding:8px 14px}
+.cl-ab.interf-btn{background:transparent;color:var(--bk);border:1px solid var(--bd)}
+.det-btn{background:transparent;border:1px solid var(--bd);color:var(--bk);font-weight:600;border-radius:8px}
+.msave-full{background:var(--na);box-shadow:none;border-radius:8px;font-weight:700}
+.msave-full:hover{background:var(--na2)}
+.interf-chip{background:var(--wh);border:1px solid var(--bd);border-left:3px solid var(--am);border-radius:8px}
+.interf-edit{border-radius:6px}
+
+/* ── Modal de actividad ── */
+.modal{border-top:none;border-radius:12px;padding:26px}
+.mey{color:var(--gm);font-size:12px;font-weight:600}
+.mttl{font-size:18px;color:var(--bk)}
+.cl-ai,.vu-ta,.vu-ctrl{border-radius:8px}
+.vu-it{border-left-width:1px;border-left-color:var(--bd);border-radius:8px}
+.vu-n{background:var(--bk)}
+.prep-row{grid-template-columns:minmax(120px,1fr) minmax(130px,190px) auto auto;gap:10px}
+.prep-row>.cl-v2{margin:0}
+.prep-row>.cl-disc{margin:0;width:auto;padding:5px 8px}
+.prep-lbl-s{font-size:12.5px;font-weight:600;color:var(--bk)}
+.prep-sel{font-size:12.5px;font-weight:600;border:1px solid var(--bd);border-radius:6px;padding:7px 8px}
+.prep-auto{font-size:10px;border-radius:4px;color:var(--gm);border-color:var(--bd)}
+.cl-v2{font-size:11px}
+.obs-xp{border-radius:6px}
+
+/* ── Curva S ── */
+.cv-stat-l{font-size:11.5px;color:var(--gm);font-weight:600}
+.cv-dv{background:transparent;border:none;border-top:1px solid var(--bd);border-radius:0;padding:14px 0 4px;margin-top:12px}
+.cv-dv-t{font-size:13px;color:var(--bk)}
+.cv-dv-c{border-radius:8px}
+.cv-dv-c.today{box-shadow:none;border-color:var(--na)}
+.cv-dv-b{border-radius:6px}
+.cv-st{box-shadow:none}
+
+/* ── Gantt ── */
+.g-hname,.g-htot,.g-fname{font-size:11.5px}
+.g-meta{font-size:10.5px}
+
+/* ── Bitácora del día, historial, traspaso ── */
+.mv-h{background:var(--wh)}
+.mv-card{border-radius:10px}
+.tr-stat-l,.kl,.kpi3-n,.kpi3-ct,.ek-sectitle,.opt-sec{font-size:11.5px}
+.kpi3-c,.ek-stat,.da-title{background-image:none!important}
+
+/* ── Aviso flotante ── */
+.toast{background:var(--bk)!important;background-image:none!important;border-left:none!important;border-radius:8px;font-size:12.5px;font-weight:500;box-shadow:0 8px 24px rgba(20,30,40,.22)!important}
+
+@media(max-width:700px){
+  .tabs{top:auto}
+  .modal{padding:16px;border-radius:10px}
+  .prep-row{grid-template-columns:1fr minmax(110px,150px) auto auto;gap:6px}
+  .mttl{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ── Ajustes 2ª pasada ── */
+.hweek{background:transparent!important;padding:0!important;color:var(--gm)}
+.wkp{border:1px solid var(--bd)!important;background:transparent!important;color:var(--gm)!important;border-radius:8px!important;font-weight:600!important;font-size:12px!important;padding:6px 10px!important}
+.wkp:hover{background:var(--gb)!important}
+.wkp.on,.wkp.next.on,.wkp.hist.on{background:var(--bk)!important;color:#fff!important;border-color:var(--bk)!important}
+.wkp.add{border-style:dashed!important}
+body.wk-hist .hdr{background:var(--wh)!important;background-image:none!important}
+.wk-note,body.wk-hist .wk-note{background:var(--wh)!important;background-image:none!important;border:1px solid var(--bd)!important;border-left:3px solid var(--am)!important;color:var(--bk)!important;border-radius:8px}
+.msave{background:var(--na);border-radius:8px}
+.msave:hover{background:var(--na2)}
+.np-add{background:transparent!important;color:var(--bk)!important;border:1px solid var(--bd)!important;border-radius:8px!important;box-shadow:none!important}
+.np-add:hover{background:var(--gb)!important}
+.kc{animation:none}
+.kc::after{display:none!important}
+.card-t{border-left:none;padding-left:0;font-size:14px;color:var(--bk)}
+/* Gantt clara */
+.g-hname,.g-hday,.g-htot{background:var(--wh)!important;color:var(--bk)!important;border-bottom:1px solid var(--bd)}
+.g-hname{border-left-color:var(--wh)!important}
+.g-head .g-today{background:var(--wh)!important;color:var(--na)!important;box-shadow:inset 0 -2px 0 var(--na)}
+.g-head .g-today *{color:var(--na)!important}
+.g-foot .g-name{background:var(--gb)!important;color:var(--bk)!important;border-left-color:var(--gb)!important}
+.g-ftot{background:var(--gb)!important;color:var(--bk)!important}
+.g-foot .g-today{background:var(--gb)}
+.ppt-box{background:var(--gb);border:1px solid var(--bd)}
+.ppt-h{color:var(--bk)}
+.ppt-lbl{color:var(--gm);font-size:11.5px}
+
+/* ══ v19 · Cabecera del detalle: Guardar y × separados ══ */
+.mhdr-actions{gap:18px}
+.mcl{width:40px;height:40px;border:1px solid var(--bd);border-radius:8px;font-size:24px;color:var(--bk);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.mcl:hover{background:var(--gb)}
+
+/* ══ v19 · Celular: orden simétrico y controles grandes para terreno ══ */
+@media(max-width:700px){
+  /* cabecera en dos filas parejas */
+  .hdr{padding:10px 14px;gap:8px}
+  .hl{padding:0;width:100%;gap:10px}
+  .hn small{display:none}
+  .hweek{margin-left:auto;display:flex!important;gap:6px;min-width:0}
+  .wkp{white-space:nowrap;min-height:40px}
+  .hr2{padding:0;width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+  .hr2 .notif-wrap{order:1}
+  .hr2 .user-chip{order:2;width:100%;justify-content:center;min-height:42px;border-radius:8px;font-size:13px}
+  .hr2 .opt-wrap{order:3}
+  .hr2 .save-ind{order:4;grid-column:1/-1;justify-content:center;font-size:12px;padding:2px 0}
+  .hr2 #btn-archback{order:5;grid-column:1/-1;justify-content:center}
+  .notif-bell,.opt-btn{min-height:42px;border-radius:8px}
+  .tabs{padding:0 8px}
+  .tabs .tab{padding:13px 6px;font-size:14px}
+
+  /* filtros: grilla de 2 columnas iguales */
+  .flt{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}
+  .flt .sw{order:1;grid-column:1/-1;max-width:none;min-width:0}
+  .flt .sb{height:46px}
+  .flt .vseg{order:2;grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;width:100%;gap:0}
+  .flt .vseg .seg-b{justify-content:center;text-align:center;min-height:42px;font-size:14px}
+  .flt #f-disc{order:3}.flt .fms{order:4;display:block;min-width:0}
+  .flt #f-crit{order:5}.flt #f-estado{order:6}
+  .flt .fclear{order:7}.flt .np-add{order:8}
+  .flt .cbadge{order:9;grid-column:1/-1;margin:0;text-align:right;font-size:12px}
+  .flt .fsel,.flt .fms-b{width:100%;max-width:none!important;min-width:0;height:46px;padding:0 12px;font-weight:500;font-size:15px!important;box-sizing:border-box}
+  .flt .fms-b{justify-content:space-between}
+  .flt .fclear,.flt .np-add{width:100%;height:46px;font-size:14px;font-weight:600;border-radius:8px;box-sizing:border-box}
+  select.fsel{font-size:16px!important}
+
+  /* ubicación: panel inferior a todo el ancho (ya no se corta) */
+  .fms-p{position:fixed!important;left:10px!important;right:10px!important;top:auto!important;bottom:10px!important;min-width:0!important;max-width:none!important;max-height:64vh!important;z-index:400;padding:10px;border-radius:14px;box-shadow:0 0 0 100vmax rgba(20,30,40,.35),0 10px 40px rgba(0,0,0,.25)!important}
+  .fms-o{min-height:48px;font-size:15px;font-weight:500}
+  .fms-top{position:sticky;top:-10px;background:var(--wh);padding:8px 4px 10px;z-index:1}
+
+  /* tarjeta: acciones en filas completas */
+  .sec-h{padding:12px}
+  .sec-body.open{padding:10px}
+  .acard{padding:12px}
+  .ac-foot{gap:8px}
+  .ac-foot .ac-chat{margin-left:auto}
+  .ac-foot .qsel{order:10;flex:1 1 100%;max-width:none;margin:0;height:46px;font-size:16px!important;font-weight:600;padding:0 12px;border-radius:8px}
+  .ac-foot .ac-qb{order:11;flex:1 1 0;margin:0;height:46px;font-size:14px;border-radius:8px}
+  .ac-foot .ac-edit{order:12;flex:1 1 0;margin:0;height:46px;font-size:14px;font-weight:700;background:var(--bk);color:#fff;border-color:var(--bk);border-radius:8px}
+
+  /* detalle a pantalla completa: × grande arriba, Guardar fijo abajo */
+  .mo{padding:0!important}
+  .modal{width:100%!important;max-width:none!important;min-height:100vh;border-radius:0!important;padding:14px 14px 18px!important;box-sizing:border-box}
+  .mhdr{position:sticky;top:0;background:var(--wh);z-index:6;margin:-14px -14px 12px;padding:12px 14px 10px}
+  .mhdr .msave{display:none}
+  .mcl{width:44px;height:44px}
+  .msave-full{position:sticky;bottom:10px;z-index:5;height:52px;font-size:16px;box-shadow:0 0 0 10px var(--wh)!important}
+}
+@media(max-width:700px){
+  .hl{flex-wrap:nowrap;min-width:0}
+  .hn{flex:0 0 auto}
+  .hweek{flex:1 1 auto;justify-content:flex-end;overflow-x:auto;scrollbar-width:none}
+  .hweek::-webkit-scrollbar{display:none}
+  .wkp{font-size:11.5px!important;padding:6px 8px!important;flex:0 0 auto}
+  .ac-foot{padding:10px 0 0!important}
+}
+@media(max-width:700px){
+  .hl .hn{display:none}
+  .hweek{justify-content:flex-start}
+  .hweek .wkp{flex:1 1 0;text-align:center;font-size:12px!important;min-width:0;overflow:hidden;text-overflow:ellipsis}
+}
+@media(max-width:700px){
+  .hweek{border-radius:0!important;overflow:visible!important;min-width:0}
+  .hweek .wkp{white-space:nowrap}
+}
+
+/* ══ v20 · Traspaso de turno: cuadro de comentario a todo el ancho ══ */
+.bit-compose .log-input{display:block;width:100%;box-sizing:border-box;min-height:110px;font-size:15px;line-height:1.5;margin-bottom:10px}
+.bit-compose{border-left-width:1px!important;border-left-color:var(--bd)!important}
+
+/* ══ v21 · Filtro de ubicación en celular: botón para salir ══ */
+.fms-done{display:none}
+@media(max-width:700px){
+  .fms-done{display:block;position:sticky;bottom:-10px;width:100%;height:50px;margin-top:8px;border:none;border-radius:10px;background:var(--bk);color:#fff;font-family:var(--fn);font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 0 0 10px var(--wh)}
+}
+
+/* ══ v22 · Franja «qué semana estoy viendo» ══ */
+.wk-now{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;max-width:1700px;margin:0 auto;padding:10px 22px;background:var(--wh);border-bottom:1px solid var(--bd);box-sizing:border-box}
+.wk-now-l{font-size:12px;color:var(--gm);font-weight:600}
+.wk-now-w{font-size:17px;font-weight:800;color:var(--bk);line-height:1.2}
+.wk-now-r{font-size:13px;color:var(--gm);font-weight:500}
+.wk-now-t{font-size:12px;font-weight:700;border-radius:6px;padding:4px 10px;color:#fff;background:var(--bk);white-space:nowrap}
+.wk-now-t.next{background:var(--te2)}
+.wk-now-t.hist{background:#B45309}
+.wk-now-sw{margin-left:auto;font-family:var(--fn);font-size:12.5px;font-weight:600;color:var(--bk);background:var(--wh);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.wk-now-sw:hover{background:var(--gb)}
+.wk-now.next{box-shadow:inset 4px 0 0 var(--te2)}
+.wk-now.hist{box-shadow:inset 4px 0 0 #B45309}
+@media(max-width:700px){
+  .wk-now{padding:10px 14px;gap:6px 10px}
+  .wk-now-l{display:none}
+  .wk-now-sw{margin-left:0;flex:1 1 100%;min-height:42px;font-size:14px}
+}
+body:not(.wk-hist) #wk-note{display:none!important}
+body.wk-next .tabs .tab.active{box-shadow:none!important;border-bottom-color:var(--te2)!important}
+body.wk-hist .tabs .tab.active{box-shadow:none!important;border-bottom-color:#B45309!important}
+</style>
 </head>
 <body>
 
@@ -1572,18 +1843,19 @@ button,.acard,.mrow,.tab,.day-pill,.log-photo-thumb,.bit-photo,.sec-h{touch-acti
 <input type="file" id="fiarch" accept=".json" style="display:none" onchange="archImport(this.files[0]);this.value=''">
 <input type="file" id="fiall" accept=".json" style="display:none" onchange="restoreAll(this.files[0]);this.value=''">
 
+<div class="wk-now" id="wk-now" style="display:none"></div>
 <div class="wk-note" id="wk-note" style="display:none"></div>
 <div class="tabs" id="tabs" style="display: flex;">
   <!-- v1 simplificada: pestañas de dashboard (Planificación / Ejecución / Global) retiradas.
        Sus paneles siguen en el DOM ocultos para no romper funciones internas. -->
-  <button class="tab active" id="tab-btn-plani" onclick="showTab(&#39;plani&#39;)">📋 Planificación</button>
-  <button class="tab" id="tab-btn-ejec" onclick="showTab(&#39;ejec&#39;)">🔧 Ejecución</button>
-  <button class="tab only-mob" id="tab-btn-movs" onclick="showTab('movs')">📓 Bitácora</button>
-<button class="tab" id="tab-btn-kpis" onclick="showTab(&#39;kpis&#39;)">📊 KPIs</button>
-  <button class="tab" id="tab-btn-detalle" onclick="showTab(&#39;detalle&#39;)">📄 Detalle Actividades</button>
-  <button class="tab" id="tab-btn-traspaso" onclick="showTab(&#39;traspaso&#39;)">⇄ Traspaso de turno</button>
-  <button class="tab" id="tab-btn-historial" onclick="showTab(&#39;historial&#39;)">🕘 Historial</button>
-  <button class="tab" id="tab-btn-semanas" onclick="showTab(&#39;semanas&#39;)">🗂 Semanas</button>
+  <button class="tab active" id="tab-btn-plani" onclick="showTab(&#39;plani&#39;)">Planificación</button>
+  <button class="tab" id="tab-btn-ejec" onclick="showTab(&#39;ejec&#39;)">Ejecución</button>
+  <button class="tab only-mob" id="tab-btn-movs" onclick="showTab('movs')">Bitácora</button>
+<button class="tab" id="tab-btn-kpis" onclick="showTab(&#39;kpis&#39;)">KPIs</button>
+  <button class="tab" id="tab-btn-detalle" onclick="showTab(&#39;detalle&#39;)">Detalle Actividades</button>
+  <button class="tab" id="tab-btn-traspaso" onclick="showTab(&#39;traspaso&#39;)">Traspaso de turno</button>
+  <button class="tab" id="tab-btn-historial" onclick="showTab(&#39;historial&#39;)">Historial</button>
+  <button class="tab" id="tab-btn-semanas" onclick="showTab(&#39;semanas&#39;)">Semanas</button>
 </div>
 
 <main class="dash" id="dash" style="display: block;">
@@ -1940,10 +2212,22 @@ button,.acard,.mrow,.tab,.day-pill,.log-photo-thumb,.bit-photo,.sec-h{touch-acti
    get/set/del por llamadas a la API manteniendo las mismas claves
    (ver SECURITY-SUPABASE.md). Tolera valores antiguos no-JSON. */
 var HIST_VIEW=false, HIST_B=null; /* modo «semana archivada» (solo lectura) */
+/* v23 · salud del almacenamiento local. Si el navegador no puede guardar (vista
+   previa de archivos, modo privado o almacenamiento lleno) la app NO sube a la
+   nube un documento incompleto ni saca al usuario de la semana que está viendo. */
+var LS_BAD=false;
+function lsFail(){
+  if(LS_BAD)return;LS_BAD=true;
+  try{var b=document.getElementById('ls-bad');if(!b){b=document.createElement('div');b.id='ls-bad';
+    b.style.cssText='position:sticky;top:0;z-index:500;background:#C13832;color:#fff;font:600 13px/1.45 Inter,system-ui,sans-serif;padding:10px 14px;text-align:center';
+    b.textContent='⚠ Este navegador no está guardando los datos (vista previa de archivo, modo privado o almacenamiento lleno). Abre la app desde su link en Safari o Chrome. Desde aquí no se subirá nada a la nube, para proteger la semana.';
+    document.body.insertBefore(b,document.body.firstChild);}}catch(e){}
+}
+try{localStorage.setItem('prep__probe','1');localStorage.removeItem('prep__probe');}catch(e){setTimeout(lsFail,0);}
 var Store={
   ns:'prep_',
   get:function(k,d){try{if(HIST_VIEW&&HIST_B&&archLocalKey(k)){var hv=archVirt(k);return hv===undefined?d:hv;}var v=localStorage.getItem(this.ns+k);if(v===null)return d;try{return JSON.parse(v);}catch(e){return v;}}catch(e){return d;}},
-  set:function(k,v){try{if(HIST_VIEW&&archLocalKey(k))return true;localStorage.setItem(this.ns+k,typeof v==='string'?v:JSON.stringify(v));if(typeof CLOUD!=='undefined'&&CLOUD.active()&&!CLOUD._applying&&cloudShared(this.ns+k)){CLOUD.setDirty(true);CLOUD.push();}return true;}catch(e){return false;}},
+  set:function(k,v){try{if(HIST_VIEW&&archLocalKey(k))return true;localStorage.setItem(this.ns+k,typeof v==='string'?v:JSON.stringify(v));if(typeof CLOUD!=='undefined'&&CLOUD.active()&&!CLOUD._applying&&cloudShared(this.ns+k)){CLOUD.setDirty(true);CLOUD.push();}return true;}catch(e){try{if(e&&(e.name==='QuotaExceededError'||e.name==='SecurityError'||e.code===22||e.code===1014))lsFail();}catch(e2){}return false;}},
   del:function(k){try{if(HIST_VIEW&&archLocalKey(k))return;localStorage.removeItem(this.ns+k);if(typeof CLOUD!=='undefined'&&CLOUD.active()&&!CLOUD._applying&&cloudShared(this.ns+k)){CLOUD.setDirty(true);CLOUD.push();}}catch(e){}}
 };
 
@@ -2052,9 +2336,9 @@ var CLOUD={
       Object.keys(data).forEach(function(k){
         if(!(k.indexOf(ns)===0&&cloudShared(k)&&typeof data[k]==='string'))return;
         var local=null;try{local=localStorage.getItem(k);}catch(e){}
-        if(local===null||local===data[k]){localStorage.setItem(k,data[k]);return;}
+        if(local===null||local===data[k]){try{localStorage.setItem(k,data[k]);}catch(e3){lsFail();}return;}
         var m=cloudMerge(k.slice(ns.length),local,data[k],tombs);
-        localStorage.setItem(k,m.json);localWon+=m.localWon;remoteWon+=m.remoteWon;
+        try{localStorage.setItem(k,m.json);}catch(e3){lsFail();}localWon+=m.localWon;remoteWon+=m.remoteWon;
         /* mantiene coherente la memoria de la semana abierta (salvo la actividad en edición) */
         if(DATA&&!HIST_VIEW&&k===ns+'edits_s'+DATA.semana){try{var mg=JSON.parse(m.json);var open=(document.getElementById('mo')&&document.getElementById('mo').classList.contains('open'))?editId:null;
           Object.keys(mg).forEach(function(id){if(id!==open){EDITS[id]=mg[id];ed(id);_edSig[DATA.semana+'|'+id]=_sigOf(EDITS[id]);}});Object.keys(EDITS).forEach(function(id){if(!mg[id]&&id!==open)delete EDITS[id];});}catch(e){}}
@@ -2074,10 +2358,13 @@ var CLOUD={
     }
     return fetch(this.url('?id=eq.'+encodeURIComponent(SUPA_DOC)+'&select=data,cid,updated_at'),{headers:this.hdr()})
       .then(function(r){return r.json();})
-      .then(function(rows){if(rows&&rows[0]){self._seen=rows[0].updated_at;if(rows[0].data)self.apply(rows[0].data);return true;}return false;})
-      .catch(function(){return false;});},
+      .then(function(rows){if(rows&&rows[0]){self._seen=rows[0].updated_at;if(rows[0].data)self.apply(rows[0].data);return true;}return Array.isArray(rows)?false:null;})
+      .catch(function(){return null;});},
   push:function(){if(!this.active()||this._applying)return;var self=this;clearTimeout(this._t);this._t=setTimeout(function(){self._send();},800);},
   _send:function(){if(!this.active())return;var self=this;
+    /* v23 · nunca subir un documento incompleto */
+    if(LS_BAD){setSaved(true);return;}
+    try{if(DATA&&!HIST_VIEW&&!localStorage.getItem(Store.ns+dataKey())){lsFail();setSaved(true);return;}}catch(e0){lsFail();return;}
     if(!this.online()){this._retry();setSaved(true);return;} /* sin señal: queda pendiente */
     var stamp=new Date().toISOString();
     var body=JSON.stringify({id:SUPA_DOC,data:this.collect(),cid:this.cid,updated_at:stamp});
@@ -2188,6 +2475,7 @@ function reloadFromStore(){
   if(HIST_VIEW){CLOUD._pending=true;return;}
   if(!DATA){if(restoreData())showDash(true);return;}
   var d=Store.get(dataKey(),null);
+  if((!d||!d.secs)&&LS_BAD){toast('⚠ No se pudo actualizar desde la nube en este navegador — sigues viendo la semana cargada');return;}
   if(!d||!d.secs){
     /* La semana fue finalizada desde otro dispositivo: sale de la vista para todos.
        CLOUD._applying evita reenviar a la nube el estado que acaba de llegar de ella. */
@@ -3128,7 +3416,7 @@ var BOOT_DATA={"title":"PROGRAMA DE ACTIVIDADES SEMANALES SUPERINTENDENCIA DE IN
 function restoreData(){
   try{
     var d=Store.get('data',null);
-    if((!d||!d.secs)&&!Store.get('data_next',null)&&typeof BOOT_DATA==='object'&&BOOT_DATA&&BOOT_DATA.secs){Store.set('data',BOOT_DATA);d=Store.get('data',null);}
+    if((!d||!d.secs)&&!Store.get('data_next',null)&&typeof BOOT_DATA==='object'&&BOOT_DATA&&BOOT_DATA.secs&&!LS_BAD&&!Store.get('fin_s'+BOOT_DATA.semana,null)){Store.set('data',BOOT_DATA);d=Store.get('data',null);}
     if(d&&d.secs&&Array.isArray(d.secs)&&d.semana!=null){WSLOT=0;}
     else{d=Store.get('data_next',null);if(d&&d.secs&&Array.isArray(d.secs)&&d.semana!=null){WSLOT=1;}else{return false;}}
     DATA=d;
@@ -6972,6 +7260,37 @@ function obsToggle(){
   if(!OBS_FULL){var s=document.getElementById('obs-sec');if(s&&s.scrollIntoView)s.scrollIntoView({block:'start'});}
 }
 if(window.visualViewport){window.visualViewport.addEventListener('resize',function(){if(OBS_FULL)obsFit();});window.visualViewport.addEventListener('scroll',function(){if(OBS_FULL)obsFit();});}
+
+/* v21 · botón «Listo» para cerrar el panel de ubicación (celular) */
+var _rlf0=renderLocFilter;
+renderLocFilter=function(){
+  _rlf0();
+  var p=document.getElementById('f-loc-p');if(!p||p.querySelector('.fms-done'))return;
+  var d=document.createElement('button');d.type='button';d.className='fms-done';d.textContent='✓ Listo';
+  d.onclick=function(ev){ev.stopPropagation();locClose();};p.appendChild(d);
+};
+
+/* v22 · franja siempre visible con la semana que se está viendo */
+function renderWkNow(){
+  var b=document.getElementById('wk-now');if(!b)return;
+  if(typeof DATA==='undefined'||!DATA||!DATA.secs){b.style.display='none';return;}
+  var d0=(DATA.dates&&DATA.dates[0])||'',d6=(DATA.dates&&DATA.dates[6])||'';
+  var kind=HIST_VIEW?'hist':(WSLOT===1?'next':'cur');
+  var tag=kind==='hist'?'Archivada · solo lectura':(kind==='next'?'Semana siguiente · preparativos':'Semana en curso');
+  var h='<span class="wk-now-l">Estás viendo</span><span class="wk-now-w">Semana '+esc(DATA.semana)+'</span>'
+    +'<span class="wk-now-t'+(kind==='cur'?'':' '+kind)+'">'+tag+'</span>'
+    +((d0&&d6)?'<span class="wk-now-r">Del '+esc(d0)+' al '+esc(d6)+'</span>':'');
+  if(kind==='hist')h+='<button class="wk-now-sw" onclick="archClose()">← Volver a la semana actual</button>';
+  else{
+    var o=Store.get(dataKey(WSLOT===1?0:1),null);
+    if(o&&o.secs)h+='<button class="wk-now-sw" onclick="setWeekSlot('+(WSLOT===1?0:1)+')">Cambiar a la semana '+esc(o.semana)+' ('+(WSLOT===1?'en curso':'siguiente')+')</button>';
+  }
+  b.className='wk-now'+(kind==='cur'?'':' '+kind);b.innerHTML=h;b.style.display='flex';
+}
+var _rwp0=renderWeekPills;
+renderWeekPills=function(){_rwp0.apply(this,arguments);try{renderWkNow();}catch(e){}};
+var _rp0=renderPeriod;
+renderPeriod=function(){_rp0.apply(this,arguments);try{renderWkNow();}catch(e){}};
 
 function boot(){
   loadUser();
