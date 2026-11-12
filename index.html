@@ -1800,6 +1800,12 @@ body.wk-hist .tabs .tab.active{box-shadow:none!important;border-bottom-color:#B4
 .kpi3-day b{font-size:16px;font-weight:800}
 .kpi3-day-l{font-weight:700;color:var(--bk)}
 @media(max-width:700px){.st-addw{flex:0 0 96px!important}.st-wi{width:52px;font-size:16px}}
+
+/* ══ v25 · dotación por turno ══ */
+.m-tbl tr.dot-tot td{font-weight:800;border-top:1px solid var(--bd);background:var(--gb)}
+.m-tbl .rl{white-space:nowrap}
+.day-t{font-size:11px;font-weight:600;color:var(--gm);margin-top:2px}
+.day-r{font-size:11px}
 </style>
 </head>
 <body>
@@ -3708,9 +3714,10 @@ function renderExec(){
 /* ── Daily strip ── */
 function renderDayStrip(boxId){
   var tdp=[0,0,0,0,0,0,0],tdr=[0,0,0,0,0,0,0];
-  allActs().forEach(function(a){var rd=realDot(a);for(var d=0;d<7;d++){tdp[d]+=a.dp[d];tdr[d]+=rd[d];}});
+  var tA=_z7(),tC=_z7(),rA=_z7(),rC=_z7();
+  allActs().forEach(function(a){var rd=realDot(a),p=planT(a),r=realT(a);for(var d=0;d<7;d++){tdp[d]+=a.dp[d];tdr[d]+=rd[d];tA[d]+=p.A[d];tC[d]+=p.C[d];rA[d]+=r.A[d];rC[d]+=r.C[d];}});
   var h='';for(var d=0;d<7;d++){var p=tdp[d],rl=tdr[d];var clr=rl>=p&&p>0?'var(--ve)':rl>0?'var(--am)':'transparent';var rclr=rl>=p&&p>0?'var(--ve)':rl>0?'#8A6600':'var(--gl)';
-    h+='<div class="day-c" style="border-bottom-color:'+clr+'"><div class="day-n">'+DSHORT[d]+'</div><div class="day-d">'+fmtFechaCorta(DATA.dates[d]||'')+'</div><div class="day-v">'+p+'</div><div class="day-r" style="color:'+rclr+'">'+(rl?'↻ '+rl:'—')+'</div></div>';}
+    h+='<div class="day-c" style="border-bottom-color:'+clr+'"><div class="day-n">'+DSHORT[d]+'</div><div class="day-d">'+fmtFechaCorta(DATA.dates[d]||'')+'</div><div class="day-v">'+p+'</div><div class="day-t">A '+tA[d]+' · C '+tC[d]+'</div><div class="day-r" style="color:'+rclr+'">'+(rl?'Real '+rl+' (A '+rA[d]+' · C '+rC[d]+')':'—')+'</div></div>';}
   var box=document.getElementById(boxId||'day-strip');if(box)box.innerHTML=h;
 }
 
@@ -4326,12 +4333,7 @@ function openEdit(id,_focus){
   h+='<div class="shdg">Dotación · Plan'+(MODE==='ejec'?' vs Real (editable)':' (la dotación real la registra Ejecución)')+(MODE==='plani'?(planEdit?' <button class="plan-lock" style="border-color:var(--ve);color:var(--ve)" onclick="savePlan()">💾 Guardar cambios</button>':' <button class="plan-lock" onclick="unlockPlan()">🔒 Editar plan</button>'):'')+'</div>';
   h+='<table class="m-tbl"><thead><tr><th class="rl">Día</th>';for(var d=0;d<7;d++)h+='<th>'+DSHORT[d]+'</th>';h+='<th>Total</th></tr></thead><tbody>';
   h+='<tr><td class="rl">Fecha</td>';for(var d=0;d<7;d++)h+='<td style="color:var(--gm);font-size:9px">'+fmtFechaCorta(DATA.dates[d]||'—')+'</td>';h+='<td>—</td></tr>';
-  h+='<tr><td class="rl">Plan</td>';for(var d=0;d<7;d++){if(planEdit)h+='<td><input class="dr-inp" type="number" min="0" value="'+(a.dp[d]||0)+'" oninput="setPlanDot('+d+',this.value)"></td>';else h+='<td style="color:var(--na)">'+(a.dp[d]||'—')+'</td>';}h+='<td style="color:var(--na)" id="tot-plan">'+totPlan(a)+'</td></tr>';
-  if(MODE==='ejec'){
-    h+='<tr><td class="rl">Real</td>';for(var d=0;d<7;d++)h+='<td><input class="dr-inp" type="number" min="0" value="'+(rd[d]||0)+'" data-d="'+d+'" oninput="setReal('+d+',this.value)"></td>';h+='<td style="color:var(--ve)" id="tot-real">'+totReal(a)+'</td></tr>';
-  }else{
-    h+='<tr><td class="rl" style="color:var(--gm)">Real</td>';for(var d=0;d<7;d++)h+='<td style="color:var(--gm);font-size:11px">'+(rd[d]||'·')+'</td>';h+='<td style="color:var(--gm)">'+totReal(a)+'</td></tr>';
-  }
+  h+=dotTurnoRows(a,planEdit);
   h+='</tbody></table>';
 
   // Horas · por día (bloque derecho del programa semanal)
@@ -4611,6 +4613,64 @@ function setF(field,val){
   else if(field==='fechaTermino')logAction('Fechas',editId,'Término: '+(val||'—'));
   else if(field==='ot'){var id=editId;logTraceDeb('ot:'+id,1500,function(){if(EDITS[id])logAction('OT',id,'N° OT: '+(EDITS[id].ot||'—'));});}
   else if(field==='responsable'){var idr=editId;logTraceDeb('resp:'+idr,1500,function(){if(EDITS[idr])logAction('Responsable',idr,EDITS[idr].responsable||'—');});}
+}
+/* v25 · Dotación por turno. Plan: a.dpA / a.dpC (vienen del programa SEM#NN).
+   Real: e.drA / e.drC. El total del día (a.dp / e.dr) se mantiene como la suma,
+   así KPIs, Gantt, curva S y la base PBI siguen funcionando igual. */
+function _z7(){return [0,0,0,0,0,0,0];}
+function planT(a){
+  var A=(a.dpA&&a.dpA.length===7)?a.dpA:null,C=(a.dpC&&a.dpC.length===7)?a.dpC:null,oA=[],oC=[];
+  for(var d=0;d<7;d++){var tot=+a.dp[d]||0,x=A?(+A[d]||0):0,y=C?(+C[d]||0):0;
+    if(x+y!==tot){if(y>tot)y=tot;x=tot-y;}   /* sin detalle (o editado como total): lo que falte va al turno A */
+    oA.push(x);oC.push(y);}
+  return {A:oA,C:oC};
+}
+function realT(a){
+  var e=ed(a.id),rd=realDot(a),p=planT(a),oA=[],oC=[];
+  var hA=(e.drA&&e.drA.length===7),hC=(e.drC&&e.drC.length===7);
+  for(var d=0;d<7;d++){var tot=+rd[d]||0,x=hA?(+e.drA[d]||0):0,y=hC?(+e.drC[d]||0):0;
+    if(!(hA&&hC)||x+y!==tot){if(p.A[d]===0&&p.C[d]>0){x=0;y=tot;}else{x=tot;y=0;}}
+    oA.push(x);oC.push(y);}
+  return {A:oA,C:oC};
+}
+function dotTurnoRows(a,planEdit){
+  var p=planT(a),r=realT(a),h='',d;
+  function sum(v){return v.reduce(function(s,x){return s+(+x||0);},0);}
+  [['A','Plan · Turno A'],['C','Plan · Turno C']].forEach(function(t){
+    h+='<tr><td class="rl">'+t[1]+'</td>';
+    for(d=0;d<7;d++){if(planEdit)h+='<td><input class="dr-inp" type="number" min="0" value="'+(p[t[0]][d]||0)+'" oninput="setPlanDotT(\''+t[0]+'\','+d+',this.value)"></td>';else h+='<td style="color:var(--na)">'+(p[t[0]][d]||'—')+'</td>';}
+    h+='<td style="color:var(--na)" id="tot-plan-'+t[0]+'">'+sum(p[t[0]])+'</td></tr>';});
+  h+='<tr class="dot-tot"><td class="rl">Plan total</td>';for(d=0;d<7;d++)h+='<td style="color:var(--na)" id="ps-'+d+'">'+(a.dp[d]||'—')+'</td>';h+='<td style="color:var(--na)" id="tot-plan">'+totPlan(a)+'</td></tr>';
+  [['A','Real · Turno A'],['C','Real · Turno C']].forEach(function(t){
+    h+='<tr><td class="rl"'+(MODE==='ejec'?'':' style="color:var(--gm)"')+'>'+t[1]+'</td>';
+    for(d=0;d<7;d++){if(MODE==='ejec')h+='<td><input class="dr-inp" type="number" min="0" value="'+(r[t[0]][d]||0)+'" oninput="setRealT(\''+t[0]+'\','+d+',this.value)"></td>';else h+='<td style="color:var(--gm);font-size:11px">'+(r[t[0]][d]||'·')+'</td>';}
+    h+='<td style="color:var(--ve)" id="tot-real-'+t[0]+'">'+sum(r[t[0]])+'</td></tr>';});
+  var rd=realDot(a);
+  h+='<tr class="dot-tot"><td class="rl">Real total</td>';for(d=0;d<7;d++)h+='<td style="color:var(--ve)" id="rs-'+d+'">'+(rd[d]||'·')+'</td>';h+='<td style="color:var(--ve)" id="tot-real">'+totReal(a)+'</td></tr>';
+  return h;
+}
+function setRealT(t,d,val){
+  var e=ed(editId),a=findAct(editId);if(!a)return;var r=realT(a);
+  e.drA=r.A.slice();e.drC=r.C.slice();
+  e['dr'+t][d]=Math.max(0,parseInt(val)||0);
+  if(!e.dr||e.dr.length!==7)e.dr=realDot(a).slice();
+  e.dr[d]=(e.drA[d]||0)+(e.drC[d]||0);
+  var c=document.getElementById('rs-'+d);if(c)c.textContent=e.dr[d]||'·';
+  var tt=document.getElementById('tot-real');if(tt)tt.textContent=totReal(a);
+  var ts=document.getElementById('tot-real-'+t);if(ts)ts.textContent=e['dr'+t].reduce(function(s,x){return s+(+x||0);},0);
+  markUnsaved();
+  var id=editId;logTraceDeb('real:'+id+':'+t+':'+d,1500,function(){if(EDITS[id]&&EDITS[id]['dr'+t])logAction('Dotación real',id,DSHORT[d]+' · Turno '+t+' = '+(EDITS[id]['dr'+t][d]||0)+' pers.');});
+}
+function setPlanDotT(t,d,val){
+  if(!PLAN_UNLOCKED)return;var a=findAct(editId);if(!a)return;var p=planT(a);
+  a.dpA=p.A.slice();a.dpC=p.C.slice();
+  a['dp'+t][d]=Math.max(0,parseInt(val)||0);a.dp[d]=(a.dpA[d]||0)+(a.dpC[d]||0);
+  Store.set(dataKey(),DATA);
+  var c=document.getElementById('ps-'+d);if(c)c.textContent=a.dp[d]||'—';
+  var el=document.getElementById('tot-plan');if(el)el.textContent=totPlan(a);
+  var ts=document.getElementById('tot-plan-'+t);if(ts)ts.textContent=a['dp'+t].reduce(function(s,x){return s+(+x||0);},0);
+  markUnsaved();planRefresh();
+  logTraceDeb('pdot:'+editId+':'+t+':'+d,1500,function(){logAction('Plan dotación',editId,DSHORT[d]+' · Turno '+t+' = '+(a['dp'+t][d]||0)+' pers.');});
 }
 function setReal(d,val){
   var e=ed(editId);var a=findAct(editId);if(!e.dr)e.dr=realDot(a).slice();e.dr[d]=parseInt(val)||0;
@@ -7187,7 +7247,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){var lb=docu
 function mrow(a){
   var e=ed(a.id);var qb=isQuiebre(a);var ej=ejInfo(e.estEj||'');var mida=+e.mida||0;var avc=avColor(mida);
   var rd=realDot(a);var d=(typeof DIA==='number'&&DIA>=0)?DIA:-1;
-  var dot=d>=0?('👷 '+(a.dp[d]||0)+(rd[d]?' · real '+rd[d]:'')):('👷 '+totPlan(a));
+  var _pt=planT(a);var dot=d>=0?('👷 A '+(_pt.A[d]||0)+' · C '+(_pt.C[d]||0)+(rd[d]?' · real '+rd[d]:'')):('👷 '+totPlan(a));
   var nlog=(e.log||[]).length,vn=vulnOpenN(a);
   return '<div class="mrow'+(qb?' obs':isCrit(a)?' crit':'')+'" onclick="openEdit('+jsArg(a.id)+')">'
     +'<div class="mrow-top"><span class="mrow-id">'+esc(a.id)+'</span>'
