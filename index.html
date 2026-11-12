@@ -1784,6 +1784,22 @@ body.wk-hist .hdr{background:var(--wh)!important;background-image:none!important
 body:not(.wk-hist) #wk-note{display:none!important}
 body.wk-next .tabs .tab.active{box-shadow:none!important;border-bottom-color:var(--te2)!important}
 body.wk-hist .tabs .tab.active{box-shadow:none!important;border-bottom-color:#B45309!important}
+
+/* ══ v24 · pasos con peso y KPIs del día ══ */
+.st-w{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--gm);flex:0 0 auto}
+.st-wi{width:58px;border:1px solid var(--bd);border-radius:6px;padding:5px 6px;font-family:var(--fn);font-size:13px;font-weight:600;text-align:right;background:var(--wh);color:var(--bk)}
+.st-wi::placeholder{color:var(--gl);font-weight:500}
+.st-addw{flex:0 0 118px!important;min-width:0}
+.st-note{font-size:11.5px;color:var(--gm);margin:6px 0 2px}
+.kpi3-daybar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--wh);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.kpi3-daybar-l{font-size:13px;font-weight:700;color:var(--bk);margin-right:4px}
+.kpi3-daybar-n{flex:1 1 100%;font-size:11.5px;color:var(--gm);line-height:1.5}
+.kpi3-wk{font-weight:700;color:var(--bk)}
+.kpi3-gs{font-size:11.5px}
+.kpi3-day{display:flex;align-items:baseline;justify-content:center;gap:8px;flex-wrap:wrap;width:100%;box-sizing:border-box;margin-top:8px;padding:8px 10px;border:1px solid var(--bd);border-left:3px solid var(--bd);border-radius:8px;background:var(--gb);font-size:11.5px;color:var(--gm)}
+.kpi3-day b{font-size:16px;font-weight:800}
+.kpi3-day-l{font-weight:700;color:var(--bk)}
+@media(max-width:700px){.st-addw{flex:0 0 96px!important}.st-wi{width:52px;font-size:16px}}
 </style>
 </head>
 <body>
@@ -4360,9 +4376,9 @@ function openEdit(id,_focus){
   h+='</div>';
 
   // Paso a paso → maneja el % de avance
-  h+='<div class="shdg">Paso a paso <span class="pcttag" id="tag-step"></span><span style="font-weight:600;color:var(--gm);font-size:10px"> · el % de avance se calcula con los pasos cumplidos</span></div>';
+  h+='<div class="shdg">Paso a paso <span class="pcttag" id="tag-step"></span><span style="font-weight:600;color:var(--gm);font-size:10px"> · el % de avance se calcula con los pasos cumplidos y lo que vale cada uno</span></div>';
   h+='<div class="cl-ed" id="cl-step"></div>';
-  h+='<div class="cl-ar"><input class="cl-ai" id="add-step" placeholder="Agregar paso…" onkeydown="if(event.key===\'Enter\')stepAdd()"><button class="cl-ab" onclick="stepAdd()">+ Paso</button></div>';
+  h+='<div class="cl-ar"><input class="cl-ai" id="add-step" placeholder="Agregar paso…" onkeydown="if(event.key===\'Enter\')stepAdd()"><input class="cl-ai st-addw" id="add-step-w" type="number" inputmode="decimal" min="0" max="100" step="any" placeholder="% (opcional)" title="Cuánto vale el paso. Vacío = todos valen lo mismo" onkeydown="if(event.key===\'Enter\')stepAdd()"><button class="cl-ab" onclick="stepAdd()">+ Paso</button></div>';
 
   h+='<!--S:rest-->';
   // N° Orden de Trabajo (OT)
@@ -4509,19 +4525,42 @@ function clSetConsumed(i,v){var it=ed(editId).matItems[i];if(!it)return;it.consu
 function clSetUnit(i,v){var it=ed(editId).matItems[i];if(!it)return;it.unit=ct2(v);markUnsaved();}
 
 /* ── Paso a paso: maneja el % de avance (interino: pasos cumplidos / total) ── */
-function stepsPct(a){var st=ed(a.id).stepItems||[];if(!st.length)return null;var d=st.filter(function(s){return s.done;}).length;return Math.round(d/st.length*100);}
+/* v24 · cada paso puede tener un peso en %. Sin pesos → todos valen lo mismo.
+   Con algunos pesos → los que quedan en blanco se reparten lo que falta para 100.
+   Si los pesos suman distinto de 100 (o más) se ajustan proporcionalmente. */
+function stepWeights(st){
+  var n=st.length;if(!n)return [];
+  var spec=0,ns=0;st.forEach(function(s){var w=+s.w;if(w>0){spec+=w;ns++;}});
+  if(ns===0)return st.map(function(){return 100/n;});
+  if(ns===n||spec>=100)return st.map(function(s){var w=+s.w;return w>0?w/spec*100:0;});
+  var rest=(100-spec)/(n-ns);return st.map(function(s){var w=+s.w;return w>0?w:rest;});
+}
+function stepsPct(a){var st=ed(a.id).stepItems||[];if(!st.length)return null;var w=stepWeights(st),p=0;st.forEach(function(s,i){if(s.done)p+=w[i];});return Math.max(0,Math.min(100,Math.round(p)));}
+function stepFmt(v){var r=Math.round(v*10)/10;return (r%1===0?String(r):r.toFixed(1).replace('.',','));}
+function stepW(i,val){
+  var it=ed(editId).stepItems[i];if(!it)return;var v=parseFloat(String(val).replace(',','.'));
+  if(isNaN(v)||v<=0)delete it.w;else it.w=Math.min(100,Math.round(v*10)/10);
+  logAction('Paso',editId,'Peso de «'+it.text+'»: '+(it.w?it.w+'%':'automático'));
+  stepRender();applyStepMida();markUnsaved();
+}
 function stepRender(){
   var box=document.getElementById('cl-step');if(!box)return;var st=ed(editId).stepItems||[];
   if(!st.length){box.innerHTML='<div class="cl-empty">Sin pasos. Agrega el paso a paso para que el avance se calcule solo.</div>';return;}
+  var W=stepWeights(st),spec=0,ns=0;st.forEach(function(s){if(+s.w>0){spec+=+s.w;ns++;}});
   box.innerHTML=st.map(function(it,i){
-    return '<div class="cl-item"><input type="checkbox" class="cl-cb"'+(it.done?' checked':'')+(MODE==='ejec'?' onchange="stepTog('+i+',this.checked)"':' disabled title="El avance lo registra Ejecución"')+'><span class="cl-tx'+(it.done?' done':'')+'">'+esc(it.text)+'</span><button class="cl-del" onclick="stepDel('+i+')">×</button></div>';
-  }).join('');
+    return '<div class="cl-item"><input type="checkbox" class="cl-cb"'+(it.done?' checked':'')+(MODE==='ejec'?' onchange="stepTog('+i+',this.checked)"':' disabled title="El avance lo registra Ejecución"')+'><span class="cl-tx'+(it.done?' done':'')+'">'+esc(it.text)+'</span>'
+      +'<span class="st-w" title="Cuánto vale este paso en el avance. Déjalo vacío para repartirlo parejo."><input type="number" inputmode="decimal" min="0" max="100" step="any" class="st-wi" value="'+(+it.w>0?it.w:'')+'" placeholder="'+stepFmt(W[i])+'" onchange="stepW('+i+',this.value)">%</span>'
+      +'<button class="cl-del" onclick="stepDel('+i+')">×</button></div>';
+  }).join('')
+  +((ns>0&&Math.abs((ns===st.length?spec:Math.max(spec,100))-100)>0.05)?'<div class="st-note">Los pesos escritos suman '+stepFmt(spec)+'% — se ajustan proporcionalmente para llegar a 100%.</div>':(ns>0&&ns<st.length?'<div class="st-note">Los pasos sin peso se reparten el '+stepFmt(100-spec)+'% restante en partes iguales.</div>':''));
 }
 function stepAdd(){
   var inp=document.getElementById('add-step');var v=ct2(inp.value);if(!v)return;
-  ed(editId).stepItems.push({text:v,done:false,by:userName(),ts:Date.now()});
-  inp.value='';inp.focus();stepRender();applyStepMida();markUnsaved();
-  logAction('Paso',editId,'Agregado: '+v);
+  var _wi=document.getElementById('add-step-w');var _wv=_wi?parseFloat(String(_wi.value).replace(',','.')):NaN;
+  var _it={text:v,done:false,by:userName(),ts:Date.now()};if(!isNaN(_wv)&&_wv>0)_it.w=Math.min(100,Math.round(_wv*10)/10);
+  ed(editId).stepItems.push(_it);
+  inp.value='';if(_wi)_wi.value='';inp.focus();stepRender();applyStepMida();markUnsaved();
+  logAction('Paso',editId,'Agregado: '+v+(_it.w?' ('+_it.w+'%)':''));
 }
 function stepTog(i,done){var it=ed(editId).stepItems[i];if(!it)return;it.done=done;it.doneBy=done?userName():'';it.doneTs=Date.now();stepRender();applyStepMida();markUnsaved();logAction('Paso',editId,(done?'✓ ':'○ ')+it.text);}
 function stepDel(i){var st=ed(editId).stepItems;var it=st[i];logAction('Paso',editId,'Eliminado: '+(it?it.text:''));st.splice(i,1);stepRender();applyStepMida();markUnsaved();if(!st.length)openEdit(editId);}
@@ -6556,6 +6595,27 @@ function kpiHH(esp){
   });
   return {num:num,den:den};
 }
+/* v24 · KPIs del día (se muestran junto al resultado semanal)
+   06: HH en terreno del día ÷ HH planificadas del día.
+   10 y 13: de las actividades con dotación planificada ese día, cuántas registraron dotación real. */
+var KPI_DIA=null;
+function kpiDia(){if(KPI_DIA===null){var ti=todayIndex();KPI_DIA=ti>=0?ti:(kpiDayMask()[6]?6:0);}return KPI_DIA;}
+function setKpiDia(d){KPI_DIA=d;renderKpiTab();}
+function kpiHHDia(esp,d){var num=0,den=0;kpiActs(esp,false).forEach(function(a){var hp=planHora(a),rd=realDot(a),hr=realHora(a);den+=(+a.dp[d]||0)*(+hp[d]||0);if(!isQuiebre(a))num+=(+rd[d]||0)*(+hr[d]||0);});return {num:num,den:den};}
+function kpiActDia(esp,pm,d){var num=0,den=0;kpiActs(esp,pm).forEach(function(a){if(!((+a.dp[d]||0)>0))return;den++;if(!isQuiebre(a)&&(+(realDot(a)[d])||0)>0)num++;});return {num:num,den:den};}
+function kpiDiaLbl(d){var ti=todayIndex();return (d===ti?'Hoy':DSHORT[d])+(DATA.dates&&DATA.dates[d]?' '+fmtFechaCorta(DATA.dates[d]):'');}
+function kpiDayLine(n,esp,meta,unit){
+  var d=kpiDia();var r=(n==='06')?kpiHHDia(esp,d):kpiActDia(esp,n==='13',d);
+  if(!(r.den>0))return '<div class="kpi3-day na"><span class="kpi3-day-l">Día · '+esc(kpiDiaLbl(d))+'</span><span>Sin programa ese día</span></div>';
+  var p=r.num/r.den*100,col=kpiColor(p,meta);
+  return '<div class="kpi3-day" style="border-color:'+col+'"><span class="kpi3-day-l">Día · '+esc(kpiDiaLbl(d))+'</span><b style="color:'+col+'">'+(Math.round(p*10)/10).toFixed(1).replace('.',',')+'%</b><span>'+ek_fmt(r.num)+' / '+ek_fmt(r.den)+' '+esc(unit)+'</span></div>';
+}
+function kpiDayBar(){
+  var d=kpiDia(),ti=todayIndex(),m=kpiDayMask();
+  var h='<div class="kpi3-daybar"><span class="kpi3-daybar-l">Resultado del día</span>';
+  for(var i=0;i<7;i++)h+='<button class="day-pill'+(i===d?' on':'')+(i===ti?' today':'')+'"'+(m[i]?'':' style="opacity:.5"')+' onclick="setKpiDia('+i+')">'+(i===ti?'HOY':DSHORT[i])+(DATA.dates&&DATA.dates[i]?'<span class="day-pill-d">'+esc(fmtFechaCorta(DATA.dates[i]))+'</span>':'')+'</button>';
+  return h+'<span class="kpi3-daybar-n">Cada medidor muestra la semana; debajo va el resultado del día elegido. KPI 06 del día: HH en terreno ÷ HH planificadas de ese día. KPI 10 y 13 del día: actividades con dotación planificada ese día que registraron dotación real.</span></div>';
+}
 /* KPI 10 y 13 — actividades terminadas */
 function kpiActCount(esp,soloPlanMatriz){
   var list=kpiActs(esp,soloPlanMatriz),num=0;
@@ -6594,7 +6654,7 @@ function kpiCard(title,r,meta,unit,drill,extra){
   return '<div class="kpi3-c" data-tip="'+escAttr(tip)+'"'+dr+'>'
     +'<div class="kpi3-ct">'+esc(title)+'</div>'
     +kpiGauge(r.num,r.den,meta)
-    +'<div class="kpi3-gs"><b>'+ek_fmt(r.num)+'</b> / '+ek_fmt(r.den)+' '+esc(unit)+'</div>'
+    +'<div class="kpi3-gs"><span class="kpi3-wk">Semana · </span><b>'+ek_fmt(r.num)+'</b> / '+ek_fmt(r.den)+' '+esc(unit)+'</div>'
     +kpiDelta(r.num,r.den,meta)
     +(extra||'')+'</div>';
 }
@@ -6619,6 +6679,7 @@ function kpiRow(n,titulo,meta,unit,formula,calc,drillBase){
         extra='<div class="kpi3-x" data-tip="El KPI no descuenta estas horas (el maestro las trata aparte); se muestran para explicar la brecha.">⇄ '+ek_fmt(lost)+' HH perdidas por interferencia · ≈'+pts+' pts</div>';
       }
     }
+    extra=kpiDayLine(n,esp,meta,unit)+extra;
     return kpiCard((titles[n]||titles['10'])(lbl),calc(esp),meta,unit,d,extra);
   }).join('');
   return '<div class="kpi3-row" style="--kacc:'+col+'">'
@@ -6662,8 +6723,8 @@ function kpiInterfCard(){
 function renderKpiTab(){
   var box=document.getElementById('kpi3-box');if(!box)return;
   if(!DATA){box.innerHTML='<div class="da-empty">Carga primero un programa semanal para calcular los indicadores.</div>';return;}
-  box.innerHTML=
-     kpiRow('06','% Cumplimiento Trabajo Planificado HH',80,'HH',
+  box.innerHTML=kpiDayBar()
+    +kpiRow('06','% Cumplimiento Trabajo Planificado HH',80,'HH',
             'HH en terreno \u00f7 HH planificadas del programa de la semana.',
             function(esp){return kpiHH(esp);},{origen:'PL'})
     +kpiRow('10','% Cumplimiento Programa semanal',80,'act.',
