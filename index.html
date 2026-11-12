@@ -4136,7 +4136,7 @@ function renderVSeg(){
   var a=document.getElementById('vm-cuadros'),b=document.getElementById('vm-lista');
   if(a)a.classList.toggle('on',VMODE==='cuadros');
   if(b)b.classList.toggle('on',VMODE==='lista');
-  var ds=document.getElementById('day-sel');if(ds)ds.style.display=(VMODE==='lista'&&!isMob())?'none':'';
+  var ds=document.getElementById('day-sel');if(ds)ds.style.display='';
 }
 function gCritCls(a){return isCrit(a)?'g-crit':((a.crit||'').toUpperCase()==='IMPORTANTE'?'g-imp':'g-norm');}
 var MES_ABR=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -4152,7 +4152,7 @@ function renderGantt(){
   head+='<div class="g-tot g-htot">Total</div></div>';
   var body='',shown=0,dayTot=[0,0,0,0,0,0,0],grand=0,hourTot=[0,0,0,0,0,0,0],grandH=0;
   DATA.secs.forEach(function(sec){
-    var acts=sec.actividades.filter(function(a){return match(a,q,true);});
+    var acts=sec.actividades.filter(function(a){return match(a,q);});
     if(!acts.length)return;
     var stp=0;acts.forEach(function(a){stp+=totPlan(a);});
     body+='<div class="g-grp"><span class="g-grp-n">'+esc(sec.nombre)+'</span><span class="g-grp-m">'+acts.length+' act. · '+stp+' pers.</span></div>';
@@ -6671,7 +6671,14 @@ function kpiHH(esp){
    06: HH en terreno del día ÷ HH planificadas del día.
    10 y 13: de las actividades con dotación planificada ese día, cuántas registraron dotación real. */
 var KPI_DIA=null;
-function kpiDia(){if(KPI_DIA===null){var ti=todayIndex();KPI_DIA=ti>=0?ti:(kpiDayMask()[6]?6:0);}return KPI_DIA;}
+function kpiDia(){if(KPI_DIA===null)KPI_DIA=-1;return KPI_DIA;}   /* -1 = semana completa */
+function kpiPerLbl(){var d=kpiDia();return d<0?'Semana':kpiDiaLbl(d);}
+function kpiDiaCalc(n,esp,d){return (n==='06')?kpiHHDia(esp,d):kpiActDia(esp,n==='13',d);}
+function kpiAltLine(lbl,r,meta,unit){
+  if(!(r.den>0))return '<div class="kpi3-day na"><span class="kpi3-day-l">'+esc(lbl)+'</span><span>Sin programa</span></div>';
+  var p=r.num/r.den*100,col=kpiColor(p,meta);
+  return '<div class="kpi3-day" style="border-color:'+col+'"><span class="kpi3-day-l">'+esc(lbl)+'</span><b style="color:'+col+'">'+(Math.round(p*10)/10).toFixed(1).replace('.',',')+'%</b><span>'+ek_fmt(r.num)+' / '+ek_fmt(r.den)+' '+esc(unit)+'</span></div>';
+}
 function setKpiDia(d){KPI_DIA=d;renderKpiTab();}
 function kpiHHDia(esp,d){var num=0,den=0;kpiActs(esp,false).forEach(function(a){var hp=planHora(a),rd=realDot(a),hr=realHora(a);den+=(+a.dp[d]||0)*(+hp[d]||0);if(!isQuiebre(a))num+=(+rd[d]||0)*(+hr[d]||0);});return {num:num,den:den};}
 function kpiActDia(esp,pm,d){var num=0,den=0;kpiActs(esp,pm).forEach(function(a){if(!((+a.dp[d]||0)>0))return;den++;if(!isQuiebre(a)&&(+(realDot(a)[d])||0)>0)num++;});return {num:num,den:den};}
@@ -6684,9 +6691,9 @@ function kpiDayLine(n,esp,meta,unit){
 }
 function kpiDayBar(){
   var d=kpiDia(),ti=todayIndex(),m=kpiDayMask();
-  var h='<div class="kpi3-daybar"><span class="kpi3-daybar-l">Resultado del día</span>';
+  var h='<div class="kpi3-daybar"><span class="kpi3-daybar-l">Ver resultado de</span><button class="day-pill'+(d<0?' on':'')+'" onclick="setKpiDia(-1)">Semana completa</button>';
   for(var i=0;i<7;i++)h+='<button class="day-pill'+(i===d?' on':'')+(i===ti?' today':'')+'"'+(m[i]?'':' style="opacity:.5"')+' onclick="setKpiDia('+i+')">'+(i===ti?'HOY':DSHORT[i])+(DATA.dates&&DATA.dates[i]?'<span class="day-pill-d">'+esc(fmtFechaCorta(DATA.dates[i]))+'</span>':'')+'</button>';
-  return h+'<span class="kpi3-daybar-n">Cada medidor muestra la semana; debajo va el resultado del día elegido. KPI 06 del día: HH en terreno ÷ HH planificadas de ese día. KPI 10 y 13 del día: actividades con dotación planificada ese día que registraron dotación real.</span></div>';
+  return h+'<span class="kpi3-daybar-n">El medidor muestra lo que elijas aquí (la semana completa o un día) y debajo va el otro resultado para comparar. KPI 06 del día: HH en terreno ÷ HH planificadas de ese día. KPI 10 y 13 del día: actividades con dotación planificada ese día que registraron dotación real.</span></div>';
 }
 /* KPI 10 y 13 — actividades terminadas */
 function kpiActCount(esp,soloPlanMatriz){
@@ -6726,7 +6733,7 @@ function kpiCard(title,r,meta,unit,drill,extra){
   return '<div class="kpi3-c" data-tip="'+escAttr(tip)+'"'+dr+'>'
     +'<div class="kpi3-ct">'+esc(title)+'</div>'
     +kpiGauge(r.num,r.den,meta)
-    +'<div class="kpi3-gs"><span class="kpi3-wk">Semana · </span><b>'+ek_fmt(r.num)+'</b> / '+ek_fmt(r.den)+' '+esc(unit)+'</div>'
+    +'<div class="kpi3-gs"><span class="kpi3-wk">'+esc(kpiPerLbl())+' · </span><b>'+ek_fmt(r.num)+'</b> / '+ek_fmt(r.den)+' '+esc(unit)+'</div>'
     +kpiDelta(r.num,r.den,meta)
     +(extra||'')+'</div>';
 }
@@ -6751,8 +6758,10 @@ function kpiRow(n,titulo,meta,unit,formula,calc,drillBase){
         extra='<div class="kpi3-x" data-tip="El KPI no descuenta estas horas (el maestro las trata aparte); se muestran para explicar la brecha.">⇄ '+ek_fmt(lost)+' HH perdidas por interferencia · ≈'+pts+' pts</div>';
       }
     }
-    extra=kpiDayLine(n,esp,meta,unit)+extra;
-    return kpiCard((titles[n]||titles['10'])(lbl),calc(esp),meta,unit,d,extra);
+    var _kd=kpiDia(),_kr=calc(esp),_kt=todayIndex();
+    if(_kd>=0){extra=kpiAltLine('Semana',_kr,meta,unit)+extra;_kr=kpiDiaCalc(n,esp,_kd);}
+    else if(_kt>=0){extra=kpiAltLine('Hoy '+(DATA.dates&&DATA.dates[_kt]?fmtFechaCorta(DATA.dates[_kt]):''),kpiDiaCalc(n,esp,_kt),meta,unit)+extra;}
+    return kpiCard((titles[n]||titles['10'])(lbl),_kr,meta,unit,d,extra);
   }).join('');
   return '<div class="kpi3-row" style="--kacc:'+col+'">'
     +'<div class="kpi3-side"><span class="kpi3-n">KPI '+n+'</span>'
