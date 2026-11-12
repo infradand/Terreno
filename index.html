@@ -1814,6 +1814,14 @@ body.wk-hist .tabs .tab.active{box-shadow:none!important;border-bottom-color:#B4
 .g-bar{font-size:10.5px;white-space:nowrap;overflow:hidden}
 @media(max-width:700px){.mini-t{font-size:8.5px}}
 .g-foot .g-fday{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+
+/* ══ v29 · actividades pendientes de días anteriores (al filtrar por día) ══ */
+.carry-chip{background:#FFF4D6!important;color:#8A5A00!important;border:1px solid #F0CF7A!important;font-weight:700!important}
+.acard.carry,.mrow.carry{background:#FFFBEF!important;border-style:dashed!important;border-color:#E6C766!important}
+.acard.carry.crit,.acard.carry.obs,.mrow.carry.crit,.mrow.carry.obs{border-left-style:solid!important;border-left-color:var(--ro)!important}
+.g-act.carry .g-name{background:#FFFBEF!important;box-shadow:inset 3px 0 0 #E0B000}
+.g-act.carry .g-day,.g-act.carry .g-tot{background:#FFFDF6}
+.g-act.carry .carry-chip{margin-left:6px}
 </style>
 </head>
 <body>
@@ -2951,12 +2959,28 @@ function renderDaySel(){
   box.innerHTML=h;
 }
 function setDia(i){DIA=i;DIA_INIT=true;renderDaySel();render();}
+function actDone(a){var e=ed(a.id);return (+e.mida||0)>=100||e.estEj==='Completada';}
+/* v29 · «arrastre»: actividad sin dotación el día filtrado, pero que tenía días
+   planificados antes y todavía no llega al 100 % → sigue pendiente ese día. */
+function isCarry(a){
+  if(typeof DIA!=='number'||DIA<0||a.np)return false;
+  var e=ed(a.id);
+  if((a.dp[DIA]||0)>0)return false;
+  if(e.adelanto!==null&&e.adelanto===DIA)return false;
+  if(actDone(a))return false;
+  for(var d=0;d<DIA;d++){if((a.dp[d]||0)>0)return true;}
+  return false;
+}
+function carryLastDay(a){var l=-1;for(var d=0;d<DIA;d++){if((a.dp[d]||0)>0)l=d;}return l;}
+function carryChip(a){var l=carryLastDay(a);return '<span class="chip carry-chip" title="No tiene dotación planificada este día, pero viene de días anteriores y no está al 100 %">Pendiente'+(l>=0?' desde '+DSHORT[l]:'')+' · '+(+ed(a.id).mida||0)+'%</span>';}
+function carryCount(q){var n=0;if(typeof DIA!=='number'||DIA<0)return 0;allActs().forEach(function(a){if(isCarry(a)&&match(a,q))n++;});return n;}
 function inDia(a){
   if(DIA===-1)return true;
   var e=ed(a.id);
   if(e.adelanto!==null&&e.adelanto===DIA)return true;
   if(a.np)return true; // las NP se ven todos los días
-  return (a.dp[DIA]||0)>0;
+  if((a.dp[DIA]||0)>0)return true;
+  return isCarry(a);
 }
 
 /* ── Drag & file ── */
@@ -4123,7 +4147,7 @@ function _renderRaw(){
     html+='</div></div>';
   });
   document.getElementById('list').innerHTML=html||'<div class="empty">Sin resultados para el filtro actual</div>';
-  var ftxt=shown+' actividades';if(CHFLT.type)ftxt+=' · filtro activo';
+  var ftxt=shown+' actividades';var _cn=carryCount((document.getElementById('sq').value||'').toLowerCase());if(_cn)ftxt+=' · '+_cn+' pendiente'+(_cn===1?'':'s')+' de días anteriores';if(CHFLT.type)ftxt+=' · filtro activo';
   document.getElementById('cbadge').textContent=ftxt;
 }
 function tog(h){var b=h.nextElementSibling,a=h.querySelector('.sec-arr');b.classList.toggle('open');a.classList.toggle('open');}
@@ -4165,7 +4189,8 @@ function renderGantt(){
       var meta=(a.area?'<span>📍 '+esc(dispArea(a))+'</span>':'');
       var _vn=vulnOpenN(a);if(_vn)meta+='<span style="color:var(--am)">🛡 '+_vn+' vuln.</span>';
       if(e.interfs&&e.interfs.length)meta+='<span style="color:var(--pu,#7B5EA7)">⇄ '+e.interfs.length+' interf.</span>';
-      var row='<div class="g-row g-act '+rowCls+'" onclick="openEdit('+jsArg(a.id)+')">';
+      var _cy=isCarry(a);if(_cy)chip+=carryChip(a);
+      var row='<div class="g-row g-act '+rowCls+(_cy?' carry':'')+'" onclick="openEdit('+jsArg(a.id)+')">';
       row+='<div class="g-name"><div class="g-aid">'+esc(a.id)+(a.np?' · NP':'')+(ot?' · OT '+esc(ot):'')+chip+'</div><div class="g-an">'+esc(a.nombre)+'</div>'+(meta?'<div class="g-meta">'+meta+'</div>':'')+'<div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:'+mida+'%;background:'+avc+'"></div>'+(_cv.plan>0?'<div class="g-av-plan" style="left:'+_cv.plan+'%" title="Plan a hoy '+_cv.plan+'%"></div>':'')+'</div><span class="g-av-n" style="color:'+avc+'">'+mida+'%</span>'+quickSel(a)+'</div>'
         +'<div class="g-cv">'+curvaChip(a,true)+'</div></div>';
       var tp=0,th=0,prevDev=null,closed=false,aw=cvW(a),_gp=planT(a);
@@ -4198,7 +4223,7 @@ function renderGantt(){
     foot+='<div class="g-tot g-ftot">'+(grandH?(+grandH)+' h':'')+'</div></div>';
   }
   document.getElementById('list').innerHTML=shown?('<div class="gantt"><div class="g-grid">'+head+body+foot+'</div></div>'):'<div class="empty">Sin resultados para el filtro actual</div>';
-  var ftxt=shown+' actividades';if(CHFLT.type)ftxt+=' · filtro activo';
+  var ftxt=shown+' actividades';var _cn=carryCount((document.getElementById('sq').value||'').toLowerCase());if(_cn)ftxt+=' · '+_cn+' pendiente'+(_cn===1?'':'s')+' de días anteriores';if(CHFLT.type)ftxt+=' · filtro activo';
   document.getElementById('cbadge').textContent=ftxt;
 }
 
@@ -4214,8 +4239,9 @@ function acard(a){
   var critLbl=isCrit(a)?'Crítica':((a.crit||'').toUpperCase()==='IMPORTANTE'?'Importante':'Normal');
   var ej=ejInfo(e.estEj||'');var mida=e.mida||0;
   var rd=realDot(a);var tp=totPlan(a),tr=totReal(a);var ot=actOT(a);
-  var h='<div class="acard'+(qb?' obs':isCrit(a)?' crit':'')+'" onclick="openEdit('+jsArg(a.id)+')">';
-  h+='<div class="ac-top"><span class="ac-id">'+esc(a.id)+'</span>'
+  var _cy=isCarry(a);
+  var h='<div class="acard'+(qb?' obs':isCrit(a)?' crit':'')+(_cy?' carry':'')+'" onclick="openEdit('+jsArg(a.id)+')">';
+  h+='<div class="ac-top"><span class="ac-id">'+esc(a.id)+'</span>'+(_cy?carryChip(a):'')
     +(a.np?'<span class="chip np-badge">NP</span>':'')
     +'<span class="chip '+cc+'">'+esc(critLbl)+'</span>'
     +(qb?'<span class="chip quiebre-chip">'+(MODE==='plani'?'↺ Replanificar':'⚠ Quiebre')+'</span>':'')
@@ -7270,8 +7296,9 @@ function mrow(a){
   var rd=realDot(a);var d=(typeof DIA==='number'&&DIA>=0)?DIA:-1;
   var _pt=planT(a);var dot=d>=0?('👷 A '+(_pt.A[d]||0)+' · C '+(_pt.C[d]||0)+(rd[d]?' · real '+rd[d]:'')):('👷 '+totPlan(a)+(totPlan(a)?' ('+turnoTxt(turnoTot(_pt.A),turnoTot(_pt.C))+')':''));
   var nlog=(e.log||[]).length,vn=vulnOpenN(a);
-  return '<div class="mrow'+(qb?' obs':isCrit(a)?' crit':'')+'" onclick="openEdit('+jsArg(a.id)+')">'
-    +'<div class="mrow-top"><span class="mrow-id">'+esc(a.id)+'</span>'
+  var _cy=isCarry(a);
+  return '<div class="mrow'+(qb?' obs':isCrit(a)?' crit':'')+(_cy?' carry':'')+'" onclick="openEdit('+jsArg(a.id)+')">'
+    +'<div class="mrow-top"><span class="mrow-id">'+esc(a.id)+'</span>'+(_cy?carryChip(a):'')
     +(a.np?'<span class="chip np-badge">NP</span>':'')
     +(isCrit(a)?'<span class="chip c-crit">Crítica</span>':'')
     +(qb?'<span class="chip quiebre-chip">⚠ Quiebre</span>':'')
