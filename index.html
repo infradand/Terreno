@@ -1806,6 +1806,14 @@ body.wk-hist .tabs .tab.active{box-shadow:none!important;border-bottom-color:#B4
 .m-tbl .rl{white-space:nowrap}
 .day-t{font-size:11px;font-weight:600;color:var(--gm);margin-top:2px}
 .day-r{font-size:11px}
+
+/* ══ v26 · turnos visibles en tarjetas y Gantt ══ */
+.mini-t{font-size:9px;font-weight:600;color:var(--gm);margin-top:2px;white-space:nowrap;line-height:1.2;min-height:11px}
+.ac-turno{font-size:10.5px;font-weight:600;color:var(--gm)}
+.g-turno{display:block;font-size:9.5px;font-weight:600;color:var(--gm);margin-top:1px}
+.g-bar{font-size:10.5px;white-space:nowrap;overflow:hidden}
+@media(max-width:700px){.mini-t{font-size:8.5px}}
+.g-foot .g-fday{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
 </style>
 </head>
 <body>
@@ -4137,6 +4145,7 @@ function renderGantt(){
   if(!DATA)return;
   var q=(document.getElementById('sq').value||'').toLowerCase();
   var ti=todayIndex();
+  var dayA=_z7(),dayC=_z7();
   var tpos=cvWeekPos(),devAg=[];for(var z=0;z<7;z++)devAg.push({w:0,p:0,r:0});
   var head='<div class="g-row g-head"><div class="g-name g-hname">Actividad</div>';
   for(var d=0;d<7;d++){var dt=DATA.dates[d]||'';head+='<div class="g-day g-hday'+(d===ti?' g-today':'')+'"><span class="g-dl">'+DSHORT[d]+'</span>'+(dt?'<span class="g-df">'+esc(fechaEsp(dt))+'</span>':'')+'</div>';}
@@ -4159,19 +4168,19 @@ function renderGantt(){
       var row='<div class="g-row g-act '+rowCls+'" onclick="openEdit('+jsArg(a.id)+')">';
       row+='<div class="g-name"><div class="g-aid">'+esc(a.id)+(a.np?' · NP':'')+(ot?' · OT '+esc(ot):'')+chip+'</div><div class="g-an">'+esc(a.nombre)+'</div>'+(meta?'<div class="g-meta">'+meta+'</div>':'')+'<div class="g-av"><div class="g-av-bar"><div class="g-av-f" style="width:'+mida+'%;background:'+avc+'"></div>'+(_cv.plan>0?'<div class="g-av-plan" style="left:'+_cv.plan+'%" title="Plan a hoy '+_cv.plan+'%"></div>':'')+'</div><span class="g-av-n" style="color:'+avc+'">'+mida+'%</span>'+quickSel(a)+'</div>'
         +'<div class="g-cv">'+curvaChip(a,true)+'</div></div>';
-      var tp=0,th=0,prevDev=null,closed=false,aw=cvW(a);
+      var tp=0,th=0,prevDev=null,closed=false,aw=cvW(a),_gp=planT(a);
       for(var d=0;d<7;d++){
         var dvh='',dd=cvDayDev(a,d,tpos);
         if(dd){devAg[d].w+=aw;devAg[d].p+=dd.p*aw;devAg[d].r+=dd.r*aw;
           /* v16: el desvío se muestra solo en la Curva S */
           prevDev=dd.dev;}
-        var v=a.dp[d]||0;tp+=v;dayTot[d]+=v;
+        var v=a.dp[d]||0;tp+=v;dayTot[d]+=v;dayA[d]+=_gp.A[d];dayC[d]+=_gp.C[d];
         var hv=(a.hp&&a.hp[d])?a.hp[d]:0;th+=hv;hourTot[d]+=hv;
         var cls='g-day'+(d===ti?' g-today':'');
         var hh=hv>0?'<span class="g-hh">'+(+hv)+' h</span>':'';
         if(v>0){
           var lft=(d===0||(a.dp[d-1]||0)===0),rgt=(d===6||(a.dp[d+1]||0)===0);
-          row+='<div class="'+cls+'"><span class="g-bar'+(lft?' bl':'')+(rgt?' br':'')+'" style="background:'+avc+';color:'+bt+'">'+v+'</span>'+hh+dvh+'</div>';
+          row+='<div class="'+cls+'"><span class="g-bar'+(lft?' bl':'')+(rgt?' br':'')+'" style="background:'+avc+';color:'+bt+'" title="Dotación planificada: '+v+' ('+turnoTxt(_gp.A[d],_gp.C[d])+')">'+turnoTxt(_gp.A[d],_gp.C[d])+'</span>'+hh+dvh+'</div>';
         }else{row+='<div class="'+cls+'">'+hh+dvh+'</div>';}
       }
       grand+=tp;grandH+=th;
@@ -4182,7 +4191,7 @@ function renderGantt(){
   var foot='';
   if(shown){
     foot='<div class="g-row g-foot"><div class="g-name g-fname">Dotación / día</div>';
-    for(var d2=0;d2<7;d2++){foot+='<div class="g-day g-fday'+(d2===ti?' g-today':'')+'">'+(dayTot[d2]||'')+'</div>';}
+    for(var d2=0;d2<7;d2++){foot+='<div class="g-day g-fday'+(d2===ti?' g-today':'')+'">'+(dayTot[d2]||'')+(dayTot[d2]?'<span class="g-turno">'+turnoTxt(dayA[d2],dayC[d2])+'</span>':'')+'</div>';}
     foot+='<div class="g-tot g-ftot">'+grand+'</div></div>';
     foot+='<div class="g-row g-foot g-foot2"><div class="g-name g-fname">Horas mtto / día</div>';
     for(var d3=0;d3<7;d3++){foot+='<div class="g-day g-fday'+(d3===ti?' g-today':'')+'">'+(hourTot[d3]?(+hourTot[d3])+' h':'')+'</div>';}
@@ -4223,9 +4232,10 @@ function acard(a){
     +'<div class="cv-row">'+curvaChip(a)+'</div></div>';
   h+='<div class="ac-prog">'+progCell('Req',rq.done,rq.total,false)+progCell('Mat',mt.done,mt.total,false)+progCell('Prep',pr.done,pr.applicable,true)+'</div>';
   h+='<div class="mini">';
-  for(var d=0;d<7;d++){var p=a.dp[d],r=rd[d];var cls=r&&p&&r>=p?'mc-r':p?'mc-p':'mc-e';h+='<div class="mini-c"><div class="mini-d">'+DSHORT[d].slice(0,1)+'</div><div class="mini-cell '+cls+'">'+(p||'·')+(r?'<span class="mini-real">'+r+'</span>':'')+'</div></div>';}
+  var _pt=planT(a);
+  for(var d=0;d<7;d++){var p=a.dp[d],r=rd[d];var cls=r&&p&&r>=p?'mc-r':p?'mc-p':'mc-e';h+='<div class="mini-c"><div class="mini-d">'+DSHORT[d].slice(0,1)+'</div><div class="mini-cell '+cls+'">'+(p||'·')+(r?'<span class="mini-real">'+r+'</span>':'')+'</div><div class="mini-t">'+turnoTxt(_pt.A[d],_pt.C[d],' ')+'</div></div>';}
   h+='</div>';
-  h+='<div class="ac-foot"><span class="ac-st b-na">Plan <b>'+tp+'</b></span><span class="ac-st b-ve">Real <b>'+tr+'</b></span>'
+  h+='<div class="ac-foot"><span class="ac-st b-na" title="Dotación planificada por turno">Plan <b>'+tp+'</b>'+(tp?' <span class="ac-turno">'+turnoTxt(turnoTot(_pt.A),turnoTot(_pt.C))+'</span>':'')+'</span><span class="ac-st b-ve">Real <b>'+tr+'</b></span>'
     +'<button class="ac-chat" title="Ver / escribir observaciones" onclick="event.stopPropagation();openEdit('+jsArg(a.id)+',\'log\')">💬 '+((e.log||[]).length)+'</button>'
     +(vulnOpenN(a)?'<span class="ac-st" style="color:var(--am)" title="Vulnerabilidades registradas">🛡 '+vulnOpenN(a)+'</span>':'')
     +(e.interfs&&e.interfs.length?'<span class="ac-st" title="Interferencias registradas">⇄ '+e.interfs.length+'</span>':'');
@@ -4618,6 +4628,8 @@ function setF(field,val){
    Real: e.drA / e.drC. El total del día (a.dp / e.dr) se mantiene como la suma,
    así KPIs, Gantt, curva S y la base PBI siguen funcionando igual. */
 function _z7(){return [0,0,0,0,0,0,0];}
+function turnoTxt(x,y,sep){x=+x||0;y=+y||0;if(!x&&!y)return '';if(!y)return 'A '+x;if(!x)return 'C '+y;return 'A '+x+(sep||' · ')+'C '+y;}
+function turnoTot(v){return v.reduce(function(s,n){return s+(+n||0);},0);}
 function planT(a){
   var A=(a.dpA&&a.dpA.length===7)?a.dpA:null,C=(a.dpC&&a.dpC.length===7)?a.dpC:null,oA=[],oC=[];
   for(var d=0;d<7;d++){var tot=+a.dp[d]||0,x=A?(+A[d]||0):0,y=C?(+C[d]||0):0;
@@ -7247,7 +7259,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){var lb=docu
 function mrow(a){
   var e=ed(a.id);var qb=isQuiebre(a);var ej=ejInfo(e.estEj||'');var mida=+e.mida||0;var avc=avColor(mida);
   var rd=realDot(a);var d=(typeof DIA==='number'&&DIA>=0)?DIA:-1;
-  var _pt=planT(a);var dot=d>=0?('👷 A '+(_pt.A[d]||0)+' · C '+(_pt.C[d]||0)+(rd[d]?' · real '+rd[d]:'')):('👷 '+totPlan(a));
+  var _pt=planT(a);var dot=d>=0?('👷 A '+(_pt.A[d]||0)+' · C '+(_pt.C[d]||0)+(rd[d]?' · real '+rd[d]:'')):('👷 '+totPlan(a)+(totPlan(a)?' ('+turnoTxt(turnoTot(_pt.A),turnoTot(_pt.C))+')':''));
   var nlog=(e.log||[]).length,vn=vulnOpenN(a);
   return '<div class="mrow'+(qb?' obs':isCrit(a)?' crit':'')+'" onclick="openEdit('+jsArg(a.id)+')">'
     +'<div class="mrow-top"><span class="mrow-id">'+esc(a.id)+'</span>'
