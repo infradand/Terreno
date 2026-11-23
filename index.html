@@ -3136,6 +3136,19 @@ function parseSemTurnos(wb,sh,filename){
   var cOT=colOf(/^ORDEN/),cList=colOf(/^NOMBRE LISTADO/),cUbi=colOf(/^UBICACI/),cArea=colOf(/^[ÁA]REA/),cEjec=colOf(/^EJECUTOR/),cSup=colOf(/^SUPERVISOR/),cOrig=colOf(/^PL\s*\/\s*NP|^ORIGEN/),cConc=colOf(/^CONCLUIDO/);
   var cCrit=-1;for(r=0;r<hr;r++){var rwc=raw[r]||[];for(c=0;c<rwc.length;c++)if(/^CRITICIDAD/i.test(ct2(rwc[c]))){cCrit=c;break;}if(cCrit>=0)break;}
   if(cOT<0)cOT=24;
+  /* v31 · La columna de la orden es la que SEPARA el bloque de dotación (TA/TC) del
+     bloque de horas (TA/TC). En algunos programas su encabezado es «OTM» o «N°» y la
+     palabra «Orden» aparece recién en el bloque de datos SAP de la derecha, lo que
+     hacía contar 14 días. Se ubica por posición: primera columna sin TA/TC después
+     del primer bloque corrido de turnos. */
+  (function(){
+    var isT=function(j){return /^T[AC]\d?$/.test(ct2(H[j]).toUpperCase());};
+    var f=-1,j;for(j=0;j<H.length;j++){if(isT(j)){f=j;break;}}
+    if(f<0)return;
+    var e=f;while(e+1<H.length&&isT(e+1))e++;
+    var gap=e+1,hasNext=false;for(j=gap+1;j<Math.min(H.length,gap+4);j++){if(isT(j)){hasNext=true;break;}}
+    if(hasNext&&(cOT<f||cOT>gap+2))cOT=gap;
+  })();
   var dotCols=[],hrCols=[];
   for(c=0;c<H.length;c++){var lb=ct2(H[c]).toUpperCase();if(!/^T[AC]\d?$/.test(lb))continue;var o={c:c,t:lb.charAt(1)};if(c<cOT)dotCols.push(o);else hrCols.push(o);}
   /* día = posición del par TA/TC dentro del bloque */
@@ -3164,11 +3177,13 @@ function parseSemTurnos(wb,sh,filename){
     if(_xr[r]&&_xr[r].hidden){hiddenRows++;continue;}
     var row=raw[r]||[],frow=fmt[r]||[];
     var c0=ct2(frow[0]!==''&&frow[0]!==undefined?frow[0]:row[0]),c1=ct2(row[1]);
-    if(/^OCULTAR$/i.test(c0))continue;
+    if(/^OCULTAR$/i.test(c0)||/^OCULTAR$/i.test(c1))continue;
+    if(/^sin actividad(es)?\.?$/i.test(c1))continue;   /* fila de relleno */
     if(!c0&&!c1)continue;
     if(/^(DOTACI[ÓO]N|DELTA$|PERSONAL PLANIFICADO)/i.test(c1.toUpperCase())){skipBlock=true;continue;}
     var hasDot=false;dotCols.forEach(function(o){if(_semNum(row[o.c])>0)hasDot=true;});
-    var isSecHdr=(/^\d{1,2}$/.test(c0)||c0==='-')&&c1&&!hasDot;
+    var _dl=0;dotCols.forEach(function(o){if(/^[LMJVSD]$/i.test(ct2(row[o.c])))_dl++;});
+    var isSecHdr=((/^\d{1,2}$/.test(c0)||c0==='-')&&c1&&!hasDot)||(!c0&&c1&&!hasDot&&_dl>=5);
     if(isSecHdr){skipBlock=false;var sid=/^\d{1,2}$/.test(c0)?c0:(curNum||String(secs.length+1));curNum=sid;
       cur={id:String(secs.length+1),nombre:c1.replace(/\s+/g,' ').trim(),num:sid,actividades:[]};secs.push(cur);continue;}
     if(/^\d{1,2}$/.test(c0)&&!c1)continue; /* «8» sin nombre */
