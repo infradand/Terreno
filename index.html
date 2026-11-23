@@ -1871,6 +1871,20 @@ body.wk-hist .tabs .tab.active{box-shadow:none!important;border-bottom-color:#B4
 .lb-where{font-size:12px;color:#5A6268;margin-top:2px}
 .lb-tx{font-size:14px;color:#111;margin-top:6px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
 .lb-tx.none{color:#8A9299;font-style:italic}
+
+/* v33 · celular: el cuadro del mensaje ocupa todo el ancho; cámara y Enviar van debajo */
+@media(max-width:700px){
+  .obs-sec .log-bar-row{flex-wrap:wrap!important;gap:8px}
+  .obs-sec .log-bar-row .log-input{flex:1 1 100%!important;width:100%!important;box-sizing:border-box;min-height:76px}
+  .obs-sec .log-bar-row .log-send{flex:1 1 auto;height:50px}
+  .obs-sec .log-bar-row .log-photo-btn{flex:0 0 64px;height:50px}
+}
+
+
+/* v34 · todo lo automático / no editable se ve gris, tipo bloqueado */
+.fi:disabled,.fi.pbi-ro,.fi.auto-fld,select.auto-fld{background:#ECEEF0!important;color:#6B7379!important;border:1px dashed #B9C0C6!important;opacity:1!important;-webkit-text-fill-color:#6B7379;cursor:default}
+.pbi-auto{background:#ECEEF0!important;color:#6B7379!important;border:1px dashed #B9C0C6!important}
+.pbi-auto b{color:#4A5258}
 </style>
 </head>
 <body>
@@ -4457,9 +4471,9 @@ function openEdit(id,_focus){
   h+='<!--S:av-->';
   // Estado ejecución + Avance (slider + número manual)
   h+='<div class="grid2" style="margin-top:14px">';
-  h+='<div class="fg"><label class="fl">Estado de Ejecución</label><select class="fi'+(MODE==='plani'?' pbi-ro':'')+'" id="ej-sel"'+(MODE==='plani'?' disabled title="Lo registra Ejecución"':' onchange="setF(\'estEj\',this.value)"')+'>'
+  h+='<div class="fg"><label class="fl">Estado de Ejecución <span class="prep-auto">🔒 auto</span></label><select class="fi auto-fld" id="ej-sel" disabled title="Automático: cambia solo según el % de avance">'
     +EJ_OPTS.map(function(o){return '<option value="'+o+'"'+((e.estEj||'Sin iniciar')===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select>'
-    +'<div style="font-size:9px;color:var(--gm);margin-top:4px">'+(MODE==='plani'?'Lo registra Ejecución.':'Se actualiza solo según el avance (En proceso / Completada).')+'</div></div>';
+    +'<div style="font-size:9px;color:var(--gm);margin-top:4px">'+(MODE==='plani'?'Lo registra Ejecución.':'Automático: cambia solo según el % de avance (0 = Sin iniciar · 100 = Completada).')+'</div></div>';
   var hasSteps=(e.stepItems&&e.stepItems.length>0);var midaVal=hasSteps?stepsPct(a):(e.mida||0);
   var canEditMida=(MODE==='ejec'&&!hasSteps);
   var midaNote=hasSteps?' · <span style="color:var(--te2)">por pasos</span>':(MODE==='plani'?' · <span style="color:var(--gm)">lo registra Ejecución</span>':'');
