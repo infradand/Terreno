@@ -3925,7 +3925,7 @@ function renderEjecTop(){
 function buildChips(){
   buildLocStandard();
   var disc={},loc={};
-  allActs().forEach(function(a){if(a.disc)disc[a.disc]=true;var g=normLoc(a.area);if(g)loc[g]=true;});
+  allActs().forEach(function(a){if(a.disc)disc[a.disc]=true;var g=normLoc(areaEff(a));if(g)loc[g]=true;});
   var ds=document.getElementById('f-disc');
   if(ds){ds.innerHTML='<option value="">Toda disciplina</option>'+Object.keys(disc).sort().map(function(d){return '<option value="'+esc(d)+'">'+esc(d)+'</option>';}).join('');ds.value=FILT.disc;}
   LOC_OPTS=Object.keys(loc).sort(function(a,b){return (LOC_LABELS[a]||a).localeCompare(LOC_LABELS[b]||b);});
@@ -3999,7 +3999,7 @@ function digSig(s){return (s.match(/\d/g)||[]).join('');}
 function simLoc(a,b){if(digSig(a)!==digSig(b))return false;return lev(a,b)<=1;}
 function buildLocStandard(){
   LOC_MAP={};LOC_LABELS={};
-  var counts={};allActs().forEach(function(a){var o=(a.area||'').trim();if(o)counts[o]=(counts[o]||0)+1;});
+  var counts={};allActs().forEach(function(a){var o=areaEff(a);if(o)counts[o]=(counts[o]||0)+1;});
   var origs=Object.keys(counts);if(!origs.length)return;
   var canon={};origs.forEach(function(o){canon[o]=canonLoc(o);});
   var keys=[];origs.forEach(function(o){if(keys.indexOf(canon[o])<0)keys.push(canon[o]);});
@@ -4012,7 +4012,7 @@ function buildLocStandard(){
   origs.forEach(function(o){LOC_MAP[o]=groupOf[o];});
 }
 function normLoc(area){var o=(area||'').trim();return o?(LOC_MAP[o]||canonLoc(o)):'';}
-function dispArea(a){var g=normLoc(a.area);return (g&&LOC_LABELS[g])?LOC_LABELS[g]:(a.area||'');}
+function dispArea(a){var g=normLoc(areaEff(a));return (g&&LOC_LABELS[g])?LOC_LABELS[g]:(a.area||'');}
 
 function critOf(a){return isCrit(a)?'CRITICO':((a.crit||'').toUpperCase()==='IMPORTANTE'?'IMPORTANTE':'NORMAL');}
 function estadoOf(a){return ed(a.id).estEj||'Sin iniciar';}
@@ -4020,7 +4020,7 @@ function estadoOf(a){return ed(a.id).estEj||'Sin iniciar';}
 function match(a,q,ignoreDia){
   if(!ignoreDia&&!inDia(a))return false;
   if(FILT.disc&&a.disc!==FILT.disc)return false;
-  var _ls=locSel();if(_ls.length&&_ls.indexOf(normLoc(a.area))<0)return false;
+  var _ls=locSel();if(_ls.length&&_ls.indexOf(normLoc(areaEff(a)))<0)return false;
   if(FILT.crit&&critOf(a)!==FILT.crit)return false;
   if(FILT.estado==='__quiebre'){if(!isQuiebre(a))return false;}
   else if(FILT.estado&&estadoOf(a)!==FILT.estado)return false;
@@ -7643,6 +7643,36 @@ function lbInfo(by,ts,text,where){
 function openLogPhoto(actId,idx){var it=ed(actId).log[idx];if(!it||!it.photo)return;var a=findAct(actId);
   document.getElementById('lb-img').src=it.photo;lbInfo(it.by,it.ts,it.text,a?(a.id+' · '+a.nombre):'');document.getElementById('lb').classList.add('open');}
 function openTrPhoto(ts){for(var i=0;i<HANDOVERS.length;i++){var c=HANDOVERS[i];if(c.ts===ts&&c.photo){document.getElementById('lb-img').src=c.photo;lbInfo(c.by,c.ts,c.text,'Traspaso de turno'+(c.turno?' · Turno '+c.turno:''));document.getElementById('lb').classList.add('open');return;}}}
+
+/* ══ v35 ══ */
+var LOC_ALIAS=[
+  [/^(km|kilometros?)\s*15$/,'KM 15'],
+  [/^(pmfc\s+)?efluentes$/,'Efluentes'],
+  [/^((p|pta|planta)\s+)?(de\s+)?(molibdeno|moly|molib)$/,'Planta Molibdeno'],
+  [/^cal\s+int(erior)?$/,'Cal interior'],
+  [/^cal\s+ext(erior)?$/,'Cal exterior'],
+  [/^(planta|plata|pta)\s+(de\s+)?cal\s+movil$/,'Planta de cal móvil'],
+  [/^super[vf]icie$/,'Superficie'],
+  [/^flota(cion)?$/,'Flotación'],
+  [/^(filtro\s+)?larox$/,'Larox'],
+  [/^ch(ancado)?\s+fino$/,'Chancado fino']
+];
+function convPlant(a,c){
+  var d=(a.disc||'').toUpperCase(),n=(a.nombre||'').toLowerCase();
+  if(/PMFC/.test(d))return 'PMFC';
+  if(/CONCENTRADOR/.test(d))return 'Concentrador';
+  if(/filtro|filt\b|cer[aá]mic|larox|espesador|moly|molibdeno|pmfc/.test(n))return 'PMFC';
+  if(/barras|bolas|mob[oa]|molienda|molino|\bmc\b|concentrador/.test(n))return 'Concentrador';
+  if(/^(p|pta|planta)\s/.test(c))return 'PMFC';
+  return '';
+}
+function areaEff(a){
+  var o=(a&&a.area||'').trim();if(!o)return '';
+  var c=canonLoc(o);
+  if(/^((p|pta|planta)\s+)?conv(encional)?$/.test(c)){var p=convPlant(a,c);return p?('Convencional · '+p):'Convencional (sin planta indicada)';}
+  for(var i=0;i<LOC_ALIAS.length;i++){if(LOC_ALIAS[i][0].test(c))return LOC_ALIAS[i][1];}
+  return o;
+}
 
 function boot(){
   loadUser();
