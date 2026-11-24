@@ -1915,6 +1915,7 @@ body.wk-hist .tabs .tab.active{box-shadow:none!important;border-bottom-color:#B4
         <div class="opt-sep"></div>
         <div class="opt-sec">Datos</div>
         <button class="btn show" id="btn-export" onclick="optGo();exportarPBIBase()" title="Genera/actualiza PBI_SINFRA_Base.xlsx sin finalizar la semana">⬇ Base de datos PBI</button>
+        <button class="btn show" id="btn-espejo" onclick="optGo();ESPEJO.push(true,true)" title="Envía ahora las filas de Base_de_datos a la tabla espejo que lee Power Automate / Power BI">⟳ Actualizar Excel espejo</button>
         <button class="btn show" id="btn-sem" onclick="optGo();openArch()" title="Todas las semanas guardadas en la app">🗂 Semanas guardadas</button>
         <div class="opt-sep"></div>
         <button class="btn show" id="btn-finweek" onclick="optGo();openFinWeek()">✓ Finalizar semana<small>encargado</small></button>
@@ -2471,7 +2472,7 @@ var CLOUD={
     var body=JSON.stringify({id:SUPA_DOC,data:this.collect(),cid:this.cid,updated_at:stamp});
     fetch(this.url(''),{method:'POST',headers:Object.assign({'Prefer':'resolution=merge-duplicates,return=minimal'},this.hdr()),body:body})
       .then(function(r){
-        if(r&&r.ok){self._seen=stamp;self._werr=null;self._lastErr=null;self._lastOk=Date.now();self.setDirty(false);setSaved(true);
+        if(r&&r.ok){self._seen=stamp;self._werr=null;self._lastErr=null;self._lastOk=Date.now();self.setDirty(false);setSaved(true);try{ESPEJO.plan();}catch(eE){}
           if(self._offToast){self._offToast=false;toast('🌐 ✓ Cambios y fotos de terreno sincronizados');}}
         else{self._lastErr='la nube respondió '+(r?r.status:'?');if(r&&self._werr!==r.status){self._werr=r.status;toast('⚠ No se pudo guardar en la nube ('+r.status+') — revisa las políticas insert/update de la tabla «'+SUPA_TABLE+'» en Supabase');}self._retry();}
       }).catch(function(){self._lastErr='sin respuesta de la nube';self._retry();});},
@@ -7673,6 +7674,40 @@ function areaEff(a){
   for(var i=0;i<LOC_ALIAS.length;i++){if(LOC_ALIAS[i][0].test(c))return LOC_ALIAS[i][1];}
   return o;
 }
+
+/* ══ v36 · espejo para Excel / Power BI ══
+   Cada vez que la app guarda en la nube (y como máximo cada 2 min) deja en la tabla
+   «terreno_bd» las mismas filas de la hoja Base_de_datos (29 columnas) de la semana cargada.
+   Un flujo de Power Automate lee esa tabla y reescribe el Excel que consume Power BI. */
+var ESPEJO={T:'terreno_bd',_t:null,_last:0,_sig:'',_err:null,_ok:0,
+  url:function(q){return SUPA_URL+'/rest/v1/'+this.T+(q||'');},
+  plan:function(ms){var s=this;clearTimeout(s._t);var w=(ms!=null)?ms:Math.max(20000,120000-(Date.now()-s._last));s._t=setTimeout(function(){s.push();},w);},
+  val:function(v){if(v instanceof Date){return v.getFullYear()+'-'+('0'+(v.getMonth()+1)).slice(-2)+'-'+('0'+v.getDate()).slice(-2);}return (v==null)?'':v;},
+  push:function(force,say){var s=this;
+    function msg(m){if(say)toast(m);}
+    if(typeof CLOUD==='undefined'||!CLOUD.active()){msg('Sincronización no configurada');return;}
+    if(!DATA||HIST_VIEW){msg('Abre la semana en curso para actualizar el espejo');return;}
+    if(typeof LS_BAD!=='undefined'&&LS_BAD){return;}
+    if(!CLOUD.online()){msg('Sin conexión: el espejo se actualizará cuando vuelva la señal');s.plan(60000);return;}
+    var rows;try{rows=pbiBuildRows();}catch(e){msg('No se pudieron armar las filas: '+e.message);return;}
+    var anio=parseInt(DATA.anio,10),sem=parseInt(DATA.semana,10);if(!anio||!sem){msg('La semana cargada no tiene número o año');return;}
+    var norm=rows.map(function(r){return r.map(s.val);});
+    var sig=anio+'|'+sem+'|'+JSON.stringify(norm);
+    if(!force&&sig===s._sig)return;
+    var stamp=new Date().toISOString();
+    var body=norm.map(function(r,i){return {anio:anio,semana:sem,fila:i+1,datos:r,updated_at:stamp};});
+    var H=Object.assign({'Prefer':'resolution=merge-duplicates,return=minimal'},CLOUD.hdr());
+    var p=body.length?fetch(s.url('?on_conflict=anio,semana,fila'),{method:'POST',headers:H,body:JSON.stringify(body)}):Promise.resolve({ok:true,status:200});
+    p.then(function(r){
+      if(!r||!r.ok){s._err=r?r.status:'?';msg('⚠ El espejo no se pudo actualizar ('+s._err+'). Revisa que exista la tabla «'+s.T+'» y sus políticas en Supabase');return null;}
+      return fetch(s.url('?anio=eq.'+anio+'&semana=eq.'+sem+'&fila=gt.'+body.length),{method:'DELETE',headers:CLOUD.hdr()}).then(function(){
+        s._err=null;s._sig=sig;s._last=Date.now();s._ok=Date.now();msg('✓ Espejo actualizado: '+body.length+' filas de la semana '+sem);});
+    }).catch(function(e){s._err='sin respuesta';msg('⚠ Sin respuesta de la nube al actualizar el espejo');});
+  }
+};
+(function(){var f0=finalizarSemana;finalizarSemana=function(){try{ESPEJO.push(true);}catch(e){}return f0.apply(this,arguments);};
+  var p0=publicarSemana;publicarSemana=function(){var r=p0.apply(this,arguments);try{ESPEJO.plan(8000);}catch(e){}return r;};
+  setTimeout(function(){try{ESPEJO.plan(1000);}catch(e){}},60000);})();
 
 function boot(){
   loadUser();
